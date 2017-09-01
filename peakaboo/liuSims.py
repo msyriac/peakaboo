@@ -1,4 +1,5 @@
-from enlib import enmap,utils,lensing,powspec
+from enlib import enmap
+#,utils,lensing,powspec
 import copy
 from alhazen.halos import NFWkappa
 from alhazen.lensTools import alphaMaker
