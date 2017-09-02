@@ -19,7 +19,7 @@ from szar.counts import ClusterCosmology
 
 class LiuConvergence(object):
 
-    def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/jia/"):
+    def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/massless/"):
 
 
         self.root = root_dir
