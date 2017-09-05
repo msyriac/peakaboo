@@ -20,11 +20,11 @@ from szar.counts import ClusterCosmology
 
 class LiuConvergence(object):
 
-    def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/massless/"):
+    def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/massless/",zstr="1100.00"):
 
 
         self.root = root_dir
-        self.kappa_file = lambda i :root_dir+"WLconv_z1100.00_"+str(i).zfill(4)+"r.fits"
+        self.kappa_file = lambda i :root_dir+"WLconv_z"+zstr+"_"+str(i).zfill(4)+"r.fits"
 
         
 
