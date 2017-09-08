@@ -3,67 +3,176 @@ from peakaboo import liuSims as ls
 import orphics.tools.io as io
 import os,sys
 import orphics.analysis.flatMaps as fmaps
+from mpi4py import MPI
+import argparse
+from orphics.analysis.pipeline import mpi_distribute, MPIStats
+
+
+parser = argparse.ArgumentParser(description='Do all the things.')
+parser.add_argument("-N", "--nsim",     type=int,  default=None)
+args = parser.parse_args()
+
+Nsims = args.nsim
+
+
+# Get MPI comm
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+numcores = comm.Get_size()    
+
+
+
+# Efficiently distribute sims over MPI cores
+num_each,each_tasks = mpi_distribute(Nsims,numcores)
+# Initialize a container for stats and stacks
+mpibox = MPIStats(comm,num_each,tag_start=333)
 
 def get_cents(edges):
     return (edges[1:]+edges[:-1])/2.
 
+
+# What am I doing?
+my_tasks = each_tasks[rank]
+
 out_dir = os.environ['WWW']+"peakaboo/"
-
-LC = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/Maps10/",zstr="1100.00")
-
-cmb = LC.get_kappa(1)
-
-
-LC = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/Maps10/",zstr="1.00")
-
-gal = LC.get_kappa(1)
-
 
 dw = 0.001
 bin_edges = np.arange(-0.3,0.3+dw,dw)+dw
-
-hist1d_cmb, bin_edges = np.histogram(cmb.ravel(),bin_edges,density=True)
-hist1d_gal, bin_edges = np.histogram(gal.ravel(),bin_edges,density=True)
-
 bincents = get_cents(bin_edges)
 
 
-pl = io.Plotter()
-pl.add(bincents,hist1d_cmb)
-pl.add(bincents,hist1d_gal)
-pl.done(out_dir+"hist1d.png")
+dw2d = 0.01
+bin_edges2d = np.arange(-0.3,0.3+dw2d,dw2d)+dw2d
 
-
-hist2d, x_edges,y_edges = np.histogram2d(cmb.ravel(),gal.ravel(),bin_edges,normed=True)
-
-
-import matplotlib
-import matplotlib.cm as cm
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
-
-matplotlib.rcParams['xtick.direction'] = 'out'
-matplotlib.rcParams['ytick.direction'] = 'out'
-
-x = get_cents(x_edges)
-y = get_cents(y_edges)
-X, Y = np.meshgrid(x, y)
-Z = hist2d
-
-plt.figure()
-CS = plt.contour(X, Y, Z)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.title('Simplest default with labels')
-plt.savefig(out_dir+"hist2d.png")
-
-
-p2d = fmaps.get_simple_power_enmap(cmb,enmap2=gal)
-modlmap = LC.modlmap
-import orphics.tools.stats as stats
 lbin_edges = np.arange(400,3000,100)
-binner = stats.bin2D(modlmap,lbin_edges)
-cents, p1d = binner.bin(p2d)
 
-pl = io.Plotter(scaleY='log')
-pl.add(cents,p1d)
-pl.done(out_dir+"cpower.png")
+for mnu in ["massive","massless"]:
+
+    LCc = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/cmb/"+mnu+"/",zstr="1100.00")
+    LCg1 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/gal10/"+mnu+"/",zstr="1.00")
+    LCg15 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/gal15/"+mnu+"/",zstr="1.50")
+    LCg2 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/gal20/"+mnu+"/",zstr="2.00")
+    qpower = fmaps.QuickPower(LCc.modlmap,lbin_edges)
+
+
+    for k,index in enumerate(my_tasks):
+
+        cmb = LCc.get_kappa(index+1)
+        # if rank==0 and k==0: io.highResPlot2d(cmb,out_dir+"cmb_"+mnu+".png")
+        gal1 = LCg1.get_kappa(index+1)
+        # if rank==0 and k==0: io.highResPlot2d(gal1,out_dir+"gal1_"+mnu+".png")
+        gal15 = LCg15.get_kappa(index+1)
+        # if rank==0 and k==0: io.highResPlot2d(gal15,out_dir+"gal15_"+mnu+".png")
+        gal2 = LCg2.get_kappa(index+1)
+        # if rank==0 and k==0: io.highResPlot2d(gal2,out_dir+"gal2_"+mnu+".png")
+
+
+
+        hist1d_cmb, bin_edges = np.histogram(cmb.ravel(),bin_edges,density=True)
+        hist1d_gal1, bin_edges = np.histogram(gal1.ravel(),bin_edges,density=True)
+        hist1d_gal15, bin_edges = np.histogram(gal15.ravel(),bin_edges,density=True)
+        hist1d_gal2, bin_edges = np.histogram(gal2.ravel(),bin_edges,density=True)
+
+
+        mpibox.add_to_stack("cmb_1d_"+mnu,hist1d_cmb)
+        mpibox.add_to_stack("gal1_1d_"+mnu,hist1d_gal1)
+        mpibox.add_to_stack("gal15_1d_"+mnu,hist1d_gal15)
+        mpibox.add_to_stack("gal2_1d_"+mnu,hist1d_gal2)
+        
+
+
+
+        hist2d1, x_edges,y_edges = np.histogram2d(cmb.ravel(),gal1.ravel(),bin_edges2d,normed=True)
+        hist2d15, x_edges,y_edges = np.histogram2d(cmb.ravel(),gal15.ravel(),bin_edges2d,normed=True)
+        hist2d2, x_edges,y_edges = np.histogram2d(cmb.ravel(),gal2.ravel(),bin_edges2d,normed=True)
+
+        mpibox.add_to_stack("cgal1_2d_"+mnu,hist2d1)
+        mpibox.add_to_stack("cgal15_2d_"+mnu,hist2d15)
+        mpibox.add_to_stack("cgal2_2d_"+mnu,hist2d2)
+
+
+        cents, pauto_cmb = qpower.calc(cmb)
+        cents, pauto_gal1 = qpower.calc(gal1)
+        cents, pcross1 = qpower.calc(cmb,gal1)
+        cents, pauto_gal15 = qpower.calc(gal15)
+        cents, pcross15 = qpower.calc(cmb,gal15)
+        cents, pauto_gal2 = qpower.calc(gal2)
+        cents, pcross2 = qpower.calc(cmb,gal2)
+
+
+        mpibox.add_to_stats("auto_cmb_"+mnu,pauto_cmb)
+        mpibox.add_to_stats("auto_gal1_"+mnu,pauto_gal1)
+        mpibox.add_to_stats("cross_gal1_"+mnu,pcross1)
+        mpibox.add_to_stats("auto_gal15_"+mnu,pauto_gal15)
+        mpibox.add_to_stats("cross_gal15_"+mnu,pcross15)
+        mpibox.add_to_stats("auto_gal2_"+mnu,pauto_gal2)
+        mpibox.add_to_stats("cross_gal2_"+mnu,pcross2)
+
+        if rank==0: print mnu,index+1
+
+mpibox.get_stacks()
+mpibox.get_stats()
+        
+if rank==0:
+
+    import matplotlib.pyplot as plt
+
+    pd = lambda x,y: (x-y)*100./y
+    pd1d = lambda x: (mpibox.stacks[x+"massive"]-mpibox.stacks[x+"massless"])*100./mpibox.stacks[x+"massless"]
+    
+    pl = io.Plotter()
+    for mnu,ls in zip(["massive","massless"],["-","--"]):
+        pl.add(bincents,mpibox.stacks["cmb_1d_"+mnu],ls=ls)
+        pl.add(bincents,mpibox.stacks["gal1_1d_"+mnu],ls=ls)
+        pl.add(bincents,mpibox.stacks["gal15_1d_"+mnu],ls=ls)
+        pl.add(bincents,mpibox.stacks["gal2_1d_"+mnu],ls=ls)
+        plt.gca().set_prop_cycle(None)
+    pl.done(out_dir+"hist1d.png")
+    pl = io.Plotter()
+    pl.add(bincents,pd1d("cmb_1d_"),ls=ls)
+    pl.add(bincents,pd1d("gal1_1d_"),ls=ls)
+    pl.add(bincents,pd1d("gal15_1d_"),ls=ls)
+    pl.add(bincents,pd1d("gal2_1d_"),ls=ls)
+    pl._ax.set_ylim(-20,10)
+    pl.hline()
+    pl.done(out_dir+"hist1diff.png")
+
+    
+    import matplotlib
+    import matplotlib.cm as cm
+    import matplotlib.mlab as mlab
+
+    matplotlib.rcParams['xtick.direction'] = 'out'
+    matplotlib.rcParams['ytick.direction'] = 'out'
+
+    x = get_cents(x_edges)
+    y = get_cents(y_edges)
+    X, Y = np.meshgrid(x, y)
+    
+    plt.figure()
+    for mnu,ls in zip(["massive","massless"],["-","--"]):
+        for lab in ["cgal1_2d_"+mnu,"cgal15_2d_"+mnu,"cgal2_2d_"+mnu]:
+            Z = mpibox.stacks[lab]
+            #CS = plt.contour(X, Y, Z,levels=[2,10,30],linestyles=[ls])
+            CS = plt.contour(X, Y, Z,levels=[10],linestyles=[ls])
+    #plt.clabel(CS, inline=1, fontsize=10)
+    plt.savefig(out_dir+"hist2d.png")
+
+
+    plt.clf()
+
+    pl = io.Plotter(labelX="$\\ell$",labelY="$\\ell C_{\\ell}$",scaleY='log')
+    for mnu,ls in zip(["massive","massless"],["-","--"]):
+        acstats = mpibox.stats["auto_cmb_"+mnu]
+        pl.addErr(cents,acstats['mean']*cents,yerr=acstats['errmean']*cents,ls=ls)
+        for z in ["1","15","2"]:
+            agstats = mpibox.stats["auto_gal"+z+"_"+mnu]
+            cstats = mpibox.stats["cross_gal"+z+"_"+mnu]
+
+            pl.addErr(cents,agstats['mean']*cents,yerr=agstats['errmean']*cents,ls=ls)
+            pl.addErr(cents,cstats['mean']*cents,yerr=cstats['errmean']*cents,ls=ls)
+        plt.gca().set_prop_cycle(None)
+    pl.hline()
+    pl._ax.set_ylim(1.e-7,3.e-5)
+    pl.legendOn(loc="lower right",labsize=12)
+    pl.done(out_dir+"cpower.png")

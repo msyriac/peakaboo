@@ -27,13 +27,19 @@ class LiuConvergence(object):
         self.kappa_file = lambda i :root_dir+"WLconv_z"+zstr+"_"+str(i).zfill(4)+"r.fits"
 
         
-
-        
-        size_deg = 3.5
-        Npix = 2048.
+        if False: #Ezstr=="1.00":        
+            size_deg = 6.3
+            Npix = 2048.
+        else:
+            size_deg = 3.5
+            Npix = 2048.
+            
         px = size_deg*60./Npix
+        self.px = px
 
         self.shape, self.wcs = enmap.get_enmap_patch(size_deg*60.,px,proj="CAR",pol=False)
+
+        self.zstr = zstr
         self.lxmap,self.lymap,self.modlmap,self.angmap,self.lx,self.ly = fmaps.get_ft_attributes_enmap(self.shape,self.wcs)
 
         
@@ -53,7 +59,32 @@ class LiuConvergence(object):
         self.low_pass_ell = 10000
         retmap = enmap.ndmap(my_map,self.wcs)
         retmap = enmap.ndmap(fmaps.filter_map(retmap,retmap.copy()*0.+1.,self.modlmap,lowPass=self.low_pass_ell),self.wcs)
+
+
+        # if self.zstr=="1.00":
+        #     import enlib
+        #     import enlib.resample as resample
+        #     degree =  enlib.utils.degree
+
+        #     degwidth = 3.5
+        #     Npixn = int(degwidth*60./self.px+0.5)
+
             
+        #     imap = retmap
+        #     smap = imap[int(1024-Npixn/2.):int(1024+Npixn/2.),int(1024-Npixn/2.):int(1024+Npixn/2.)]
+        #     print smap.shape
+        #     size_deg = 3.5
+        #     Npix = 2048.
+        #     px = size_deg*60./Npix
+        #     shape, new_wcs = enmap.get_enmap_patch(size_deg*60.,px,proj="CAR",pol=False)
+        #     #umap = enmap.ndmap(resample.resample_fft(smap,(2048,2048)),new_wcs)
+        #     umap = enmap.ndmap(enmap.upgrade(smap,1./1.8),new_wcs)
+        #     print umap.shape
+        #     self.shape = umap.shape
+        #     self.wcs = umap.wcs
+        #     retmap = umap
+
+        
         return retmap
         
 # # === TEMPLATE MAP ===
