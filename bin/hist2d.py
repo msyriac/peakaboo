@@ -7,7 +7,6 @@ from mpi4py import MPI
 import argparse
 from orphics.analysis.pipeline import mpi_distribute, MPIStats
 
-
 parser = argparse.ArgumentParser(description='Do all the things.')
 parser.add_argument("-N", "--nsim",     type=int,  default=None)
 args = parser.parse_args()
@@ -44,14 +43,14 @@ bincents = get_cents(bin_edges)
 dw2d = 0.01
 bin_edges2d = np.arange(-0.3,0.3+dw2d,dw2d)+dw2d
 
-lbin_edges = np.arange(400,3000,100)
+lbin_edges = np.arange(400,3000,200)
 
 for mnu in ["massive","massless"]:
 
-    LCc = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/cmb/"+mnu+"/",zstr="1100.00")
-    LCg1 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/gal10/"+mnu+"/",zstr="1.00")
-    LCg15 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/gal15/"+mnu+"/",zstr="1.50")
-    LCg2 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/gal20/"+mnu+"/",zstr="2.00")
+    LCc = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/cmb/"+mnu+"/",zstr="1100.00")
+    LCg1 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/gal10/"+mnu+"/",zstr="1.00")
+    LCg15 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/gal15/"+mnu+"/",zstr="1.50")
+    LCg2 = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/gal20/"+mnu+"/",zstr="2.00")
     qpower = fmaps.QuickPower(LCc.modlmap,lbin_edges)
 
 
@@ -161,18 +160,78 @@ if rank==0:
 
     plt.clf()
 
+
+
+
+    from orphics.theory.cosmology import LimberCosmology
+
+    defaultCosmology = {}
+    defaultCosmology['omch2'] = 0.12470
+    defaultCosmology['ombh2'] = 0.02230
+    defaultCosmology['H0'] = 70.
+    defaultCosmology['ns'] = 0.97
+    defaultCosmology['As'] = 2.1e-9
+    defaultCosmology['mnu'] = 0.06
+    defaultCosmology['w0'] = -1.0
+
+    lcmassless = LimberCosmology(defaultCosmology,lmax=3000,pickling=True)
+    lcmassless.addDeltaNz("z1",1.0)
+    lcmassless.addDeltaNz("z15",1.5)
+    lcmassless.addDeltaNz("z2",2.0)
+    ellrange = np.arange(400,3000,1)
+    lcmassless.generateCls(ellrange)
+    clkk = lcmassless.getCl("cmb","cmb")
+
+    
+
     pl = io.Plotter(labelX="$\\ell$",labelY="$\\ell C_{\\ell}$",scaleY='log')
-    for mnu,ls in zip(["massive","massless"],["-","--"]):
+    for mnu,ls in zip(["massive","massless"],["--","-"]):
+        if mnu=="massless":
+            mark ="^"
+        else:
+            mark="o"
         acstats = mpibox.stats["auto_cmb_"+mnu]
-        pl.addErr(cents,acstats['mean']*cents,yerr=acstats['errmean']*cents,ls=ls)
-        for z in ["1","15","2"]:
+        pl.addErr(cents,acstats['mean']*cents,yerr=acstats['errmean']*cents,ls="none",marker="o" if mnu=="massive" else "^",color="C0",markersize=4)
+        atheory = lcmassless.getCl("cmb","cmb")
+        pl.add(ellrange,ellrange*atheory,color="C0")
+        for k,z in enumerate(["1","15","2"]):
+            atheory = lcmassless.getCl("z"+z,"z"+z)
+            ctheory = lcmassless.getCl("z"+z,"cmb")
             agstats = mpibox.stats["auto_gal"+z+"_"+mnu]
             cstats = mpibox.stats["cross_gal"+z+"_"+mnu]
-
-            pl.addErr(cents,agstats['mean']*cents,yerr=agstats['errmean']*cents,ls=ls)
-            pl.addErr(cents,cstats['mean']*cents,yerr=cstats['errmean']*cents,ls=ls)
+            if mnu=="massless":
+                pl.add(ellrange,ellrange*atheory,color="C"+str(k+1))
+                pl.add(ellrange,ellrange*ctheory,color="C"+str(k+2))
+                
+            pl.addErr(cents,agstats['mean']*cents,yerr=agstats['errmean']*cents,ls="none",marker=mark,color="C"+str(k+1),markersize=4)
+            pl.addErr(cents,cstats['mean']*cents,yerr=cstats['errmean']*cents,ls="none",marker=mark,color="C"+str(k+2),markersize=4)
         plt.gca().set_prop_cycle(None)
     pl.hline()
     pl._ax.set_ylim(1.e-7,3.e-5)
     pl.legendOn(loc="lower right",labsize=12)
     pl.done(out_dir+"cpower.png")
+
+
+    
+
+    # pl = io.Plotter(labelX="$\\ell$",labelY="$100\\Delta C_{\\ell} / C_{\\ell}$",scaleY='log')
+    #     for k,z in enumerate(["cmb","1","15","2"]):
+            
+    #         acstats = mpibox.stats["auto_cmb_"+mnu]
+    #         agstats = mpibox.stats["auto_gal"+z+"_"+mnu]
+    #         cstats = mpibox.stats["cross_gal"+z+"_"+mnu]
+            
+    #         atheory = lcmassless.getCl("z"+z,"z"+z)
+    #         ctheory = lcmassless.getCl("z"+z,"cmb")
+    #         agstats = mpibox.stats["auto_gal"+z+"_"+mnu]
+    #         cstats = mpibox.stats["cross_gal"+z+"_"+mnu]
+    #         if mnu=="massless":
+    #             pl.add(ellrange,ellrange*atheory,color="C"+str(k+1))
+    #             pl.add(ellrange,ellrange*ctheory,color="C"+str(k+2))
+    #         pl.addErr(cents,agstats['mean']*cents,yerr=agstats['errmean']*cents,ls="none",marker="o" if mnu=="massive" else "^",color="C"+str(k+1))
+    #         pl.addErr(cents,cstats['mean']*cents,yerr=cstats['errmean']*cents,ls="none",marker="o" if mnu=="massive" else "^",color="C"+str(k+2))
+    #     plt.gca().set_prop_cycle(None)
+    # pl.hline()
+    # pl._ax.set_ylim(1.e-7,3.e-5)
+    # pl.legendOn(loc="lower right",labsize=12)
+    # pl.done(out_dir+"cpowerdiff.png")

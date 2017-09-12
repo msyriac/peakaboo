@@ -16,23 +16,27 @@ numcores = comm.Get_size()
 
 out_dir = os.environ['WWW']+"peakaboo/"
 
-file_root = "/gpfs01/astro/workarea/msyriac/data/sehgal/cutouts_15041257462/jia_recon_"
+#file_root = "/gpfs01/astro/workarea/msyriac/data/sims/jia/output/jia_recon_"
+file_root = lambda mass,ftype,x,ext: "/gpfs01/astro/workarea/msyriac/data/sims/jia/output/"+mass+"_"+ftype+"_experiment_simple_"+str(x).zfill(9)+"."+ext
 
-Ntot = 200
+Ntot = 500
 num_each,each_tasks = mpi_distribute(Ntot,numcores)
 mpibox = MPIStats(comm,num_each,tag_start=333)
 my_tasks = each_tasks[rank]
 
-LCmassless = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/massless/",zstr="1100.00")
-LCmassive = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/massive/",zstr="1100.00")
+LCmassless = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/cmb/massless/",zstr="1100.00")
+LCmassive = ls.LiuConvergence(root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/cmb/massive/",zstr="1100.00")
 
 lbin_edges = np.arange(200,3000,100)
 
 
 
 for k,i in enumerate(my_tasks):
-    massive = enmap.read_map(file_root+"massive_"+str(i).zfill(9)+".fits")
-    massless = enmap.read_map(file_root+"massless_"+str(i).zfill(9)+".fits")
+    #massive = enmap.read_map(file_root+"massive_"+str(i).zfill(9)+".fits")
+    #massless = enmap.read_map(file_root+"massless_"+str(i).zfill(9)+".fits")
+
+    massive = enmap.read_map(file_root("massive","kappa_recon",i,"fits"))
+    massless = enmap.read_map(file_root("massless","kappa_recon",i,"fits"))
 
     if k==0:
         qpower = fmaps.QuickPower(massive.modlmap(),lbin_edges)
@@ -53,6 +57,12 @@ for k,i in enumerate(my_tasks):
     cents, pauto_massive_input = qpower.calc(massive_input)
     cents, pauto_massless_input = qpower.calc(massless_input)
 
+    lcents,massive_rkk = np.loadtxt(file_root("massive","auto_n0_subbed",i,"fits"),unpack=True)
+    lcents,massless_rkk = np.loadtxt(file_root("massless","auto_n0_subbed",i,"fits"),unpack=True)
+
+    mpibox.add_to_stats("massiveAutoN0",massive_rkk)
+    mpibox.add_to_stats("masslessAutoN0",massless_rkk)
+
     
     mpibox.add_to_stats("massiveAuto",pauto_massive)
     mpibox.add_to_stats("masslessAuto",pauto_massless)
@@ -67,6 +77,8 @@ for k,i in enumerate(my_tasks):
 mpibox.get_stats()
 
 if rank==0:
+    rm = mpibox.stats["massiveAutoN0"]
+    rm0 = mpibox.stats["masslessAutoN0"]
     mauto = mpibox.stats["massiveAuto"]
     m0auto = mpibox.stats["masslessAuto"]
     m0cross = mpibox.stats["masslessCross"]
@@ -87,7 +99,7 @@ if rank==0:
     ellrange,clkk_camb0 = camb_pred("massless")
     
     pl = io.Plotter(scaleY='log',labelX="$\\ell$",labelY="$C_{\ell}$")
-    pl.addErr(cents,m0auto['mean'],yerr=m0auto['errmean'],marker="o")
+    pl.addErr(lcents,rm0['mean'],yerr=rm0['errmean'],marker="o")
     pl.addErr(cents,m0cross['mean'],yerr=m0cross['errmean'],marker="^")
     pl.add(cents,m0auto_input['mean'],marker="x",ls="none")
     pl.add(ellrange,clkk_camb0,label="cl camb",color="k")
@@ -97,7 +109,7 @@ if rank==0:
     ellrange,clkk_camb = camb_pred("massive")
 
     pl = io.Plotter(scaleY='log',labelX="$\\ell$",labelY="$C_{\ell}$")
-    pl.addErr(cents,mauto['mean'],yerr=mauto['errmean'],marker="o")
+    pl.addErr(lcents,rm['mean'],yerr=rm['errmean'],marker="o")
     pl.addErr(cents,mcross['mean'],yerr=mcross['errmean'],marker="^")
     pl.add(cents,mauto_input['mean'],marker="x",ls="none")
     pl.add(ellrange,clkk_camb,label="cl camb",color="k")
@@ -107,7 +119,7 @@ if rank==0:
     pdiff = (clkk_camb-clkk_camb0)*100./clkk_camb0
     
     pl = io.Plotter(labelX="$\\ell$",labelY="$100\\Delta C_{\ell}/C_{\ell}$")
-    pl.add(cents,(mauto['mean']-m0auto['mean'])*100./m0auto['mean'],marker="o",ls="none")
+    pl.add(lcents,(rm['mean']-rm0['mean'])*100./rm0['mean'],marker="o",ls="none")
     pl.add(cents,(mauto_input['mean']-m0auto_input['mean'])*100./m0auto_input['mean'],marker="x",ls="none")
     pl.add(ellrange,pdiff,label="cl camb",color="k")
     pl.hline()
