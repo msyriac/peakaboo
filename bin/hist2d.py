@@ -171,16 +171,37 @@ if rank==0:
     defaultCosmology['H0'] = 70.
     defaultCosmology['ns'] = 0.97
     defaultCosmology['As'] = 2.1e-9
-    defaultCosmology['mnu'] = 0.06
+    defaultCosmology['mnu'] = 0.0
     defaultCosmology['w0'] = -1.0
 
-    lcmassless = LimberCosmology(defaultCosmology,lmax=3000,pickling=True)
+
+    
+    lcmassless = LimberCosmology(defaultCosmology,lmax=3000,pickling=True,nonlinear=False)
     lcmassless.addDeltaNz("z1",1.0)
     lcmassless.addDeltaNz("z15",1.5)
     lcmassless.addDeltaNz("z2",2.0)
     ellrange = np.arange(400,3000,1)
     lcmassless.generateCls(ellrange)
-    clkk = lcmassless.getCl("cmb","cmb")
+    clkk0 = lcmassless.getCl("cmb","cmb")
+
+
+    defaultCosmology = {}
+    defaultCosmology['omch2'] = 0.12362
+    defaultCosmology['ombh2'] = 0.02230
+    defaultCosmology['H0'] = 70.
+    defaultCosmology['ns'] = 0.97
+    defaultCosmology['As'] = 2.1e-9
+    defaultCosmology['mnu'] = 0.1
+    defaultCosmology['w0'] = -1.0
+
+
+    lcmassive = LimberCosmology(defaultCosmology,lmax=3000,pickling=True,nonlinear=False)
+    lcmassive.addDeltaNz("z1",1.0)
+    lcmassive.addDeltaNz("z15",1.5)
+    lcmassive.addDeltaNz("z2",2.0)
+    ellrange = np.arange(400,3000,1)
+    lcmassive.generateCls(ellrange)
+    clkk = lcmassive.getCl("cmb","cmb")
 
     
 
@@ -211,6 +232,33 @@ if rank==0:
     pl.legendOn(loc="lower right",labsize=12)
     pl.done(out_dir+"cpower.png")
 
+    pl = io.Plotter(labelX="$\\ell$",labelY="$\\Delta C_{\\ell}/C_{\\ell}$")
+    acstats = mpibox.stats["auto_cmb_massive"]
+    acstats0 = mpibox.stats["auto_cmb_massless"]
+    atheory = lcmassive.getCl("cmb","cmb")
+    atheory0 = lcmassless.getCl("cmb","cmb")
+    perdiff = lambda x,y: (x-y)/y
+    pl.add(ellrange,perdiff(atheory,atheory0),color="C0")
+    pl.add(cents,perdiff(acstats['mean'],acstats0['mean']),ls="none",marker=mark,color="C0",markersize=4)
+    for k,(z,col) in enumerate(zip(["1","15","2"][:1],["C1","C2","C3"][:1])):
+        atheory = lcmassive.getCl("z"+z,"z"+z)
+        atheory0 = lcmassless.getCl("z"+z,"z"+z)
+        pl.add(ellrange,perdiff(atheory,atheory0),color="C1")
+        ctheory = lcmassive.getCl("z"+z,"cmb")
+        ctheory0 = lcmassless.getCl("z"+z,"cmb")
+        pl.add(ellrange,perdiff(ctheory,ctheory0),ls="--",color="C2")
+        agstats = mpibox.stats["auto_gal"+z+"_massive"]
+        cstats = mpibox.stats["cross_gal"+z+"_massive"]
+        agstats0 = mpibox.stats["auto_gal"+z+"_massless"]
+        cstats0 = mpibox.stats["cross_gal"+z+"_massless"]
+                
+        pl.add(cents,perdiff(agstats['mean'],agstats0['mean']),ls="none",marker=mark,color="C1",markersize=4)
+        pl.add(cents,perdiff(cstats['mean'],cstats0['mean']),ls="none",marker=mark,color="C2",markersize=4)
+        #plt.gca().set_prop_cycle(None)
+    pl.hline()
+    #pl._ax.set_ylim(1.e-7,3.e-5)
+    pl.legendOn(loc="lower right",labsize=12)
+    pl.done(out_dir+"cpowerdiff.png")
 
     
 
