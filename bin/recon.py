@@ -14,11 +14,13 @@ parser.add_argument("estimator", type=str,help='TT/EB')
 parser.add_argument("-v", "--verbose", action='store_true',help='Talk more.')
 parser.add_argument("-w", "--write_cache", action='store_true',help='Cache lensed CMB.')
 parser.add_argument("-r", "--read_cache", action='store_true',help='Read cached lensed CMB.')
+parser.add_argument("-d", "--debug", action='store_true',help='Debug.')
 parser.add_argument("-N", "--nmax",     type=int,  default=None,help="Limit to nmax sims.")
 args = parser.parse_args()
 
 experiment = args.experiment
 Nmax = args.nmax
+debug = args.debug
 
 
 # Initialize pipeline
@@ -50,14 +52,16 @@ for k,sim_id in enumerate(pipe.sim_ids):
     if args.write_cache and not(loaded_cache):
         pipe.save_cache(lensed,sim_id)
 
-    #pipe.mpibox.add_to_stack("noiseless",pipe.pwrfunc(lensed))
+        
+    if debug: pipe.power_plotter(pipe.fc.iqu2teb(lensed,normalize=False),"lensed")
     beamed = pipe.beam(lensed)
     noise = pipe.get_noise(seed=sim_id)
-    #pipe.mpibox.add_to_stack("noise",pipe.pwrfunc(noise))
 
     
     observed = beamed+noise
     lobserved = pipe.fc.iqu2teb(observed,normalize=False)
+    if debug: pipe.power_plotter(lobserved/pipe.pdat.lbeam,"observed-deconvolved")
+    
     if args.estimator=="TT":
         lT = lobserved
         lE = None
@@ -78,4 +82,4 @@ pipe.mpibox.get_stacks(verbose=False)
 pipe.mpibox.get_stats(verbose=False)
 
 if pipe.rank==0:
-    pipe.dump()
+    pipe.dump(debug=debug)

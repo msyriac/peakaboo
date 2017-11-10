@@ -217,7 +217,6 @@ class PeakabooPipeline(object):
         self.lbinner = stats.bin2D(self.pdat.modlmap,bin_edges)
         self.fc = enmap.FourierCalc(self.pdat.shape,self.pdat.wcs)
         self.cents = self.lbinner.centers
-        self.pwrfunc = lambda x: self.lbinner.bin(self.fc.power2d(x)[0])[1]
         
         self.plot_dir = PathConfig.get("paths","plots")+inp_dir+"/"+out_dir+"/"
         self.result_dir = PathConfig.get("paths","output_data")+inp_dir+"/"+out_dir+"/"
@@ -265,16 +264,83 @@ class PeakabooPipeline(object):
     def save_kappa(self,kappa,sim_id):
         kappa = enmap.ndmap(kappa,self.pdat.wcs)
         enmap.write_map(self.result_dir+"kappa_"+str(sim_id).zfill(4)+".fits",kappa)
-    
-    def dump(self):
-        # noiseless = self.mpibox.stacks["noiseless"]
-        # noisy = self.mpibox.stacks["noise"]
-        # ells = self.cents
-        # pl = io.Plotter(scaleY='log')
-        # pl.add(ells,noiseless*ells**2.,label="noiseless")
-        # pl.add(ells,noisy*ells**2.,label="noisy")
-        # pl.legendOn()
-        # pl.done(self.plot_dir+"cls.png")
+
+    def power_plotter(self,lteb,label):
+
+        if self.estimator=="TT":
+
+            lT = lteb
+            tt = self.lbinner.bin(self.fc.f2power(lT,lT))[1]
+            self.mpibox.add_to_stack(label+"TT",tt)
+
+        else:
+            
+            lT = lteb[0]
+            lE = lteb[1]
+            lB = lteb[2]
+
+
+            tt = self.lbinner.bin(self.fc.f2power(lT,lT))[1]
+            ee = self.lbinner.bin(self.fc.f2power(lE,lE))[1]
+            bb = self.lbinner.bin(self.fc.f2power(lB,lB))[1]
+            te = self.lbinner.bin(self.fc.f2power(lT,lE))[1]
+            tb = self.lbinner.bin(self.fc.f2power(lT,lB))[1]
+            eb = self.lbinner.bin(self.fc.f2power(lE,lB))[1]
+
+            self.mpibox.add_to_stack(label+"TT",tt)
+            self.mpibox.add_to_stack(label+"EE",ee)
+            self.mpibox.add_to_stack(label+"BB",bb)
+            self.mpibox.add_to_stack(label+"TE",te)
+            self.mpibox.add_to_stack(label+"TB",tb)
+            self.mpibox.add_to_stack(label+"EB",eb)
+
+                        
+    def dump(self,debug=False):
+
+
+        if debug:
+            ells = self.cents
+            # TT, EE, BB
+
+            pl = io.Plotter(scaleY='log')
+            for spec in ['TT','EE','BB']:
+                noiseless = self.mpibox.stacks["lensed"+spec]
+                noisy = self.mpibox.stacks["observed-deconvolved"+spec]
+            
+                pl.add(ells,noiseless*ells**2.)
+                pl.add(ells,noisy*ells**2.,ls="--")
+            pl.legendOn()
+            pl.done(self.plot_dir+"clsauto.png")
+
+
+            # TE
+
+            pl = io.Plotter()
+            for spec in ['TE']:
+                noiseless = self.mpibox.stacks["lensed"+spec]
+                noisy = self.mpibox.stacks["observed-deconvolved"+spec]
+            
+                pl.add(ells,noiseless*ells**2.)
+                pl.add(ells,noisy*ells**2.,ls="--")
+            pl.legendOn()
+            pl.done(self.plot_dir+"clste.png")
+
+
+
+            # TB, EB
+
+
+            pl = io.Plotter()
+            for spec in ['EB','TB']:
+                noiseless = self.mpibox.stacks["lensed"+spec]
+                noisy = self.mpibox.stacks["observed-deconvolved"+spec]
+            
+                pl.add(ells,noiseless*ells**2.)
+                pl.add(ells,noisy*ells**2.,ls="--")
+            pl.legendOn()
+            pl.done(self.plot_dir+"clsnull.png")
+
+        
         self.logger.info( "Done!")
         
     def save_cache(self,lensed,sim_id):
