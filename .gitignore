@@ -1,3 +1,5 @@
 *.pyc
 *.png
 *.log
+*_local.ini
+input/recon.ini
