@@ -15,7 +15,7 @@ git clone git@github.com:msyriac/enlib.git
 git clone git@github.com:msyriac/peakaboo.git
 
 # Create a symbolic link to relevant config file
-cd halofg/input
+cd peakaboo/input
 ln -s ../../cosmo-config/recon.ini recon.ini
 
 
