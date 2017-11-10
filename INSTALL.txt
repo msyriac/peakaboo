@@ -26,3 +26,9 @@ pip install -e . --user
 
 
 
+# Next you need to make your local copy of input/paths.ini in peakaboo
+cd peakaboo
+cp input/paths.ini input/paths_local.ini
+
+# Edit input/paths_local.ini with the paths to input, output and plots directories you want
+
