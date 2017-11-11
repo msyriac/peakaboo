@@ -2,6 +2,10 @@
 
 A typical workflow would look like the following.
 
+## Install and set up your work environment
+
+See `INSTALL.txt` for instructions.
+
 ## Create CMB lensing reconstructions 
 
 ```
@@ -14,6 +18,6 @@ In detail:
 
 1. `-W ignore` suppresses some annoying warnings that clog up the output
 2. `bin/recon.py` is the reconstruction script
-3. `cosmology_dir_name` is the name of the directory for the cosmology you are interested in. Your directory structure should be such that 1000 `input_data+cosmology_dir_name+"\Maps11000\WLConv*fits"` files exist.
+3. `cosmology_dir_name` is the name of the directory for the cosmology you are interested in. Your directory structure should be such that 1000 `input_data+cosmology_dir_name+"\Maps11000\WLConv*fits"` files exist. `input_data` is defined in `input/paths_local.ini`.
 
 
