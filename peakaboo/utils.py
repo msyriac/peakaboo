@@ -11,42 +11,26 @@ import astropy.io.fits as fits
 
 class LiuConvergence(object):
 
-    def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/jiav2/massless/",zstr="1100.00"):
-
-
+    def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/"):
         self.root = root_dir
-        self.kappa_file = lambda i :root_dir+"WLconv_z"+zstr+"_"+str(i).zfill(4)+"r.fits"
-
-        
         size_deg = 3.5
         Npix = 2048.
-            
         px = size_deg*60./Npix
         self.px = px
-
         self.shape, self.wcs = enmap.rect_geometry(size_deg*60.,px,proj="CAR",pol=False)
-
-        self.zstr = zstr
-        self.lxmap,self.lymap,self.modlmap,self.angmap,self.lx,self.ly = fmaps.get_ft_attributes_enmap(self.shape,self.wcs)
-
+        self.modlmap = enmap.modlmap(self.shape,self.wcs)
         
-    def get_kappa(self,index):
-
+    def get_kappa(self,index,z=1100):
+        zstr = "{:.2f}".format(z)
+        kappa_file = self.root+"Maps"+str(z*10)+"/WLconv_z"+zstr+"_"+str(index).zfill(4)+"r.fits"
         
-        my_map = fits.open(self.kappa_file(index))[0]
+        my_map = fits.open(kappa_file)[0]
         my_map = my_map.data
         
-        try:
-            assert my_map.shape == self.shape
-        except:
-            print my_map.shape
-            print self.shape
-            print "ERROR"
-            sys.exit()
-
-        self.low_pass_ell = 10000
+        assert my_map.shape == self.shape
+        low_pass_ell = 10000
         retmap = enmap.ndmap(my_map,self.wcs)
-        retmap = enmap.ndmap(fmaps.filter_map(retmap,retmap.copy()*0.+1.,self.modlmap,lowPass=self.low_pass_ell),self.wcs)
+        retmap = enmap.ndmap(fmaps.filter_map(retmap,retmap.copy()*0.+1.,self.modlmap,lowPass=low_pass_ell),self.wcs)
 
         return retmap
 
@@ -69,7 +53,7 @@ class PeakabooPipeline(object):
     def __init__(self,estimator,PathConfig,inp_dir,out_dir,Nmax,recon_section,
                  experiment,recon_config_file="input/recon.ini",
                  mpi_comm=None,
-                 bin_edges=None,verbose=False):
+                 bin_section=None,verbose=False):
         
         self.Config = io.config_from_file(recon_config_file)
         assert estimator=="TT" or estimator=="EB"
@@ -86,7 +70,7 @@ class PeakabooPipeline(object):
             self.numcores = 1
 
         if self.rank==0: 
-            self.logger = io.get_logger("peakaboo_recon")
+            self.logger = io.get_logger("recon")
 
 
         sims_section = "sims_liu"
@@ -121,7 +105,7 @@ class PeakabooPipeline(object):
             Ntot = len(files)
             assert Ntot>0
             
-        self.lc =  LiuConvergence(root_dir=map_root+inp_dir+"/",zstr="1100.00")
+        self.lc =  LiuConvergence(root_dir=map_root+inp_dir+"/")
 
             
         num_each,each_tasks = mpi_distribute(Ntot,self.numcores)
@@ -158,7 +142,6 @@ class PeakabooPipeline(object):
         self.psim.add_theory(cc,theory,lmax,orphics_is_dimensionless=False)
 
         self.lens_order = self.Config.getint(sims_section,"lens_order")
-        self.map_root = self.lc.root
 
 
 
@@ -206,13 +189,13 @@ class PeakabooPipeline(object):
                                         uEqualsL=True,
                                         gradCut=None,verbose=False,
                                         bigell=lmax)
-
+            Nlkk2d = self.qestimator.N.Nlkk[self.estimator]
 
         if verbose and self.rank==0: self.logger.info( "Initializing binner...")
         import orphics.tools.stats as stats
+
         
-        if bin_edges is None:
-            bin_edges = np.arange(200,4000,100)
+        bin_edges = io.bin_edges_from_config(self.Config,bin_section)
 
         self.lbinner = stats.bin2D(self.pdat.modlmap,bin_edges)
         self.fc = enmap.FourierCalc(self.pdat.shape,self.pdat.wcs)
@@ -220,14 +203,24 @@ class PeakabooPipeline(object):
         
         self.plot_dir = PathConfig.get("paths","plots")+inp_dir+"/"+out_dir+"/"
         self.result_dir = PathConfig.get("paths","output_data")+inp_dir+"/"+out_dir+"/"
-        io.mkdir(self.result_dir)
+        try:
+            io.mkdir(self.result_dir)
+        except:
+            pass
+        try:
+            io.mkdir(self.plot_dir)
+        except:
+            pass
 
+
+        cents,Nlkk = self.lbinner.bin(Nlkk2d)
+        io.save_cols(self.result_dir+"nlkk.txt",(cents,Nlkk))
 
     def get_unlensed(self,seed):
         return self.psim.get_unlensed_cmb(seed=seed)
 
     def get_kappa(self,index,stack=False):
-        imap = self.lc.get_kappa(index+1)
+        imap = self.lc.get_kappa(index+1,z=1100)
 
         retmap = enmap.ndmap(resample.resample_fft(imap,self.psim.shape[-2:]),self.psim.wcs)if imap.shape!=self.psim.shape[-2:] \
                             else enmap.ndmap(imap,self.psim.wcs)
@@ -343,7 +336,3 @@ class PeakabooPipeline(object):
         
         self.logger.info( "Done!")
         
-    def save_cache(self,lensed,sim_id):
-        np.save(self.map_root+"lensed_cmb_"+str(sim_id)+".npy",lensed)
-    def load_cached(self,sim_id):
-        return np.load(self.map_root+"lensed_cmb_"+str(sim_id)+".npy")

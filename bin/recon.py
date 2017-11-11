@@ -11,9 +11,8 @@ parser.add_argument("OutDir", type=str,help='Output Directory Name')
 parser.add_argument("recon", type=str,help='Recon section name')
 parser.add_argument("experiment", type=str,help='Name of experiment section')
 parser.add_argument("estimator", type=str,help='TT/EB')
+parser.add_argument("bin_section", type=str,help='bin_section')
 parser.add_argument("-v", "--verbose", action='store_true',help='Talk more.')
-parser.add_argument("-w", "--write_cache", action='store_true',help='Cache lensed CMB.')
-parser.add_argument("-r", "--read_cache", action='store_true',help='Read cached lensed CMB.')
 parser.add_argument("-d", "--debug", action='store_true',help='Debug.')
 parser.add_argument("-N", "--nmax",     type=int,  default=None,help="Limit to nmax sims.")
 args = parser.parse_args()
@@ -26,8 +25,8 @@ debug = args.debug
 # Initialize pipeline
 PathConfig = io.load_path_config()
 pipe = PeakabooPipeline(args.estimator,PathConfig,args.InpDir,args.OutDir,args.nmax,
-                  args.recon,args.experiment,
-                  mpi_comm = MPI.COMM_WORLD,verbose = args.verbose)
+                        args.recon,args.experiment,
+                        mpi_comm = MPI.COMM_WORLD,bin_section=args.bin_section,verbose = args.verbose)
 
 
 
@@ -35,23 +34,9 @@ pipe = PeakabooPipeline(args.estimator,PathConfig,args.InpDir,args.OutDir,args.n
 
 # Loop through sims
 for k,sim_id in enumerate(pipe.sim_ids):
-    if args.read_cache:
-        try:
-            lensed = pipe.load_cached(sim_id)
-            if pipe.rank==0 and k==0: pipe.logger.info("Sucessfully loaded cached lensed CMB.")
-            loaded_cache = True
-        except:
-            loaded_cache = False
-    else:
-        loaded_cache = False
-    if not(loaded_cache): # do lensing if not
-        if pipe.rank==0 and k==0: pipe.logger.info( "Did not load cached lensed CMB.")
-        unlensed = pipe.get_unlensed(seed=sim_id)
-        input_kappa = pipe.get_kappa(sim_id)
-        lensed = pipe.downsample(pipe.get_lensed(unlensed,input_kappa))
-    if args.write_cache and not(loaded_cache):
-        pipe.save_cache(lensed,sim_id)
-
+    unlensed = pipe.get_unlensed(seed=sim_id)
+    input_kappa = pipe.get_kappa(sim_id)
+    lensed = pipe.downsample(pipe.get_lensed(unlensed,input_kappa))
         
     if debug: pipe.power_plotter(pipe.fc.iqu2teb(lensed,normalize=False),"lensed")
     beamed = pipe.beam(lensed)
