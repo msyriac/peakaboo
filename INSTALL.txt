@@ -49,4 +49,4 @@ python setup.py install --user
 cd peakaboo
 python -W ignore bin/recon.py ARGUMENT test reconstruction_liu_EB_5000 experiment_simple EB -N 10 -d
 
-# where ARGUMENT is such that paths_local.ini:input_directory + ARGUMENT + /WLConv*fits should exist
+# where ARGUMENT is such that paths_local.ini:input_directory + ARGUMENT + /Maps11000/WLConv*fits should exist
