@@ -19,6 +19,8 @@ parser.add_argument("bin_section", type=str,help='bin_section')
 parser.add_argument("-N", "--nmax",     type=int,  default=1000,help="Limit to nmax sims.")
 parser.add_argument("-G", "--galaxies",     type=str,
                     default=None,help="Comma separated list of galaxy redshifts.")
+parser.add_argument("-s", "--smoothing",     type=str,
+                    default=None,help="Comma separated list of smoothing FWHM in arcmin.")
 args = parser.parse_args()
 
 
@@ -71,7 +73,13 @@ for k,i in enumerate(my_tasks):
 
     p2drcic,krc,kic = fc.power2d(recon,input_k)
     cents, prcic = lbinner.bin(p2drcic)
-    assert np.all(np.isclose(cents,lcents))
+
+    try:
+        assert np.all(np.isclose(cents,lcents))
+    except:
+        nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,kind="extrapolate",fill_value=0.)
+        Nlkk = nlkkfunc(cents)
+        
     p2dicic  = fc.f2power(kic,kic)
     cents, picic = lbinner.bin(p2dicic)
     p2drcrc  = fc.f2power(krc,krc)
@@ -115,7 +123,7 @@ if rank==0:
     pl.add(cents,pdiff,color="k")
     pl.hline()
     #pl._ax.set_ylim(-2,1)
-    pl._ax.set_xlim(lbin_edges[0],lbin_edges[1-])
+    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
     pl.done(io.dout_dir+"pdiff.png")
 
 
@@ -125,7 +133,7 @@ if rank==0:
     pl.add(lcents,Nlkk+inputk,ls="-")
     pl.add(cents,rcrc,marker="o",ls="none")
     pl.addErr(cents,cross,yerr=cross_err,marker="o")
-    pl._ax.set_xlim(lbin_edges[0],lbin_edges[1-])
+    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
     pl.done(io.dout_dir+"clkk.png")
 
 
@@ -133,5 +141,6 @@ if rank==0:
     pl = io.Plotter(labelX="$\\ell$",labelY="$\\ell C_{\ell}$")
     pl.add(cents,icig*cents,color="k")
     pl.addErr(cents,rcig*cents,yerr=rcig_err*cents,marker="o")
-    pl._ax.set_xlim(lbin_edges[0],lbin_edges[1-])
+    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
+    pl.hline()
     pl.done(io.dout_dir+"galcross.png")
