@@ -9,6 +9,14 @@ import numpy as np
 import logging, time, os
 import astropy.io.fits as fits
 
+
+# DEFINE SHEAR NOISE MODEL HERE
+def shear_noise(z):
+    shape_noise = 0.25
+    ngal = 30.
+    return shape_noise**2./(ngal*1.18e7)
+
+
 class LiuConvergence(object):
 
     def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/"):
