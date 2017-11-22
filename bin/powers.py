@@ -1,14 +1,14 @@
 from __future__ import print_function
 import numpy as np
 from peakaboo import utils as ls
-import orphics.tools.io as io
+from orphics import io
 import os,sys
-import orphics.analysis.flatMaps as fmaps
-from orphics.tools.mpi import mpi_distribute, MPIStats, MPI
-import orphics.analysis.flatMaps as fmaps
+import orphics.maps as fmaps
+from orphics.mpi import mpi_distribute, MPI
 from enlib import enmap, resample
-from orphics.tools.stats import bin2D
+from orphics.stats import bin2D, Stats
 import argparse
+import cPickle as pickle
 
 
 # Parse command line
@@ -38,11 +38,19 @@ inp_dir = args.InpDir
 out_dir = args.OutDir
 
 galzs = [int(x) for x in args.galaxies.split(',')]
-smoothings_cmb = [float(x) for x in args.smoothings_cmb.split(',')]
-smoothings_gal = [float(x) for x in args.smoothings_gal.split(',')]
+if args.smoothings_cmb is None:
+    smoothings_cmb = [0.]
+else:
+    smoothings_cmb = [float(x) for x in args.smoothings_cmb.split(',')]
+if args.smoothings_gal is None:
+    smoothings_gal = [0.]
+else:
+    smoothings_gal = [float(x) for x in args.smoothings_gal.split(',')]
 
 PathConfig = io.load_path_config()
 result_dir = PathConfig.get("paths","output_data")+inp_dir+"/"+out_dir+"/"
+save_dir = PathConfig.get("paths","output_data")+inp_dir+"_"+out_dir+"/"
+io.mkdir(save_dir)
 
 # CMB lens noise
 lcents,Nlkk = np.loadtxt(result_dir+"nlkk.txt",unpack=True)
@@ -52,7 +60,7 @@ file_root = lambda sim_id: result_dir+"kappa_"+str(sim_id).zfill(4)+".fits"
 # MPI
 Ntot = args.nmax
 num_each,each_tasks = mpi_distribute(Ntot,numcores)
-mpibox = MPIStats(comm,num_each,tag_start=333)
+mpibox = Stats(comm,tag_start=333)
 my_tasks = each_tasks[rank]
 if rank==0: print( "At most "+ str(max(num_each)) + " tasks...")
 
@@ -87,62 +95,91 @@ for z in galzs:
     ngs.append( enmap.MapGen(shape,wcs,cov))
 for k,z in enumerate(galzs):
     galkappa = enmap.ndmap(resample.resample_fft(LC.get_kappa(1,z=z),shape),wcs)
-    galkappa_noisy = galkappa + ngs[k].get_map(seed=int(1e9)+k)
-    sigma_gal = np.sqrt(np.var(galkappa_noisy))
-    print(sigma_gal)
-    hist_bin_edges_gals.append( io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_gal )
-    hist2d_bin_edges_gals.append( io.bin_edges_from_config(Config,hist2d_gal_bin_section )*sigma_gal )
+    
+    hist_bin_edges_gals.append({})
+    hist2d_bin_edges_gals.append({})
+    for sgal in smoothings_gal:
+
+        galkappa_noisy = galkappa + ngs[k].get_map(seed=int(1e9)+k)
+        if sgal>1.e-5: galkappa_noisy = enmap.smooth_gauss(galkappa_noisy,sgal*np.pi/180./60.)
+        sigma_gal = np.sqrt(np.var(galkappa_noisy))
+        #print(sigma_gal)
+        hist_bin_edges_gals[k][str(sgal)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_gal 
+        hist2d_bin_edges_gals[k][str(sgal)] =  io.bin_edges_from_config(Config,hist2d_gal_bin_section )*sigma_gal 
 
 for k,i in enumerate(my_tasks):
 
+    # Read reconstructed CMB lensing
     recon = enmap.read_map(file_root(i))
 
-
+    # Initialize fourier
     if k==0:
         shape,wcs = recon.shape,recon.wcs
         fc = enmap.FourierCalc(shape,wcs)
         lbinner = bin2D(recon.modlmap(),lbin_edges)
+        if i==0: np.save(save_dir+"power_1d_lbin_edges.npy",lbin_edges)
 
+    # Smooth and calculate 1d CMB pdf
     recon_smoothed = {}
-    
     for scmb in smoothings_cmb:
         recon_smoothed[str(scmb)] = enmap.smooth_gauss(recon.copy(),scmb*np.pi/180./60.)
-        cmb_pdf,_ = np.histogram(recon_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb)
-        
+        cmb_pdf,_ = np.histogram(recon_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb[str(scmb)])
+        np.save(save_dir+"cmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",cmb_pdf)
+        if i==0: np.save(save_dir+"cmb_pdf_"+str(scmb)+"_bin_edges.npy",hist_bin_edges_cmb[str(scmb)])
     
-    
+    # Get input CMB lens
     input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=1100),shape),wcs)
     
-
+    # Recon x input
     p2drcic,krc,kic = fc.power2d(recon,input_k)
     cents, prcic = lbinner.bin(p2drcic)
 
+    # Theory N0
     try:
         assert np.all(np.isclose(cents,lcents))
     except:
         nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,kind="extrapolate",fill_value=0.)
         Nlkk = nlkkfunc(cents)
-        
+
+    # Input x Input    
     p2dicic  = fc.f2power(kic,kic)
     cents, picic = lbinner.bin(p2dicic)
+    # Recon x Recon
     p2drcrc  = fc.f2power(krc,krc)
     cents, prcrc = lbinner.bin(p2drcrc)
 
 
+    # Galaxy lensing
     for j,z in enumerate(galzs):
+
+        # Load noiseless galaxy kappa
         galkappa = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=z),shape),wcs)
-        galkappa += ngs[j].get_map(seed=int(1e9)+j*1000+k)
+        # Add noise
+        galkappa_noisy = galkappa + ngs[j].get_map(seed=int(1e9)+j)
 
-        gal_pdf,_ = np.histogram(galkappa.ravel(),hist_bin_edges_gals[j])
-
-        pdf_2d,_,_ = np.histogram2d(recon.ravel(),galkappa.ravel(),bins=(hist2d_bin_edges_cmb,hist2d_bin_edges_gals[j]))
-
-
+        
+        # Gal x input CMB lens
         p2dicig,kig = fc.f1power(galkappa,kic)
         cents, picig = lbinner.bin(p2dicig)
+        # Gal x CMB recon
         p2drcig = fc.f2power(krc,kig)
         cents, prcig = lbinner.bin(p2drcig)
+        np.save(save_dir+"galXcmb_"+str(z)+"_"+str(i).zfill(4)+".npy",prcig)
         
+        for sgal in smoothings_gal:
+
+            gkappa = enmap.smooth_gauss(galkappa_noisy.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa_noisy.copy()
+            gal_pdf,_ = np.histogram(gkappa.ravel(),hist_bin_edges_gals[j][str(sgal)])
+            np.save(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf)
+            if i==0: np.save(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",hist_bin_edges_gals[j][str(sgal)])
+
+            for scmb in smoothings_cmb:
+                pdf_2d,_,_ = np.histogram2d(recon_smoothed[str(scmb)].ravel(),gkappa.ravel(),bins=(hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]))
+                np.save(save_dir+"galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d)
+                if i==0: pickle.dump((hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]),open(save_dir+"galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl",'wb'))
+
+
+
 
     mpibox.add_to_stats("icig",picig)
     mpibox.add_to_stats("rcig",prcig)
@@ -164,12 +201,12 @@ if rank==0:
     cross = mpibox.stats["rcic"]["mean"]
     cross_err = mpibox.stats["rcic"]["err"]
 
-    print (inputk)
-    print (cross)
+    # print (inputk)
+    # print (cross)
     
     pdiff = (cross-inputk)/inputk
     
-    pl = io.Plotter(labelX="$\\ell$",labelY="$\\Delta C_{\ell}/C_{\ell}$")
+    pl = io.Plotter(xlabel="$\\ell$",ylabel="$\\Delta C_{\ell}/C_{\ell}$")
     pl.add(cents,pdiff,color="k")
     pl.hline()
     #pl._ax.set_ylim(-2,1)
@@ -177,20 +214,20 @@ if rank==0:
     pl.done(io.dout_dir+"pdiff.png")
 
 
-    pl = io.Plotter(labelX="$\\ell$",labelY="$C_{\ell}$",scaleY='log')
+    pl = io.Plotter(xlabel="$\\ell$",ylabel="$C_{\ell}$",yscale='log')
     pl.add(cents,inputk,color="k")
     pl.add(lcents,Nlkk,ls="--")
     pl.add(lcents,Nlkk+inputk,ls="-")
     pl.add(cents,rcrc,marker="o",ls="none")
-    pl.addErr(cents,cross,yerr=cross_err,marker="o")
+    pl.add_err(cents,cross,yerr=cross_err,marker="o")
     pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
     pl.done(io.dout_dir+"clkk.png")
 
 
     
-    pl = io.Plotter(labelX="$\\ell$",labelY="$\\ell C_{\ell}$")
+    pl = io.Plotter(xlabel="$\\ell$",ylabel="$\\ell C_{\ell}$")
     pl.add(cents,icig*cents,color="k")
-    pl.addErr(cents,rcig*cents,yerr=rcig_err*cents,marker="o")
+    pl.add_err(cents,rcig*cents,yerr=rcig_err*cents,marker="o")
     pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
     pl.hline()
     pl.done(io.dout_dir+"galcross.png")
