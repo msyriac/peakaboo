@@ -123,6 +123,7 @@ for k,i in enumerate(my_tasks):
     recon_smoothed = {}
     for scmb in smoothings_cmb:
         recon_smoothed[str(scmb)] = enmap.smooth_gauss(recon.copy(),scmb*np.pi/180./60.)
+        recon_smoothed[str(scmb)] -= recon_smoothed[str(scmb)].mean()
         cmb_pdf,_ = np.histogram(recon_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb[str(scmb)])
         np.save(save_dir+"cmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",cmb_pdf)
         if i==0: np.save(save_dir+"cmb_pdf_"+str(scmb)+"_bin_edges.npy",hist_bin_edges_cmb[str(scmb)])
@@ -169,6 +170,7 @@ for k,i in enumerate(my_tasks):
         for sgal in smoothings_gal:
 
             gkappa = enmap.smooth_gauss(galkappa_noisy.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa_noisy.copy()
+            gkappa -= gkappa.mean()
             gal_pdf,_ = np.histogram(gkappa.ravel(),hist_bin_edges_gals[j][str(sgal)])
             np.save(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf)
             if i==0: np.save(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",hist_bin_edges_gals[j][str(sgal)])
