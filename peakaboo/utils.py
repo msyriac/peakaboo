@@ -180,7 +180,7 @@ class PeakabooPipeline(object):
         fMaskCMB_PX = maps.mask_kspace(shape_dat,wcs_dat,lmin=pellminX,lmax=pellmaxX)
         fMaskCMB_PY = maps.mask_kspace(shape_dat,wcs_dat,lmin=pellminY,lmax=pellmaxY)
         fMask = maps.mask_kspace(shape_dat,wcs_dat,lmin=kellmin,lmax=kellmax)
-        self.fMask = fMask
+        self.fMaskSim = maps.mask_kspace(shape_sim,wcs_sim,lmin=kellmin,lmax=kellmax)
 
         with io.nostdout():
             self.qestimator = Estimator(shape_dat,wcs_dat,
@@ -231,10 +231,11 @@ class PeakabooPipeline(object):
 
     def get_kappa(self,index,stack=False):
         imap = self.lc.get_kappa(index+1,z=1100)
+        
 
         retmap = enmap.ndmap(resample.resample_fft(imap,self.psim.shape[-2:]),self.psim.wcs)if imap.shape!=self.psim.shape[-2:] \
                             else enmap.ndmap(imap,self.psim.wcs)
-        return enmap.ndmap(maps.filter_map(retmap,self.fMask),self.psim.wcs)
+        return enmap.ndmap(maps.filter_map(retmap,self.fMaskSim),self.psim.wcs)
         
 
     def get_lensed(self,unlensed,kappa):
@@ -260,7 +261,7 @@ class PeakabooPipeline(object):
     def qest(self,lT,lE=None,lB=None):
         self.qestimator.updateTEB_X(lT,lE,lB,alreadyFTed=True)
         self.qestimator.updateTEB_Y()
-        recon = self.qestimator.getKappa(self.estimator).real
+        recon = self.qestimator.get_kappa(self.estimator).real
         return recon
 
 
