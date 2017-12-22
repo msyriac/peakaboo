@@ -306,7 +306,7 @@ class PeakabooPipeline(object):
             ells = self.cents
             # TT, EE, BB
 
-            pl = io.Plotter(scaleY='log')
+            pl = io.Plotter(yscale='log')
             for spec in ['TT','EE','BB']:
                 noiseless = self.mpibox.stacks["lensed"+spec]
                 noisy = self.mpibox.stacks["observed-deconvolved"+spec]
