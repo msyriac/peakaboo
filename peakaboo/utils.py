@@ -119,7 +119,7 @@ class PeakabooPipeline(object):
 
             
         num_each,each_tasks = mpi_distribute(Ntot,self.numcores)
-        self.mpibox = MPIStats(self.comm,num_each,tag_start=333)
+        self.mpibox = MPIStats(self.comm,tag_start=333)
         if self.rank==0: self.logger.info( "At most "+ str(max(num_each)) + " tasks...")
         self.sim_ids = each_tasks[self.rank]
 
