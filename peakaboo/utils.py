@@ -313,7 +313,7 @@ class PeakabooPipeline(object):
             
                 pl.add(ells,noiseless*ells**2.)
                 pl.add(ells,noisy*ells**2.,ls="--")
-            pl.legendOn()
+            pl.legend()
             pl.done(self.plot_dir+"clsauto.png")
 
 
@@ -326,7 +326,7 @@ class PeakabooPipeline(object):
             
                 pl.add(ells,noiseless*ells**2.)
                 pl.add(ells,noisy*ells**2.,ls="--")
-            pl.legendOn()
+            pl.legend()
             pl.done(self.plot_dir+"clste.png")
 
 
@@ -341,7 +341,7 @@ class PeakabooPipeline(object):
             
                 pl.add(ells,noiseless*ells**2.)
                 pl.add(ells,noisy*ells**2.,ls="--")
-            pl.legendOn()
+            pl.legend()
             pl.done(self.plot_dir+"clsnull.png")
 
         
