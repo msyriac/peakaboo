@@ -1,10 +1,11 @@
-import orphics.tools.io as io
-import orphics.analysis.flatMaps as fmaps
-from alhazen.quadraticEstimator import Estimator
+import orphics.io as io
+import orphics.maps as maps
+from orphics.lensing import Estimator
 import alhazen.io as aio
 import alhazen.lensTools as lt
 from enlib import enmap, resample, lensing, fft
-from orphics.tools.mpi import mpi_distribute, MPIStats
+from orphics.mpi import mpi_distribute
+from orphics.stats import Stats as MPIStats
 import numpy as np
 import logging, time, os
 import astropy.io.fits as fits
@@ -25,7 +26,7 @@ class LiuConvergence(object):
         Npix = 2048.
         px = size_deg*60./Npix
         self.px = px
-        self.shape, self.wcs = enmap.rect_geometry(size_deg*60.,px,proj="CAR",pol=False)
+        self.shape, self.wcs = maps.rect_geometry(width_deg = size_deg,px_res_arcmin=px,proj="CAR",pol=False)
         self.modlmap = enmap.modlmap(self.shape,self.wcs)
         
     def get_kappa(self,index,z=1100):
@@ -34,11 +35,12 @@ class LiuConvergence(object):
         
         my_map = fits.open(kappa_file)[0]
         my_map = my_map.data
-        
+
         assert my_map.shape == self.shape
         low_pass_ell = 10000
         retmap = enmap.ndmap(my_map,self.wcs)
-        retmap = enmap.ndmap(fmaps.filter_map(retmap,retmap.copy()*0.+1.,self.modlmap,lowPass=low_pass_ell),self.wcs)
+        kmask = maps.mask_kspace(self.shape,self.wcs,lmax=low_pass_ell)
+        retmap = enmap.ndmap(maps.filter_map(retmap,kmask),self.wcs)
 
         return retmap
 
@@ -156,7 +158,7 @@ class PeakabooPipeline(object):
         # RECONSTRUCTION INIT
         if verbose and self.rank==0: self.logger.info( "Initializing quadratic estimator...")
 
-        min_ell = fmaps.minimum_ell(shape_dat,wcs_dat)
+        min_ell = maps.minimum_ell(shape_dat,wcs_dat)
         lb = aio.ellbounds_from_config(self.Config,recon_section,min_ell)
         tellminY = lb['tellminY']
         tellmaxY = lb['tellmaxY']
@@ -170,18 +172,18 @@ class PeakabooPipeline(object):
         kellmax = lb['kellmax']
         self.kellmin = kellmin
         self.kellmax = kellmax
-        lxmap_dat,lymap_dat,modlmap_dat,angmap_dat,lx_dat,ly_dat = fmaps.get_ft_attributes_enmap(shape_dat,wcs_dat)
-        lxmap_sim,lymap_sim,modlmap_sim,angmap_sim,lx_sim,ly_sim = fmaps.get_ft_attributes_enmap(shape_sim,wcs_sim)
+        lxmap_dat,lymap_dat,modlmap_dat,angmap_dat,lx_dat,ly_dat = maps.get_ft_attributes(shape_dat,wcs_dat)
+        lxmap_sim,lymap_sim,modlmap_sim,angmap_sim,lx_sim,ly_sim = maps.get_ft_attributes(shape_sim,wcs_sim)
 
-        template_dat = fmaps.simple_flipper_template_from_enmap(shape_dat,wcs_dat)
-        fMaskCMB_TX = fmaps.fourierMask(lx_dat,ly_dat,modlmap_dat,lmin=tellminX,lmax=tellmaxX)
-        fMaskCMB_TY = fmaps.fourierMask(lx_dat,ly_dat,modlmap_dat,lmin=tellminY,lmax=tellmaxY)
-        fMaskCMB_PX = fmaps.fourierMask(lx_dat,ly_dat,modlmap_dat,lmin=pellminX,lmax=pellmaxX)
-        fMaskCMB_PY = fmaps.fourierMask(lx_dat,ly_dat,modlmap_dat,lmin=pellminY,lmax=pellmaxY)
-        fMask = fmaps.fourierMask(lx_dat,ly_dat,modlmap_dat,lmin=kellmin,lmax=kellmax)
+        fMaskCMB_TX = maps.mask_kspace(shape_dat,wcs_dat,lmin=tellminX,lmax=tellmaxX)
+        fMaskCMB_TY = maps.mask_kspace(shape_dat,wcs_dat,lmin=tellminY,lmax=tellmaxY)
+        fMaskCMB_PX = maps.mask_kspace(shape_dat,wcs_dat,lmin=pellminX,lmax=pellmaxX)
+        fMaskCMB_PY = maps.mask_kspace(shape_dat,wcs_dat,lmin=pellminY,lmax=pellmaxY)
+        fMask = maps.mask_kspace(shape_dat,wcs_dat,lmin=kellmin,lmax=kellmax)
+        self.fMask = fMask
 
         with io.nostdout():
-            self.qestimator = Estimator(template_dat,
+            self.qestimator = Estimator(shape_dat,wcs_dat,
                                         theory,
                                         theorySpectraForNorm=None,
                                         noiseX2dTEB=[self.pdat.nT,self.pdat.nP,self.pdat.nP],
@@ -206,7 +208,7 @@ class PeakabooPipeline(object):
         bin_edges = io.bin_edges_from_config(self.Config,bin_section)
 
         self.lbinner = stats.bin2D(self.pdat.modlmap,bin_edges)
-        self.fc = enmap.FourierCalc(self.pdat.shape,self.pdat.wcs)
+        self.fc = maps.FourierCalc(self.pdat.shape,self.pdat.wcs)
         self.cents = self.lbinner.centers
         
         self.plot_dir = PathConfig.get("paths","plots")+inp_dir+"/"+out_dir+"/"
@@ -232,7 +234,7 @@ class PeakabooPipeline(object):
 
         retmap = enmap.ndmap(resample.resample_fft(imap,self.psim.shape[-2:]),self.psim.wcs)if imap.shape!=self.psim.shape[-2:] \
                             else enmap.ndmap(imap,self.psim.wcs)
-        return enmap.ndmap(fmaps.filter_map(retmap,retmap*0.+1.,self.psim.modlmap,lowPass=self.kellmax,highPass=self.kellmin),self.psim.wcs)
+        return enmap.ndmap(maps.filter_map(retmap,self.fMask),self.psim.wcs)
         
 
     def get_lensed(self,unlensed,kappa):
