@@ -9,6 +9,7 @@ from orphics.stats import Stats as MPIStats
 import numpy as np
 import logging, time, os
 import astropy.io.fits as fits
+from orphics.cosmology import cosmology
 
 
 # DEFINE SHEAR NOISE MODEL HERE
@@ -136,27 +137,38 @@ class PeakabooPipeline(object):
         if verbose and self.rank==0: self.logger.info( "Initializing cosmology...")
 
 
-        cosmology_section = "cc_default" #!!!!!!!!WRONG
+        # cosmology_section = "cc_default" #!!!!!!!!WRONG
         
-        def do_cosmology():
-            return aio.theory_from_config(self.Config,cosmology_section,dimensionless=False)
+        # def do_cosmology():
+        #     return aio.theory_from_config(self.Config,cosmology_section,dimensionless=False)
 
-        if self.rank==0:
-            try:
-                old_cores = os.environ["OMP_NUM_THREADS"]
-            except:
-                old_cores = "1"
-            import multiprocessing
-            num_cores= str(multiprocessing.cpu_count())
-            os.environ["OMP_NUM_THREADS"] = num_cores
-            self.logger.info( "Rank 0 possibly calling CAMB with "+num_cores+" cores...")
-            theory, cc, lmax = do_cosmology()
-            os.environ["OMP_NUM_THREADS"] = old_cores
-            self.logger.info( "Rank 0 done with CAMB and setting OMP_NUM_THREADS back to  "+old_cores)
+        # if self.rank==0:
+        #     try:
+        #         old_cores = os.environ["OMP_NUM_THREADS"]
+        #     except:
+        #         old_cores = "1"
+        #     import multiprocessing
+        #     num_cores= str(multiprocessing.cpu_count())
+        #     os.environ["OMP_NUM_THREADS"] = num_cores
+        #     self.logger.info( "Rank 0 possibly calling CAMB with "+num_cores+" cores...")
+        #     theory, cc, lmax = do_cosmology()
+        #     os.environ["OMP_NUM_THREADS"] = old_cores
+        #     self.logger.info( "Rank 0 done with CAMB and setting OMP_NUM_THREADS back to  "+old_cores)
 
-        self.comm.Barrier()
-        if self.rank!=0:
-            theory, cc, lmax = do_cosmology()
+        # self.comm.Barrier()
+        # if self.rank!=0:
+        #     theory, cc, lmax = do_cosmology()
+
+        cosmo_name = inp_dir.split('/')[0]
+        camb_names,cosmologies = np.loadtxt("input/camb/fn_mapping.txt",dtype=str,unpack=True)
+        this_camb = camb_names[cosmologies=='cosmo_name']
+        assert this_camb.size==1
+        this_camb = "camb_"+this_camb.ravel()[0]
+        cc = None
+        lmax = 6000
+        theory = cosmology.loadTheorySpectraFromCAMB(this_camb,
+                                             unlensedEqualsLensed=False,useTotal=False,TCMB = 2.7255e6,lpad=9000,get_dimensionless=False)
+
         
         self.pdat.add_theory(cc,theory,lmax,orphics_is_dimensionless=False)
         self.psim.add_theory(cc,theory,lmax,orphics_is_dimensionless=False)
