@@ -58,7 +58,7 @@ for k,sim_id in enumerate(pipe.sim_ids):
         
     kappa = pipe.qest(lT,lE,lB)
 
-    
+    print ('JIA:savekappa') 
     pipe.save_kappa(kappa,sim_id)
     if pipe.rank==0 and (k+1)%1==0: pipe.logger.info( "Rank 0 done with "+str(k+1)+ " / "+str( len(pipe.sim_ids))+ " tasks.")
     

@@ -79,9 +79,15 @@ class PeakabooPipeline(object):
             self.rank = 0
             self.numcores = 1
 
-        if self.rank==0: 
-            self.logger = io.get_logger("recon")
-
+        if self.rank==0:
+            #print 'JIA: print I am rank 0' 
+            #self.logger = io.get_logger("recon")
+            class hack:                                                                                                                              
+               def info(self,x):                                                                                                                    
+                   print(x)                                                                                                                        
+                                                                                                                                                    
+            T = hack()                                                                                                                              
+            self.logger = T
 
         sims_section = "sims_liu"
         analysis_section = "analysis_liu"
@@ -110,13 +116,17 @@ class PeakabooPipeline(object):
             Ntot = Nmax
         else:
             import glob
-            search_path = map_root+inp_dir+"/WLconv_z1100*.fits"
+            search_path = map_root+inp_dir+"/Maps11000/WLconv_z1100*.fits"
             files = glob.glob(search_path)
+            #print files
+            #print 'JIA NOTE: SEARCH PATH',search_path
             Ntot = len(files)
+            #print Ntot
             assert Ntot>0
-            
-        self.lc =  LiuConvergence(root_dir=map_root+inp_dir+"/")
 
+        #print 'before self.lc'
+        self.lc =  LiuConvergence(root_dir=map_root+inp_dir+"/")
+        #print 'after self.lc'
             
         num_each,each_tasks = mpi_distribute(Ntot,self.numcores)
         self.mpibox = MPIStats(self.comm,tag_start=333)
@@ -268,6 +278,7 @@ class PeakabooPipeline(object):
     def save_kappa(self,kappa,sim_id):
         kappa = enmap.ndmap(kappa,self.pdat.wcs)
         enmap.write_map(self.result_dir+"kappa_"+str(sim_id).zfill(4)+".fits",kappa)
+        #print (self.result_dir+"kappa_"+str(sim_id).zfill(4)+".fits")
 
     def power_plotter(self,lteb,label):
 
