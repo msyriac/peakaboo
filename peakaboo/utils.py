@@ -29,6 +29,7 @@ class LiuConvergence(object):
         self.px = px
         self.shape, self.wcs = maps.rect_geometry(width_deg = size_deg,px_res_arcmin=px,proj="CAR",pol=False)
         self.modlmap = enmap.modlmap(self.shape,self.wcs)
+        print ('JIA print self.shape',self.shape)
         
     def get_kappa(self,index,z=1100):
         zstr = "{:.2f}".format(z)
@@ -36,13 +37,14 @@ class LiuConvergence(object):
         
         my_map = fits.open(kappa_file)[0]
         my_map = my_map.data
+        print ('JIA print my_map.shape',my_map.shape)
 
         assert my_map.shape == self.shape
         low_pass_ell = 10000
         retmap = enmap.ndmap(my_map,self.wcs)
         kmask = maps.mask_kspace(self.shape,self.wcs,lmax=low_pass_ell)
         retmap = enmap.ndmap(maps.filter_map(retmap,kmask),self.wcs)
-
+        print ('JIA print retmap.shape', retmap.shape)
         return retmap
 
 
@@ -98,7 +100,7 @@ class PeakabooPipeline(object):
                                                                         sims_section,
                                                                         analysis_section,
                                                                         pol=pol)
-
+        #print ('JIA print shape_sim, shape_dat', shape_sim, shape_dat)
         if verbose and self.rank==0: self.logger.info("Got shapes and wcs.")
         
         self.psim = aio.patch_array_from_config(self.Config,experiment,
@@ -253,7 +255,7 @@ class PeakabooPipeline(object):
 
     def get_kappa(self,index,stack=False):
         imap = self.lc.get_kappa(index+1,z=1100)
-        
+       # print ('JIA print self.psim.shape', psim.shape)    
 
         retmap = enmap.ndmap(resample.resample_fft(imap,self.psim.shape[-2:]),self.psim.wcs)if imap.shape!=self.psim.shape[-2:] \
                             else enmap.ndmap(imap,self.psim.wcs)
@@ -281,9 +283,11 @@ class PeakabooPipeline(object):
         return pdat.get_noise_sim(seed=seed)
 
     def qest(self,lT,lE=None,lB=None):
+        print ('JIA quest lT.shape', lT.shape)
         self.qestimator.updateTEB_X(lT,lE,lB,alreadyFTed=True)
         self.qestimator.updateTEB_Y()
         recon = self.qestimator.get_kappa(self.estimator).real
+        print ('JIA quest recon.shape', recon.shape)
         return recon
 
 

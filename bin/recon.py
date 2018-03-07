@@ -37,7 +37,7 @@ for k,sim_id in enumerate(pipe.sim_ids):
     unlensed = pipe.get_unlensed(seed=sim_id)
     input_kappa = pipe.get_kappa(sim_id)
     lensed = pipe.downsample(pipe.get_lensed(unlensed,input_kappa))
-        
+    print ('JIA print unlensed, input, lensed', unlensed.shape, input_kappa.shape, lensed.shape)    
     if debug: pipe.power_plotter(pipe.fc.iqu2teb(lensed,normalize=False),"lensed")
     beamed = pipe.beam(lensed)
     noise = pipe.get_noise(seed=sim_id)
