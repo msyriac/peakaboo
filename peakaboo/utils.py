@@ -14,9 +14,15 @@ from orphics import cosmology
 
 # DEFINE SHEAR NOISE MODEL HERE
 def shear_noise(z):
-    shape_noise = 0.25
-    ngal = 30.
-    return shape_noise**2./(ngal*1.18e7)
+    ngal is None
+    ngal=8.83 if z==0.5 
+    ngal=13.25 if z==1.0
+    ngal=11.15 if z==1.5 
+    ngal=7.36 if z==2.0
+    ngal=4.26 if z==2.5
+    assert ngal is not None
+    shape_noise = 0.3
+    return shape_noise**2./(2.*ngal*1.18e7)
 
 
 class LiuConvergence(object):
