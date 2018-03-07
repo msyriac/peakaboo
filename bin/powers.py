@@ -110,7 +110,7 @@ for k,z in enumerate(galzs):
 for k,i in enumerate(my_tasks):
 
     # Read reconstructed CMB lensing
-    recon = enmap.read_map(file_root(i+1))
+    recon = enmap.read_map(file_root(i))
     print(file_root(i))
 
     # Initialize fourier
