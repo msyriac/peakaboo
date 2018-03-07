@@ -166,6 +166,7 @@ class PeakabooPipeline(object):
         this_camb = camb_names[cosmologies==cosmo_name]
         assert this_camb.size==1
         this_camb = "camb_"+this_camb.ravel()[0]
+        #this_camb = "camb_mnv0.00000_om0.30000_As2.1000"
         cc = None
         lmax = 6000
         theory = cosmology.loadTheorySpectraFromCAMB('input/camb/'+this_camb,
@@ -373,4 +374,5 @@ class PeakabooPipeline(object):
 
         
         self.logger.info( "Done!")
-        
+       
+ 

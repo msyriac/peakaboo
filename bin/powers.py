@@ -92,7 +92,7 @@ hist_bin_edges_gals = []
 hist2d_bin_edges_gals = []
 for z in galzs:
     cov = np.ones((1,1,shape[0],shape[1]))*ls.shear_noise(z)
-    ngs.append( enmap.MapGen(shape,wcs,cov))
+    ngs.append( fmaps.MapGen(shape,wcs,cov))
 for k,z in enumerate(galzs):
     galkappa = enmap.ndmap(resample.resample_fft(LC.get_kappa(1,z=z),shape),wcs)
     
@@ -111,11 +111,12 @@ for k,i in enumerate(my_tasks):
 
     # Read reconstructed CMB lensing
     recon = enmap.read_map(file_root(i))
+    print(file_root(i))
 
     # Initialize fourier
     if k==0:
         shape,wcs = recon.shape,recon.wcs
-        fc = enmap.FourierCalc(shape,wcs)
+        fc = fmaps.FourierCalc(shape,wcs)
         lbinner = bin2D(recon.modlmap(),lbin_edges)
         if i==0: np.save(save_dir+"power_1d_lbin_edges.npy",lbin_edges)
 
@@ -130,7 +131,7 @@ for k,i in enumerate(my_tasks):
     
     # Get input CMB lens
     input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=1100),shape),wcs)
-    
+    #sys.exit()
     # Recon x input
     p2drcic,krc,kic = fc.power2d(recon,input_k)
     cents, prcic = lbinner.bin(p2drcic)
@@ -217,12 +218,13 @@ if rank==0:
 
 
     pl = io.Plotter(xlabel="$\\ell$",ylabel="$C_{\ell}$",yscale='log')
-    pl.add(cents,inputk,color="k")
-    pl.add(lcents,Nlkk,ls="--")
-    pl.add(lcents,Nlkk+inputk,ls="-")
-    pl.add(cents,rcrc,marker="o",ls="none")
-    pl.add_err(cents,cross,yerr=cross_err,marker="o")
+    pl.add(cents,inputk,color="k",label="ixi")
+    pl.add(lcents,Nlkk,ls="--",label="nlkk")
+    pl.add(lcents,Nlkk+inputk,ls="-",label="nlkk+clkk")
+    pl.add(cents,rcrc,marker="o",ls="none",label="rxr")
+    pl.add_err(cents,cross,yerr=cross_err,marker="o",label="rxi")
     pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
+    pl.legend()
     pl.done(io.dout_dir+"clkk.png")
 
 
