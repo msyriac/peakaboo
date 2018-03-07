@@ -294,7 +294,7 @@ class PeakabooPipeline(object):
 
     def save_kappa(self,kappa,sim_id):
         kappa = enmap.ndmap(kappa,self.pdat.wcs)
-        enmap.write_map(self.result_dir+"kappa_"+str(sim_id).zfill(4)+".fits",kappa)
+        enmap.write_map(self.result_dir+"kappa_"+str(sim_id+1).zfill(4)+".fits",kappa)
         #print (self.result_dir+"kappa_"+str(sim_id).zfill(4)+".fits")
 
     def power_plotter(self,lteb,label):
