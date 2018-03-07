@@ -9,7 +9,7 @@ from orphics.stats import Stats as MPIStats
 import numpy as np
 import logging, time, os
 import astropy.io.fits as fits
-from orphics.cosmology import cosmology
+from orphics import cosmology
 
 
 # DEFINE SHEAR NOISE MODEL HERE
@@ -161,12 +161,12 @@ class PeakabooPipeline(object):
 
         cosmo_name = inp_dir.split('/')[0]
         camb_names,cosmologies = np.loadtxt("input/camb/fn_mapping.txt",dtype=str,unpack=True)
-        this_camb = camb_names[cosmologies=='cosmo_name']
+        this_camb = camb_names[cosmologies==cosmo_name]
         assert this_camb.size==1
         this_camb = "camb_"+this_camb.ravel()[0]
         cc = None
         lmax = 6000
-        theory = cosmology.loadTheorySpectraFromCAMB(this_camb,
+        theory = cosmology.loadTheorySpectraFromCAMB('input/camb/'+this_camb,
                                              unlensedEqualsLensed=False,useTotal=False,TCMB = 2.7255e6,lpad=9000,get_dimensionless=False)
 
         
