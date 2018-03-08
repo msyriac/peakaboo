@@ -18,6 +18,7 @@ parser.add_argument("OutDir", type=str,help='Output Directory Name')
 parser.add_argument("bin_section_power", type=str,help='1d power bin_section')
 parser.add_argument("bin_section_hist_1d", type=str,help='1d hist bin_section')
 parser.add_argument("bin_sections_hist_2d", type=str,help='2d hist bin_sections cmb,gal')
+parser.add_argument("InpDirSmooth", type=str,help='Input directory for map that will be used for deciding smoothing scale')
 parser.add_argument("-N", "--nmax",     type=int,  default=1000,help="Limit to nmax sims.")
 parser.add_argument("-G", "--galaxies",     type=str,
                     default=None,help="Comma separated list of galaxy redshifts.")
@@ -35,6 +36,7 @@ rank = comm.Get_rank()
 numcores = comm.Get_size()    
 
 inp_dir = args.InpDir
+inp_dir_smooth = args.InpDirSmooth
 out_dir = args.OutDir
 
 galzs = [int(x) for x in args.galaxies.split(',')]
@@ -49,6 +51,7 @@ else:
 
 PathConfig = io.load_path_config()
 result_dir = PathConfig.get("paths","output_data")+inp_dir+"/"+out_dir+"/"
+result_dir_smooth = PathConfig.get("paths","output_data")+inp_dir_smooth+"/"+out_dir+"/"
 save_dir = PathConfig.get("paths","output_data")+inp_dir+"_"+out_dir+"/"
 io.mkdir(save_dir)
 
@@ -56,6 +59,7 @@ io.mkdir(save_dir)
 lcents,Nlkk = np.loadtxt(result_dir+"nlkk.txt",unpack=True)
 
 file_root = lambda sim_id: result_dir+"kappa_"+str(sim_id).zfill(4)+".fits"
+file_root_smooth = lambda sim_id: result_dir_smooth+"kappa_"+str(sim_id).zfill(4)+".fits"
 
 # MPI
 Ntot = args.nmax
@@ -66,6 +70,7 @@ if rank==0: print( "At most "+ str(max(num_each)) + " tasks...")
 
 map_root = PathConfig.get("paths","input_data")
 LC = ls.LiuConvergence(root_dir=map_root+inp_dir+"/")
+LCSmooth = ls.LiuConvergence(root_dir=map_root+inp_dir_smooth+"/")
 
 Config = io.config_from_file("input/recon.ini")
 lbin_edges = io.bin_edges_from_config(Config,args.bin_section_power)
@@ -76,7 +81,7 @@ hist_bin_edges_cmb = {}
 hist2d_bin_edges_cmb = {}
 
 for scmb in smoothings_cmb:
-    recon = enmap.read_map(file_root(0))
+    recon = enmap.read_map(file_root_smooth(0))
     if scmb>1.e-5: recon = enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
     sigma_cmb = np.sqrt(np.var(recon))
     hist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_cmb
@@ -93,8 +98,9 @@ hist2d_bin_edges_gals = []
 for z in galzs:
     cov = np.ones((1,1,shape[0],shape[1]))*ls.shear_noise(z)
     ngs.append( fmaps.MapGen(shape,wcs,cov))
+    
 for k,z in enumerate(galzs):
-    galkappa = enmap.ndmap(resample.resample_fft(LC.get_kappa(1,z=z),shape),wcs)
+    galkappa = enmap.ndmap(resample.resample_fft(LCSmooth.get_kappa(1,z=z),shape),wcs)
     
     hist_bin_edges_gals.append({})
     hist2d_bin_edges_gals.append({})
