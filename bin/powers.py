@@ -147,6 +147,8 @@ for k,i in enumerate(my_tasks):
     try:
         assert np.all(np.isclose(cents,lcents))
     except:
+        print(cents,lcents)
+        from scipy.interpolate import interp1d
         nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,kind="extrapolate",fill_value=0.)
         Nlkk = nlkkfunc(cents)
 
