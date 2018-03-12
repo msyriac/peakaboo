@@ -13,16 +13,21 @@ from orphics import cosmology
 
 
 # DEFINE SHEAR NOISE MODEL HERE
-def shear_noise(z):
-    ngal is None
-    ngal=8.83 if z==0.5 else None
-    ngal=13.25 if z==1.0 else None
-    ngal=11.15 if z==1.5 else None
-    ngal=7.36 if z==2.0 else None
-    ngal=4.26 if z==2.5 else None
-    assert ngal is not None
-    shape_noise = 0.3
-    return shape_noise**2./(2.*ngal*1.18e7)
+def shear_noise(z, shape_noise = 0.3):
+    z_arr = np.arange(0.5,3,0.5)    
+    ngal_arr = np.array([8.83, 13.25, 11.15, 7.36, 4.26])
+    if z in z_arr:
+        ngal = ngal_arr[np.where(z_arr==z)]
+    else:
+        ngal = 0
+#ngal=None
+#    ngal=8.83 if z==0.5 else None
+#    ngal=13.25 if z==1.0 else None
+#    ngal=11.15 if z==1.5 else None
+#    ngal=7.36 if z==2.0 else None
+#    ngal=4.26 if z==2.5 else None
+#    assert ngal is not None
+    return shape_noise**2./(ngal*1.18e7)
 
 
 class LiuConvergence(object):
@@ -39,7 +44,7 @@ class LiuConvergence(object):
         
     def get_kappa(self,index,z=1100):
         zstr = "{:.2f}".format(z)
-        kappa_file = self.root+"Maps"+str(z*10)+"/WLconv_z"+zstr+"_"+str(index).zfill(4)+"r.fits"
+        kappa_file = self.root+"Maps"+str(int(z*10))+"/WLconv_z"+zstr+"_"+str(index).zfill(4)+"r.fits"
         
         my_map = fits.open(kappa_file)[0]
         my_map = my_map.data

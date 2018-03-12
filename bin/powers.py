@@ -39,7 +39,7 @@ inp_dir = args.InpDir
 inp_dir_smooth = args.InpDirSmooth
 out_dir = args.OutDir
 
-galzs = [int(x) for x in args.galaxies.split(',')]
+galzs = [float(x) for x in args.galaxies.split(',')]
 if args.smoothings_cmb is None:
     smoothings_cmb = [0.]
 else:
