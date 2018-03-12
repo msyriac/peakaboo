@@ -149,7 +149,7 @@ for k,i in enumerate(my_tasks):
     except:
         print(cents,lcents)
         from scipy.interpolate import interp1d
-        nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,kind="extrapolate",fill_value=0.)
+        nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,fill_value="extrapolate")
         Nlkk = nlkkfunc(cents)
 
     # Input x Input    
