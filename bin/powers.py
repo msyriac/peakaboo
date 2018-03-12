@@ -156,6 +156,7 @@ for k,i in enumerate(my_tasks):
     # Recon x Recon
     p2drcrc  = fc.f2power(krc,krc)
     cents, prcrc = lbinner.bin(p2drcrc)
+    np.save(save_dir+"cmbXcmb_"+str(i).zfill(4)+".npy",prcrc)
 
 
     # Galaxy lensing
@@ -168,12 +169,24 @@ for k,i in enumerate(my_tasks):
 
         
         # Gal x input CMB lens
-        p2dicig,kig = fc.f1power(galkappa,kic)
+        p2dicig,kig = fc.f1power(galkappa_noisy,kic)
         cents, picig = lbinner.bin(p2dicig)
         # Gal x CMB recon
         p2drcig = fc.f2power(krc,kig)
         cents, prcig = lbinner.bin(p2drcig)
         np.save(save_dir+"galXcmb_"+str(z)+"_"+str(i).zfill(4)+".npy",prcig)
+
+        for m,z2 in enumerate(galzs[j:]):
+            # Load noiseless galaxy kappa
+            galkappa2 = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=z2),shape),wcs)
+            # Add noise
+            galkappa_noisy2 = galkappa2 + ngs[m].get_map(seed=int(1e9)+m+int(1e6))
+            
+            # Gal x Gal
+            p2digig,_,_ = fc.power2d(galkappa_noisy,galkappa_noisy2)
+            cents, prigig = lbinner.bin(p2digig)
+            np.save(save_dir+"galXgal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig)
+
         
         for sgal in smoothings_gal:
 
