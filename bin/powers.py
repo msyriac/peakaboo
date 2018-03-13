@@ -121,7 +121,7 @@ for k,i in enumerate(my_tasks):
 
     # Read reconstructed CMB lensing
     recon = enmap.read_map(file_root(i))
-    print(file_root(i))
+    if rank==0: print(file_root(i))
 
     # Get input CMB lens
     input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=1100),shape),wcs)
@@ -279,8 +279,8 @@ if rank==0:
 
     pl = io.Plotter(xlabel="$\\ell$",ylabel="$C_{\ell}$",yscale='log')
     pl.add(cents,inputk,color="k",label="ixi")
-    pl.add(lcents,Nlkk,ls="--",label="nlkk")
-    pl.add(lcents,Nlkk+inputk,ls="-",label="nlkk+clkk")
+    pl.add(cents,Nlkk,ls="--",label="nlkk")
+    pl.add(cents,Nlkk+inputk,ls="-",label="nlkk+clkk")
     pl.add(cents,rcrc,marker="o",ls="none",label="rxr")
     pl.add_err(cents,cross,yerr=cross_err,marker="o",label="rxi")
     pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
