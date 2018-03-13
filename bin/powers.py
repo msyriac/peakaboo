@@ -367,7 +367,7 @@ if rank==0:
 
     # Delete everything else
     
-    cmd = "find . -type f ! -name \'"+save_dir+"ALL_*\' -delete"
+    cmd = "find "+save_dir+" -type f ! -name \'ALL_*\' -delete"
     os.system(cmd)
 
     
