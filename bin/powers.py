@@ -146,18 +146,19 @@ for k,i in enumerate(my_tasks):
     p2drcic,krc,kic = fc.power2d(recon,input_k)
     cents, prcic = lbinner.bin(p2drcic)
 
-    # Theory N0
-    try:
-        assert np.all(np.isclose(cents,lcents))
-    except:
-        print(cents,lcents)
-        from scipy.interpolate import interp1d
-        print(Nlkk)
-        print("before interpolating ",rank, args.InpDir,args.OutDir,len(lcents),len(Nlkk))
-        nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,fill_value="extrapolate")
-        Nlkk = nlkkfunc(cents)
-        print("after interpolating ",rank, args.InpDir,args.OutDir,len(lcents),len(Nlkk))
-        print ("value after interpolating",Nlkk)
+    if k==0:
+        # Theory N0
+        try:
+            assert np.all(np.isclose(cents,lcents))
+        except:
+            print(cents,lcents)
+            from scipy.interpolate import interp1d
+            print(Nlkk)
+            print("before interpolating ",rank, args.InpDir,args.OutDir,len(lcents),len(Nlkk))
+            nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,fill_value="extrapolate")
+            Nlkk = nlkkfunc(cents)
+            print("after interpolating ",rank, args.InpDir,args.OutDir,len(lcents),len(Nlkk))
+            print ("value after interpolating",Nlkk)
 
     # Input x Input    
     p2dicic  = fc.f2power(kic,kic)
