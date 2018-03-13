@@ -333,33 +333,33 @@ if rank==0:
     
     for j,z in enumerate(galzs):
         del arr
-        arr = [np.load(save_dir+"igalXicmb_"+str(z)+"_"+str(i).zfill(4)+".npy",picig) for i in range(Ntot)]
+        arr = [np.load(save_dir+"igalXicmb_"+str(z)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
         np.save(save_dir+"ALL_igalXicmb_"+str(z)+".npy",arr)
         del arr
-        arr = [np.load(save_dir+"galXgcmb_"+str(z)+"_"+str(i).zfill(4)+".npy",picig) for i in range(Ntot)]
+        arr = [np.load(save_dir+"galXgcmb_"+str(z)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
         np.save(save_dir+"ALL_galXcmb_"+str(z)+".npy",arr)
 
         for m,z2 in enumerate(galzs[j:]):
             del arr
-            arr = [np.load(save_dir+"igalXigal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig) for i in range(Ntot)]
+            arr = [np.load(save_dir+"igalXigal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
             np.save(save_dir+"ALL_igalXigal_"+str(z)+"_"+str(z2)+".npy",arr)
             del arr
-            arr = [np.load(save_dir+"galXgal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig) for i in range(Ntot)]
+            arr = [np.load(save_dir+"galXgal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
             np.save(save_dir+"ALL_galXgal_"+str(z)+"_"+str(z2)+".npy",arr)
             
         for sgal in smoothings_gal:
             del arr
-            arr = [np.load(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf) for i in range(Ntot)]
+            arr = [np.load(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
             np.save(save_dir+"ALL_gal_pdf_"+str(z)+"_"+str(sgal)+".npy",arr)
             del arr
-            arr = [np.load(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf) for i in range(Ntot)]
+            arr = [np.load(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
             np.save(save_dir+"ALL_igal_pdf_"+str(z)+"_"+str(sgal)+".npy",arr)
             for scmb in smoothings_cmb:
                 del arr
-                arr = [np.load(save_dir+"galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d) for i in range(Ntot)]
+                arr = [np.load(save_dir+"galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
                 np.save(save_dir+"ALL_galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+".npy",arr)
                 del arr
-                arr = [np.load(save_dir+"igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d) for i in range(Ntot)]
+                arr = [np.load(save_dir+"igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
                 np.save(save_dir+"ALL_igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+".npy",arr)
 
 
@@ -367,7 +367,8 @@ if rank==0:
 
     # Delete everything else
     
-    cmd = "find "+save_dir+" -type f ! -name \'ALL_*\' -delete"
+    cmd = "ls %s/*_????.npy"%(save_dir)
+    #print (cmd)    
     os.system(cmd)
 
     
