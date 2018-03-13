@@ -367,7 +367,7 @@ if rank==0:
 
     # Delete everything else
     
-    cmd = "ls %s/*_????.npy"%(save_dir)
+    cmd = "rm %s*_????.npy"%(save_dir)
     #print (cmd)    
     os.system(cmd)
 
