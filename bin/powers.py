@@ -146,7 +146,7 @@ for k,i in enumerate(my_tasks):
         shape,wcs = recon.shape,recon.wcs
         fc = fmaps.FourierCalc(shape,wcs)
         lbinner = bin2D(recon.modlmap(),lbin_edges)
-        if i==0: np.save(save_dir+"power_1d_lbin_edges.npy",lbin_edges)
+        if i==0: np.save(save_dir+"ALL_power_1d_lbin_edges.npy",lbin_edges)
 
     # Smooth and calculate 1d CMB pdf
     recon_smoothed = {}
@@ -163,8 +163,8 @@ for k,i in enumerate(my_tasks):
         np.save(save_dir+"icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",icmb_pdf)
 
         
-        if i==0: np.save(save_dir+"cmb_pdf_"+str(scmb)+"_bin_edges.npy",hist_bin_edges_cmb[str(scmb)])
-        if i==0: np.save(save_dir+"icmb_pdf_"+str(scmb)+"_bin_edges.npy",ihist_bin_edges_cmb[str(scmb)])
+        if i==0: np.save(save_dir+"ALL_cmb_pdf_"+str(scmb)+"_bin_edges.npy",hist_bin_edges_cmb[str(scmb)])
+        if i==0: np.save(save_dir+"ALL_icmb_pdf_"+str(scmb)+"_bin_edges.npy",ihist_bin_edges_cmb[str(scmb)])
     
     
     # Recon x input
@@ -240,12 +240,12 @@ for k,i in enumerate(my_tasks):
             gkappa -= gkappa.mean()
             gal_pdf,_ = np.histogram(gkappa.ravel(),hist_bin_edges_gals[j][str(sgal)])
             np.save(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf)
-            if i==0: np.save(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",hist_bin_edges_gals[j][str(sgal)])
+            if i==0: np.save(save_dir+"ALL_gal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",hist_bin_edges_gals[j][str(sgal)])
 
             for scmb in smoothings_cmb:
                 pdf_2d,_,_ = np.histogram2d(recon_smoothed[str(scmb)].ravel(),gkappa.ravel(),bins=(hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]))
                 np.save(save_dir+"galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d)
-                if i==0: pickle.dump((hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]),open(save_dir+"galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl",'wb'))
+                if i==0: pickle.dump((hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]),open(save_dir+"ALL_galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl",'wb'))
 
 
             # Noiseless
@@ -253,12 +253,12 @@ for k,i in enumerate(my_tasks):
             gkappa -= gkappa.mean()
             gal_pdf,_ = np.histogram(gkappa.ravel(),ihist_bin_edges_gals[j][str(sgal)])
             np.save(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf)
-            if i==0: np.save(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",ihist_bin_edges_gals[j][str(sgal)])
+            if i==0: np.save(save_dir+"ALL_igal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",ihist_bin_edges_gals[j][str(sgal)])
 
             for scmb in smoothings_cmb:
                 pdf_2d,_,_ = np.histogram2d(inputc_smoothed[str(scmb)].ravel(),gkappa.ravel(),bins=(ihist2d_bin_edges_cmb[str(scmb)],ihist2d_bin_edges_gals[j][str(sgal)]))
                 np.save(save_dir+"igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d)
-                if i==0: pickle.dump((ihist2d_bin_edges_cmb[str(scmb)],ihist2d_bin_edges_gals[j][str(sgal)]),open(save_dir+"igalXicmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl",'wb'))
+                if i==0: pickle.dump((ihist2d_bin_edges_cmb[str(scmb)],ihist2d_bin_edges_gals[j][str(sgal)]),open(save_dir+"ALL_igalXicmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl",'wb'))
 
 
     mpibox.add_to_stats("icig",picig)
@@ -312,3 +312,59 @@ if rank==0:
     pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
     pl.hline()
     pl.done(io.dout_dir+"galcross.png")
+
+
+
+    for scmb in smoothings_cmb:
+        arr = [np.load(save_dir+"cmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
+        np.save("ALL_cmb_pdf_"+str(scmb)+".npy",arr)
+        del arr
+        arr = [np.load(save_dir+"icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
+        np.save("ALL_icmb_pdf_"+str(scmb)+".npy",arr)
+        
+
+    del arr
+    arr = [np.load(save_dir+"icmbXicmb_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
+    np.save(save_dir+"ALL_icmbXicmb.npy",arr)
+    del arr
+    arr = [np.load(save_dir+"cmbXcmb_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
+    np.save(save_dir+"ALL_cmbXcmb.npy",arr)
+
+    
+    for j,z in enumerate(galzs):
+        del arr
+        arr = [np.load(save_dir+"igalXicmb_"+str(z)+"_"+str(i).zfill(4)+".npy",picig) for i in range(Ntot)]
+        np.save(save_dir+"ALL_igalXicmb_"+str(z)+".npy",arr)
+        del arr
+        arr = [np.load(save_dir+"galXgcmb_"+str(z)+"_"+str(i).zfill(4)+".npy",picig) for i in range(Ntot)]
+        np.save(save_dir+"ALL_galXcmb_"+str(z)+".npy",arr)
+
+        for m,z2 in enumerate(galzs[j:]):
+            del arr
+            arr = [np.load(save_dir+"igalXigal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig) for i in range(Ntot)]
+            np.save(save_dir+"ALL_igalXigal_"+str(z)+"_"+str(z2)+".npy",arr)
+            del arr
+            arr = [np.load(save_dir+"galXgal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig) for i in range(Ntot)]
+            np.save(save_dir+"ALL_galXgal_"+str(z)+"_"+str(z2)+".npy",arr)
+            
+        for sgal in smoothings_gal:
+            del arr
+            arr = [np.load(save_dir+"gal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf) for i in range(Ntot)]
+            np.save(save_dir+"ALL_gal_pdf_"+str(z)+"_"+str(sgal)+".npy",arr)
+            del arr
+            arr = [np.load(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf) for i in range(Ntot)]
+            np.save(save_dir+"ALL_igal_pdf_"+str(z)+"_"+str(sgal)+".npy",arr)
+            for scmb in smoothings_cmb:
+                del arr
+                arr = [np.load(save_dir+"galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d) for i in range(Ntot)]
+                np.save(save_dir+"ALL_galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+".npy",arr)
+                del arr
+                arr = [np.load(save_dir+"igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d) for i in range(Ntot)]
+                np.save(save_dir+"ALL_igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+".npy",arr)
+
+
+
+
+    # Delete everything else
+    
+                
