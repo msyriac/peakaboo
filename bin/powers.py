@@ -336,7 +336,7 @@ if rank==0:
         arr = [np.load(save_dir+"igalXicmb_"+str(z)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
         np.save(save_dir+"ALL_igalXicmb_"+str(z)+".npy",arr)
         del arr
-        arr = [np.load(save_dir+"galXgcmb_"+str(z)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
+        arr = [np.load(save_dir+"galXcmb_"+str(z)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
         np.save(save_dir+"ALL_galXcmb_"+str(z)+".npy",arr)
 
         for m,z2 in enumerate(galzs[j:]):
