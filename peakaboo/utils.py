@@ -44,7 +44,7 @@ class LiuConvergence(object):
         
     def get_kappa(self,index,z=1100):
         zstr = "{:.2f}".format(z)
-        kappa_file = self.root+"Maps"+str(int(z*10))+"/WLconv_z"+zstr+"_"+str(index).zfill(4)+"r.fits"
+        kappa_file = self.root+"Maps%02d"%(z*10)+"/WLconv_z"+zstr+"_"+str(index).zfill(4)+"r.fits"
         
         my_map = fits.open(kappa_file)[0]
         my_map = my_map.data
