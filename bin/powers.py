@@ -123,6 +123,10 @@ for k,i in enumerate(my_tasks):
     recon = enmap.read_map(file_root(i))
     print(file_root(i))
 
+    # Get input CMB lens
+    input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=1100),shape),wcs)
+        
+
     # Initialize fourier
     if k==0:
         shape,wcs = recon.shape,recon.wcs
@@ -132,16 +136,22 @@ for k,i in enumerate(my_tasks):
 
     # Smooth and calculate 1d CMB pdf
     recon_smoothed = {}
+    inputc_smoothed = {}
     for scmb in smoothings_cmb:
         recon_smoothed[str(scmb)] = enmap.smooth_gauss(recon.copy(),scmb*np.pi/180./60.)
         recon_smoothed[str(scmb)] -= recon_smoothed[str(scmb)].mean()
         cmb_pdf,_ = np.histogram(recon_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb[str(scmb)])
         np.save(save_dir+"cmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",cmb_pdf)
+
+        inputc_smoothed[str(scmb)] = enmap.smooth_gauss(input_k.copy(),scmb*np.pi/180./60.)
+        inputc_smoothed[str(scmb)] -= inputc_smoothed[str(scmb)].mean()
+        icmb_pdf,_ = np.histogram(inputc_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb[str(scmb)])
+        np.save(save_dir+"icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",icmb_pdf)
+
+        
         if i==0: np.save(save_dir+"cmb_pdf_"+str(scmb)+"_bin_edges.npy",hist_bin_edges_cmb[str(scmb)])
     
-    # Get input CMB lens
-    input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=1100),shape),wcs)
-    #sys.exit()
+    
     # Recon x input
     p2drcic,krc,kic = fc.power2d(recon,input_k)
     cents, prcic = lbinner.bin(p2drcic)
@@ -163,6 +173,7 @@ for k,i in enumerate(my_tasks):
     # Input x Input    
     p2dicic  = fc.f2power(kic,kic)
     cents, picic = lbinner.bin(p2dicic)
+    np.save(save_dir+"icmbXicmb_"+str(i).zfill(4)+".npy",picic)
     # Recon x Recon
     p2drcrc  = fc.f2power(krc,krc)
     cents, prcrc = lbinner.bin(p2drcrc)
@@ -178,11 +189,13 @@ for k,i in enumerate(my_tasks):
         galkappa_noisy = galkappa + ngs[j].get_map(seed=int(1e9)+j)
 
         
-        # Gal x input CMB lens
-        p2dicig,kig = fc.f1power(galkappa_noisy,kic)
+        # input Gal x input CMB lens
+        p2dicig,_,_ = fc.power2d(galkappa,input_k)
         cents, picig = lbinner.bin(p2dicig)
-        # Gal x CMB recon
-        p2drcig = fc.f2power(krc,kig)
+        np.save(save_dir+"igalXicmb_"+str(z)+"_"+str(i).zfill(4)+".npy",picig)
+        
+        # noisy Gal x noisy CMB recon
+        p2drcig,_,_ = fc.power2d(recon,galkappa_noisy)
         cents, prcig = lbinner.bin(p2drcig)
         np.save(save_dir+"galXcmb_"+str(z)+"_"+str(i).zfill(4)+".npy",prcig)
 
@@ -191,8 +204,15 @@ for k,i in enumerate(my_tasks):
             galkappa2 = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=z2),shape),wcs)
             # Add noise
             galkappa_noisy2 = galkappa2 + ngs[m].get_map(seed=int(1e9)+m+int(1e6))
+
+
+            # input Gal x Gal
+            p2digig,_,_ = fc.power2d(galkappa,galkappa)
+            cents, prigig = lbinner.bin(p2digig)
+            np.save(save_dir+"igalXigal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig)
+
             
-            # Gal x Gal
+            # noisy Gal x noisy Gal
             p2digig,_,_ = fc.power2d(galkappa_noisy,galkappa_noisy2)
             cents, prigig = lbinner.bin(p2digig)
             np.save(save_dir+"galXgal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig)
@@ -200,6 +220,7 @@ for k,i in enumerate(my_tasks):
         
         for sgal in smoothings_gal:
 
+            # Noisy
             gkappa = enmap.smooth_gauss(galkappa_noisy.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa_noisy.copy()
             gkappa -= gkappa.mean()
             gal_pdf,_ = np.histogram(gkappa.ravel(),hist_bin_edges_gals[j][str(sgal)])
@@ -212,6 +233,15 @@ for k,i in enumerate(my_tasks):
                 if i==0: pickle.dump((hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]),open(save_dir+"galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl",'wb'))
 
 
+            # Noiseless
+            gkappa = enmap.smooth_gauss(galkappa.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa.copy()
+            gkappa -= gkappa.mean()
+            gal_pdf,_ = np.histogram(gkappa.ravel(),hist_bin_edges_gals[j][str(sgal)])
+            np.save(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf)
+
+            for scmb in smoothings_cmb:
+                pdf_2d,_,_ = np.histogram2d(inputc_smoothed[str(scmb)].ravel(),gkappa.ravel(),bins=(hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]))
+                np.save(save_dir+"igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d)
 
 
     mpibox.add_to_stats("icig",picig)
