@@ -157,6 +157,7 @@ for k,i in enumerate(my_tasks):
         nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,fill_value="extrapolate")
         Nlkk = nlkkfunc(cents)
         print("after interpolating ",rank, args.InpDir,args.OutDir,len(lcents),len(Nlkk))
+        print ("value after interpolating",Nlkk)
 
     # Input x Input    
     p2dicic  = fc.f2power(kic,kic)
