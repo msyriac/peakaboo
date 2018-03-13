@@ -58,6 +58,9 @@ io.mkdir(save_dir)
 
 # CMB lens noise
 lcents,Nlkk = np.loadtxt(result_dir+"nlkk.txt",unpack=True)
+print(Nlkk)
+print(len(lcents),len(Nlkk))
+
 
 file_root = lambda sim_id: result_dir+"kappa_"+str(sim_id).zfill(4)+".fits"
 file_root_smooth = lambda sim_id: result_dir_smooth+"kappa_"+str(sim_id).zfill(4)+".fits"
@@ -149,6 +152,8 @@ for k,i in enumerate(my_tasks):
     except:
         print(cents,lcents)
         from scipy.interpolate import interp1d
+        print(Nlkk)
+        print(len(lcents),len(Nlkk))
         nlkkfunc = interp1d(lcents,Nlkk,bounds_error=False,fill_value="extrapolate")
         Nlkk = nlkkfunc(cents)
 
