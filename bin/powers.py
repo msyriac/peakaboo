@@ -86,8 +86,9 @@ hist2d_bin_edges_cmb = {}
 ihist_bin_edges_cmb = {}
 ihist2d_bin_edges_cmb = {}
 
-for scmb in smoothings_cmb:
+for p,scmb in enumerate(smoothings_cmb):
     recon = enmap.read_map(file_root_smooth(0))
+    if p==0: shape,wcs = recon.shape, recon.wcs
     if scmb>1.e-5: recon = enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
     sigma_cmb = np.sqrt(np.var(recon))
     hist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_cmb
@@ -102,7 +103,6 @@ for scmb in smoothings_cmb:
 bincents = lambda x: (x[1:]+x[:-1])/2.
 
 
-shape,wcs = recon.shape, recon.wcs
 ngs = []
 hist_bin_edges_gals = []
 hist2d_bin_edges_gals = []
