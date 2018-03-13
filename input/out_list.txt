@@ -1,0 +1,56 @@
+# Outputs of powers.py
+z are galaxy redshifts
+sgal are galaxy smoothings
+scmb are cmb smoothings
+
+1. Bin edges for 2d pdf (zs x sgals x scmb files)
+"galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl"
+
+2. Bin edges for 1d power (1 file)
+"power_1d_lbin_edges.npy"
+
+3. Noisy CMB 1D PDF for each smoothing and each sim i (N files) 
+"cmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy"
+
+4. Noiseless CMB 1D PDF for each smoothing and each sim i (N files) 
+"icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy"
+
+5. CMB 1D PDF bin edges for each smoothing (sgals files)
+"cmb_pdf_"+str(scmb)+"_bin_edges.npy"
+
+6. Noiseless CMB PS for each sim i (N files)
+"icmbXicmb_"+str(i).zfill(4)+".npy"
+
+7. Noisy CMB PS for each sim i (N files)
+"cmbXcmb_"+str(i).zfill(4)+".npy"
+
+8. Noiseless galaxy x CMB PS  for each z and each sim i (zs x N files)
+"igalXicmb_"+str(z)+"_"+str(i).zfill(4)+".npy"
+
+9. Noisy galaxy x CMB PS  for each z and each sim i (zs x N files)
+"galXcmb_"+str(z)+"_"+str(i).zfill(4)+".npy"
+
+10. Noiseless galaxy x galaxy PS (zs*(zs+1)/2 x N files)
+"igalXigal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy"
+
+11. Noisy galaxy x galaxy PS (zs*(zs+1)/2 x N files)
+"galXgal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy"
+
+12. Noisy galaxy 1D pdf (zs x sgals x N files)
+"gal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy"
+
+13. Galaxy 1D pdf bin edges (zs x sgals files)
+"gal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy"
+
+14. Noisy 2D pdf (zs x sgals x scmbs x N files)
+"galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy"
+
+15. Bin edges 2D pdf (zs x sgals x scmbs files)
+"galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl"
+
+16. Noiseless galaxy 1D pdf (zs x sgals x N files)
+"igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy"
+
+17. Noiseless 2D pdf (zs x sgals x scmbs x N files)
+"igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy"
+
