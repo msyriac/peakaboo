@@ -53,7 +53,7 @@ PathConfig = io.load_path_config()
 io.dout_dir = PathConfig.get("paths","plots")+inp_dir+"/"+out_dir+"/"
 result_dir = PathConfig.get("paths","output_data")+inp_dir+"/"+out_dir+"/"
 result_dir_smooth = PathConfig.get("paths","output_data")+inp_dir_smooth+"/"+out_dir+"/"
-save_dir = PathConfig.get("paths","stats")+inp_dir+"_"+out_dir+"/"
+save_dir = PathConfig.get("paths","stats")+inp_dir+"/"+out_dir+"/"
 io.mkdir(save_dir)
 
 # CMB lens noise
