@@ -83,6 +83,8 @@ hist2d_cmb_bin_section,hist2d_gal_bin_section = args.bin_sections_hist_2d.split(
 
 hist_bin_edges_cmb = {}
 hist2d_bin_edges_cmb = {}
+ihist_bin_edges_cmb = {}
+ihist2d_bin_edges_cmb = {}
 
 for scmb in smoothings_cmb:
     recon = enmap.read_map(file_root_smooth(0))
@@ -91,6 +93,11 @@ for scmb in smoothings_cmb:
     hist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_cmb
     hist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*sigma_cmb
 
+    input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(1,z=1100),shape),wcs)
+    isigma_cmb = np.sqrt(np.var(input_k))
+    ihist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*isigma_cmb
+    ihist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*isigma_cmb
+    
     
 bincents = lambda x: (x[1:]+x[:-1])/2.
 
@@ -99,6 +106,8 @@ shape,wcs = recon.shape, recon.wcs
 ngs = []
 hist_bin_edges_gals = []
 hist2d_bin_edges_gals = []
+ihist_bin_edges_gals = []
+ihist2d_bin_edges_gals = []
 for z in galzs:
     cov = np.ones((1,1,shape[0],shape[1]))*ls.shear_noise(z)
     ngs.append( fmaps.MapGen(shape,wcs,cov))
@@ -108,14 +117,19 @@ for k,z in enumerate(galzs):
     
     hist_bin_edges_gals.append({})
     hist2d_bin_edges_gals.append({})
+    ihist_bin_edges_gals.append({})
+    ihist2d_bin_edges_gals.append({})
     for sgal in smoothings_gal:
 
         galkappa_noisy = galkappa + ngs[k].get_map(seed=int(1e9)+k)
         if sgal>1.e-5: galkappa_noisy = enmap.smooth_gauss(galkappa_noisy,sgal*np.pi/180./60.)
         sigma_gal = np.sqrt(np.var(galkappa_noisy))
+        isigma_gal = np.sqrt(np.var(galkappa))
         #print(sigma_gal)
         hist_bin_edges_gals[k][str(sgal)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_gal 
         hist2d_bin_edges_gals[k][str(sgal)] =  io.bin_edges_from_config(Config,hist2d_gal_bin_section )*sigma_gal 
+        ihist_bin_edges_gals[k][str(sgal)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*isigma_gal 
+        ihist2d_bin_edges_gals[k][str(sgal)] =  io.bin_edges_from_config(Config,hist2d_gal_bin_section )*isigma_gal 
 
 for k,i in enumerate(my_tasks):
 
@@ -145,11 +159,12 @@ for k,i in enumerate(my_tasks):
 
         inputc_smoothed[str(scmb)] = enmap.smooth_gauss(input_k.copy(),scmb*np.pi/180./60.)
         inputc_smoothed[str(scmb)] -= inputc_smoothed[str(scmb)].mean()
-        icmb_pdf,_ = np.histogram(inputc_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb[str(scmb)])
+        icmb_pdf,_ = np.histogram(inputc_smoothed[str(scmb)].ravel(),ihist_bin_edges_cmb[str(scmb)])
         np.save(save_dir+"icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",icmb_pdf)
 
         
         if i==0: np.save(save_dir+"cmb_pdf_"+str(scmb)+"_bin_edges.npy",hist_bin_edges_cmb[str(scmb)])
+        if i==0: np.save(save_dir+"icmb_pdf_"+str(scmb)+"_bin_edges.npy",ihist_bin_edges_cmb[str(scmb)])
     
     
     # Recon x input
@@ -236,12 +251,14 @@ for k,i in enumerate(my_tasks):
             # Noiseless
             gkappa = enmap.smooth_gauss(galkappa.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa.copy()
             gkappa -= gkappa.mean()
-            gal_pdf,_ = np.histogram(gkappa.ravel(),hist_bin_edges_gals[j][str(sgal)])
+            gal_pdf,_ = np.histogram(gkappa.ravel(),ihist_bin_edges_gals[j][str(sgal)])
             np.save(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy",gal_pdf)
+            if i==0: np.save(save_dir+"igal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",ihist_bin_edges_gals[j][str(sgal)])
 
             for scmb in smoothings_cmb:
-                pdf_2d,_,_ = np.histogram2d(inputc_smoothed[str(scmb)].ravel(),gkappa.ravel(),bins=(hist2d_bin_edges_cmb[str(scmb)],hist2d_bin_edges_gals[j][str(sgal)]))
+                pdf_2d,_,_ = np.histogram2d(inputc_smoothed[str(scmb)].ravel(),gkappa.ravel(),bins=(ihist2d_bin_edges_cmb[str(scmb)],ihist2d_bin_edges_gals[j][str(sgal)]))
                 np.save(save_dir+"igalXicmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy",pdf_2d)
+                if i==0: pickle.dump((ihist2d_bin_edges_cmb[str(scmb)],ihist2d_bin_edges_gals[j][str(sgal)]),open(save_dir+"igalXicmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl",'wb'))
 
 
     mpibox.add_to_stats("icig",picig)

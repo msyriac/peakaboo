@@ -6,6 +6,9 @@ scmb are cmb smoothings
 1. Bin edges for 2d pdf (zs x sgals x scmb files)
 "galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl"
 
+1b. Noiseless Bin edges for noiseless 2d pdf (zs x sgals x scmb files)
+"igalXicmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl"
+
 2. Bin edges for 1d power (1 file)
 "power_1d_lbin_edges.npy"
 
@@ -15,8 +18,11 @@ scmb are cmb smoothings
 4. Noiseless CMB 1D PDF for each smoothing and each sim i (N files) 
 "icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy"
 
-5. CMB 1D PDF bin edges for each smoothing (sgals files)
+5. CMB 1D PDF bin edges for each smoothing (scmbs files)
 "cmb_pdf_"+str(scmb)+"_bin_edges.npy"
+
+5b. Noiseless CMB 1D PDF bin edges for each smoothing (scmbs files)
+"icmb_pdf_"+str(scmb)+"_bin_edges.npy"
 
 6. Noiseless CMB PS for each sim i (N files)
 "icmbXicmb_"+str(i).zfill(4)+".npy"
@@ -42,11 +48,11 @@ scmb are cmb smoothings
 13. Galaxy 1D pdf bin edges (zs x sgals files)
 "gal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy"
 
+13b. Noiseless Galaxy 1D pdf bin edges (zs x sgals files)
+"igal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy"
+
 14. Noisy 2D pdf (zs x sgals x scmbs x N files)
 "galXcmb_2dpdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_"+str(i).zfill(4)+".npy"
-
-15. Bin edges 2D pdf (zs x sgals x scmbs files)
-"galXcmb_pdf_"+str(z)+"_"+str(sgal)+"_"+str(scmb)+"_bin_edges.pkl"
 
 16. Noiseless galaxy 1D pdf (zs x sgals x N files)
 "igal_pdf_"+str(z)+"_"+str(sgal)+"_"+str(i).zfill(4)+".npy"
