@@ -195,7 +195,7 @@ for k,i in enumerate(my_tasks):
 
     noise_maps = []
     for j,z in enumerate(galzs):
-        noise_maps.append( ngs[j].get_map(seed=(k,j)) )
+        noise_maps.append( ngs[j].get_map(seed=(i,j)) )
         
     # Galaxy lensing
     for j,z in enumerate(galzs):
