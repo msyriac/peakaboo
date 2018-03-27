@@ -11,11 +11,9 @@ cp template.sh ${cosmodir}_stats.sh
 
 echo ${cosmodir}
 
-echo "ibrun python -W ignore bin/powers.py   ${cosmodir}/1024b512 output_eb_5000_s4 default_1d_bin default_hist_bin coarse_hist_bin_cmb,coarse_hist_bin_gal ${fidudir}/1024b512 -G 0.5,1,1.5,2,2.5 -x 1,2,5 -y 0.5,1,2,5 -N 1000 &
+echo "ibrun -n 136 -o 0 python -W ignore bin/powers.py   ${cosmodir}/1024b512 output_eb_5000_s4 default_1d_bin default_hist_bin coarse_hist_bin_cmb,coarse_hist_bin_gal ${fidudir}/1024b512 -G 0.5,1,1.5,2,2.5 -x 1,2,5 -y 0.5,1,2,5 -N 1000 &
 
-wait
-
-ibrun python -W ignore bin/powers.py   ${cosmodir}/1024b512 output_tt_3000_s4 default_1d_bin default_hist_bin coarse_hist_bin_cmb,coarse_hist_bin_gal ${fidudir}/1024b512 -G 0.5,1,1.5,2,2.5 -x 1,2,5 -y 0.5,1,2,5 -N 1000 &
+ibrun -n 136 -o 136 python -W ignore bin/powers.py   ${cosmodir}/1024b512 output_tt_3000_s4 default_1d_bin default_hist_bin coarse_hist_bin_cmb,coarse_hist_bin_gal ${fidudir}/1024b512 -G 0.5,1,1.5,2,2.5 -x 1,2,5 -y 0.5,1,2,5 -N 1000 &
 
 wait" >> ${cosmodir}_stats.sh
 done < ${peakapath}/cosmo_dir.ls

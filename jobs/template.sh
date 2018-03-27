@@ -1,7 +1,7 @@
 #!/bin/bash 
 #SBATCH -N 4 # node count 
-#SBATCH -n  136 #
-#SBATCH -J PDF
+#SBATCH -n  272 #
+### SBATCH -J PDF
 #SBATCH -t 4:00:00 #
 #SBATCH --output=logs/PDF_%j.out
 #SBATCH --error=logs/PDF_%j.err
