@@ -121,7 +121,7 @@ for k,z in enumerate(galzs):
     ihist2d_bin_edges_gals.append({})
     for sgal in smoothings_gal:
 
-        galkappa_noisy = galkappa + ngs[k].get_map(seed=int(1e9)+k)
+        galkappa_noisy = galkappa + ngs[k].get_map(seed=(k))
         if sgal>1.e-5: galkappa_noisy = enmap.smooth_gauss(galkappa_noisy,sgal*np.pi/180./60.)
         sigma_gal = np.sqrt(np.var(galkappa_noisy))
         isigma_gal = np.sqrt(np.var(galkappa))
@@ -193,14 +193,17 @@ for k,i in enumerate(my_tasks):
     #np.save(save_dir+"cmbXcmb_"+str(i).zfill(4)+".npy",prcrc)
     mpibox.add_to_stats("cmbXcmb" , prcrc)
 
-
+    noise_maps = []
+    for j,z in enumerate(galzs):
+        noise_maps.append( ngs[j].get_map(seed=(k,j)) )
+        
     # Galaxy lensing
     for j,z in enumerate(galzs):
 
         # Load noiseless galaxy kappa
         galkappa = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=z),shape),wcs)
         # Add noise
-        galkappa_noisy = galkappa + ngs[j].get_map(seed=int(1e9)+j)
+        galkappa_noisy = galkappa + noise_maps[j]
 
         
         # input Gal x input CMB lens
@@ -219,7 +222,7 @@ for k,i in enumerate(my_tasks):
             # Load noiseless galaxy kappa
             galkappa2 = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=z2),shape),wcs)
             # Add noise
-            galkappa_noisy2 = galkappa2 + ngs[m].get_map(seed=int(1e9)+m+int(1e6))
+            galkappa_noisy2 = galkappa2 + noise_maps[m]
 
 
             # input Gal x Gal
