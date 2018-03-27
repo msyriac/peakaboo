@@ -276,8 +276,11 @@ for k,i in enumerate(my_tasks):
 
     if rank==0 and (k+1)%1==0: print( "Rank 0 done with "+str(k+1)+ " / "+str( len(my_tasks))+ " tasks.")
     
-    
-mpibox.get_stats()
+
+if rank==0:
+    print ('collecting results')
+
+mpibox.get_stats(verbose=False)
 
 if rank==0:
     rcrc = mpibox.stats["rcrc"]["mean"]
