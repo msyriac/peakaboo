@@ -330,10 +330,10 @@ if rank==0:
 
     for scmb in smoothings_cmb:
         arr = mpibox.vectors["cmb_pdf_%s" % scmb] #[np.load(save_dir+"cmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
-        np.save("ALL_cmb_pdf_"+str(scmb)+".npy",arr)
+        np.save(save_dir+"ALL_cmb_pdf_"+str(scmb)+".npy",arr)
         del arr
         arr = mpibox.vectors["icmb_pdf_%s" % scmb] #[np.load(save_dir+"icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy") for i in range(Ntot)]
-        np.save("ALL_icmb_pdf_"+str(scmb)+".npy",arr)
+        np.save(save_dir+"ALL_icmb_pdf_"+str(scmb)+".npy",arr)
         
 
     del arr
