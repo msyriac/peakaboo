@@ -218,7 +218,8 @@ for k,i in enumerate(my_tasks):
         #np.save(save_dir+"galXcmb_"+str(z)+"_"+str(i).zfill(4)+".npy",prcig)
         mpibox.add_to_stats("galXcmb_%.2f" % z , prcig)
 
-        for m,z2 in enumerate(galzs[j:]):
+        for z2 in galzs[j:]:
+            m = galzs.index(z2)
             # Load noiseless galaxy kappa
             galkappa2 = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=z2),shape),wcs)
             # Add noise
