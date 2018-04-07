@@ -227,7 +227,7 @@ for k,i in enumerate(my_tasks):
 
 
             # input Gal x Gal
-            p2digig,_,_ = fc.power2d(galkappa,galkappa)
+            p2digig,_,_ = fc.power2d(galkappa,galkappa2)
             cents, prigig = lbinner.bin(p2digig)
             #np.save(save_dir+"igalXigal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig)
             mpibox.add_to_stats("igalXigal_%.2f_%.2f" %(z,z2), prigig)
