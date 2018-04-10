@@ -19,6 +19,7 @@ parser.add_argument("bin_section_power", type=str,help='1d power bin_section')
 parser.add_argument("bin_section_hist_1d", type=str,help='1d hist bin_section')
 parser.add_argument("bin_sections_hist_2d", type=str,help='2d hist bin_sections cmb,gal')
 parser.add_argument("InpDirSmooth", type=str,help='Input directory for map that will be used for deciding smoothing scale')
+parser.add_argument("-S", "--seed",     type=int,  default=0,help="Seed for noise.")
 parser.add_argument("-N", "--nmax",     type=int,  default=1000,help="Limit to nmax sims.")
 parser.add_argument("-G", "--galaxies",     type=str,
                     default=None,help="Comma separated list of galaxy redshifts.")
@@ -53,7 +54,7 @@ PathConfig = io.load_path_config()
 io.dout_dir = PathConfig.get("paths","plots")+inp_dir+"/"+out_dir+"/"
 result_dir = PathConfig.get("paths","output_data")+inp_dir+"/"+out_dir+"/"
 result_dir_smooth = PathConfig.get("paths","output_data")+inp_dir_smooth+"/"+out_dir+"/"
-save_dir = PathConfig.get("paths","stats")+inp_dir+"/"+out_dir+"/"
+save_dir = PathConfig.get("paths","stats")+inp_dir+"/"+out_dir+"/seed_"+str(args.seed)
 io.mkdir(save_dir)
 
 # CMB lens noise
@@ -195,7 +196,7 @@ for k,i in enumerate(my_tasks):
 
     noise_maps = []
     for j,z in enumerate(galzs):
-        noise_maps.append( ngs[j].get_map(seed=(i,j)) )
+        noise_maps.append( ngs[j].get_map(seed=(i,j,args.seed)) )
         
     # Galaxy lensing
     for j,z in enumerate(galzs):
