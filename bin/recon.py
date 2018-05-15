@@ -26,7 +26,7 @@ debug = args.debug
 PathConfig = io.load_path_config()
 pipe = PeakabooPipeline(args.estimator,PathConfig,args.InpDir,args.OutDir,args.nmax,
                         args.recon,args.experiment,
-                        mpi_comm = MPI.COMM_WORLD,bin_section=args.bin_section,verbose = args.verbose)
+                        mpi_comm = MPI.COMM_WORLD,bin_section=args.bin_section,verbose = args.verbose,debug=debug)
 
 
 
