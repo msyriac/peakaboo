@@ -349,20 +349,22 @@ if rank==0:
     scmb = smoothings_cmb[0]
     arr = mpibox.vectors["cmb_pdf_%s" % scmb]
     np.save(save_dir+"ALL_cmb_pdf_"+str(scmb)+".npy",arr)
+    
     del arr
     arr = mpibox.vectors["icmb_pdf_%s" % scmb]
     np.save(save_dir+"ALL_icmb_pdf_"+str(scmb)+".npy",arr)
         
-
     del arr
     arr = mpibox.vectors["icmbXicmb"]
     np.save(save_dir+"ALL_icmbXicmb.npy",arr)
+    
     del arr
     arr = mpibox.vectors["cmbXcmb"]
     np.save(save_dir+"ALL_cmbXcmb.npy",arr)
 
     
     for j,z in enumerate(galzs):
+        #### cross power spectrum
         del arr
         arr = mpibox.vectors["igalXicmb_%.2f" % z]
         np.save(save_dir+"ALL_igalXicmb_"+str(z)+".npy",arr)
