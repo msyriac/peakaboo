@@ -346,7 +346,7 @@ if rank==0:
 
 
     ############ start collecting stats
-    scmb = smoothings_cmb[0]:
+    scmb = smoothings_cmb[0]
     arr = mpibox.vectors["cmb_pdf_%s" % scmb]
     np.save(save_dir+"ALL_cmb_pdf_"+str(scmb)+".npy",arr)
     del arr
