@@ -87,6 +87,7 @@ hist2d_bin_edges_cmb = {}
 ihist_bin_edges_cmb = {}
 ihist2d_bin_edges_cmb = {}
 
+######### calculate CMB lensing bin edges
 for p,scmb in enumerate(smoothings_cmb):
     recon = enmap.read_map(file_root_smooth(0))
     if p==0: shape,wcs = recon.shape, recon.wcs
@@ -112,7 +113,8 @@ ihist2d_bin_edges_gals = []
 for z in galzs:
     cov = np.ones((1,1,shape[0],shape[1]))*ls.shear_noise(z)
     ngs.append( fmaps.MapGen(shape,wcs,cov))
-    
+
+######### calculate gal lensing bin edges    
 for k,z in enumerate(galzs):
     galkappa = enmap.ndmap(resample.resample_fft(LCSmooth.get_kappa(1,z=z),shape),wcs)
     
@@ -132,6 +134,7 @@ for k,z in enumerate(galzs):
         ihist_bin_edges_gals[k][str(sgal)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*isigma_gal 
         ihist2d_bin_edges_gals[k][str(sgal)] =  io.bin_edges_from_config(Config,hist2d_gal_bin_section )*isigma_gal 
 
+####### now do all the statistics
 for k,i in enumerate(my_tasks):
 
     # Read reconstructed CMB lensing
@@ -139,8 +142,7 @@ for k,i in enumerate(my_tasks):
     if rank==0: print(file_root(i))
 
     # Get input CMB lens
-    input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=1100),shape),wcs)
-        
+    input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(i+1,z=1100),shape),wcs)        
 
     # Initialize fourier
     if k==0:
@@ -156,16 +158,13 @@ for k,i in enumerate(my_tasks):
         recon_smoothed[str(scmb)] = enmap.smooth_gauss(recon.copy(),scmb*np.pi/180./60.)
         recon_smoothed[str(scmb)] -= recon_smoothed[str(scmb)].mean()
         cmb_pdf,_ = np.histogram(recon_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb[str(scmb)])
-        #np.save(save_dir+"cmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",cmb_pdf)
         mpibox.add_to_stats("cmb_pdf_%s" % scmb, cmb_pdf)
 
         inputc_smoothed[str(scmb)] = enmap.smooth_gauss(input_k.copy(),scmb*np.pi/180./60.)
         inputc_smoothed[str(scmb)] -= inputc_smoothed[str(scmb)].mean()
         icmb_pdf,_ = np.histogram(inputc_smoothed[str(scmb)].ravel(),ihist_bin_edges_cmb[str(scmb)])
-        #np.save(save_dir+"icmb_pdf_"+str(scmb)+"_"+str(i).zfill(4)+".npy",icmb_pdf)
         mpibox.add_to_stats("icmb_pdf_%s" % scmb, icmb_pdf)
-
-        
+    
         if i==0: np.save(save_dir+"ALL_cmb_pdf_"+str(scmb)+"_bin_edges.npy",hist_bin_edges_cmb[str(scmb)])
         if i==0: np.save(save_dir+"ALL_icmb_pdf_"+str(scmb)+"_bin_edges.npy",ihist_bin_edges_cmb[str(scmb)])
     
@@ -194,9 +193,12 @@ for k,i in enumerate(my_tasks):
     #np.save(save_dir+"cmbXcmb_"+str(i).zfill(4)+".npy",prcrc)
     mpibox.add_to_stats("cmbXcmb" , prcrc)
 
+    ###### prep noise maps, so don't need to redo it every loop
     noise_maps = []
     for j,z in enumerate(galzs):
         noise_maps.append( ngs[j].get_map(seed=(i,j,args.seed)) )
+        ####### k is realization(my_tasks) conter, i is realization number, 
+        ####### j is galaxy redshift counter
         
     # Galaxy lensing
     for j,z in enumerate(galzs):
@@ -210,13 +212,11 @@ for k,i in enumerate(my_tasks):
         # input Gal x input CMB lens
         p2dicig,_,_ = fc.power2d(galkappa,input_k)
         cents, picig = lbinner.bin(p2dicig)
-        #np.save(save_dir+"igalXicmb_"+str(z)+"_"+str(i).zfill(4)+".npy",picig)
         mpibox.add_to_stats("igalXicmb_%.2f" % z , picig)
         
         # noisy Gal x noisy CMB recon
         p2drcig,_,_ = fc.power2d(recon,galkappa_noisy)
         cents, prcig = lbinner.bin(p2drcig)
-        #np.save(save_dir+"galXcmb_"+str(z)+"_"+str(i).zfill(4)+".npy",prcig)
         mpibox.add_to_stats("galXcmb_%.2f" % z , prcig)
 
 
@@ -229,7 +229,7 @@ for k,i in enumerate(my_tasks):
         mpibox.add_to_stats("gal_pdf_%.2f_%s" %(z,sgal), gal_pdf)
         if i==0: np.save(save_dir+"ALL_gal_pdf_"+str(z)+"_"+str(sgal)+"_bin_edges.npy",hist_bin_edges_gals[j][str(sgal)])
 
-        # Noiseless
+        # Noiseless 1d pdf
         gkappa = enmap.smooth_gauss(galkappa.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa.copy()
         gkappa -= gkappa.mean()
         gal_pdf,_ = np.histogram(gkappa.ravel(),ihist_bin_edges_gals[j][str(sgal)])
@@ -262,14 +262,12 @@ for k,i in enumerate(my_tasks):
             # input Gal x Gal
             p2digig,_,_ = fc.power2d(galkappa,galkappa2)
             cents, prigig = lbinner.bin(p2digig)
-            #np.save(save_dir+"igalXigal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig)
             mpibox.add_to_stats("igalXigal_%.2f_%.2f" %(z,z2), prigig)
 
             
             # noisy Gal x noisy Gal
             p2digig,_,_ = fc.power2d(galkappa_noisy,galkappa_noisy2)
             cents, prigig = lbinner.bin(p2digig)
-            #np.save(save_dir+"galXgal_"+str(z)+"_"+str(z2)+"_"+str(i).zfill(4)+".npy",prigig)
             mpibox.add_to_stats("galXgal_%.2f_%.2f" %(z,z2), prigig)
 
 
@@ -289,14 +287,12 @@ for k,i in enumerate(my_tasks):
             mpibox.add_to_stats("igalXigal_2dpdf_%.2f_%.2f_%s" %(z,z2,sgal), pdf_2d)
             if i==0: pickle.dump((ihist2d_bin_edges_gals[j][str(sgal)],ihist2d_bin_edges_gals[m][str(sgal)]),open(save_dir+"ALL_igalXigal_pdf_"+str(z)+"_"+str(z2)+"_"+str(sgal)+"_bin_edges.pkl",'wb'))
 
-
-
-
-    mpibox.add_to_stats("icig",picig)
-    mpibox.add_to_stats("rcig",prcig)
-    mpibox.add_to_stats("icic",picic)
-    mpibox.add_to_stats("rcic",prcic)
-    mpibox.add_to_stats("rcrc",prcrc)
+    ####### what are these for? plotting?
+    mpibox.add_to_stats("icig",picig) # input cmb iput gal
+    mpibox.add_to_stats("rcig",prcig) # recon cmb input gal
+    mpibox.add_to_stats("icic",picic) # input input cmb
+    mpibox.add_to_stats("rcic",prcic) # recon input cmb
+    mpibox.add_to_stats("rcrc",prcrc) # recon recon cmb
 
     if rank==0 and (k+1)%1==0: print( "Rank 0 done with "+str(k+1)+ " / "+str( len(my_tasks))+ " tasks.")
     
@@ -307,6 +303,8 @@ if rank==0:
 mpibox.get_stats(verbose=False)
 
 if rank==0:
+    
+    ########## make sanity check plots
     rcrc = mpibox.stats["rcrc"]["mean"]
     icig = mpibox.stats["icig"]["mean"]
     rcig = mpibox.stats["rcig"]["mean"]
@@ -338,7 +336,6 @@ if rank==0:
     pl.legend()
     pl.done(io.dout_dir+"clkk.png")
 
-
     
     pl = io.Plotter(xlabel="$\\ell$",ylabel="$\\ell C_{\ell}$")
     pl.add(cents,icig*cents,color="k")
@@ -348,13 +345,13 @@ if rank==0:
     pl.done(io.dout_dir+"galcross.png")
 
 
-
-    for scmb in smoothings_cmb:
-        arr = mpibox.vectors["cmb_pdf_%s" % scmb]
-        np.save(save_dir+"ALL_cmb_pdf_"+str(scmb)+".npy",arr)
-        del arr
-        arr = mpibox.vectors["icmb_pdf_%s" % scmb]
-        np.save(save_dir+"ALL_icmb_pdf_"+str(scmb)+".npy",arr)
+    ############ start collecting stats
+    scmb = smoothings_cmb[0]:
+    arr = mpibox.vectors["cmb_pdf_%s" % scmb]
+    np.save(save_dir+"ALL_cmb_pdf_"+str(scmb)+".npy",arr)
+    del arr
+    arr = mpibox.vectors["icmb_pdf_%s" % scmb]
+    np.save(save_dir+"ALL_icmb_pdf_"+str(scmb)+".npy",arr)
         
 
     del arr
@@ -397,6 +394,7 @@ if rank==0:
             del arr
             arr = mpibox.vectors["igalXigal_%.2f_%.2f" %(z,z2)]
             np.save(save_dir+"ALL_igalXigal_"+str(z)+"_"+str(z2)+".npy",arr)
+            
             del arr
             arr = mpibox.vectors["galXgal_%.2f_%.2f" %(z,z2)]
             np.save(save_dir+"ALL_galXgal_"+str(z)+"_"+str(z2)+".npy",arr)
@@ -410,12 +408,8 @@ if rank==0:
             np.save(save_dir+"ALL_igalXigal_2dpdf_z"+str(z)+"_z2"+str(z2)+"_sg"+str(sgal)+".npy",arr)
 
 
-
-
     # Delete everything else
     
     # cmd = "rm %s*_????.npy"%(save_dir)
     # #print (cmd)    
     # os.system(cmd)
-
-    

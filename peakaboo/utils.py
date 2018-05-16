@@ -13,7 +13,7 @@ from orphics import cosmology
 
 
 # DEFINE SHEAR NOISE MODEL HERE
-def shear_noise(z, shape_noise = 0.3):
+def shear_noise(z, shape_noise = 0.35):
     z_arr = np.arange(0.5,3,0.5)    
     ngal_arr = np.array([8.83, 13.25, 11.15, 7.36, 4.26])
     if z in z_arr:
