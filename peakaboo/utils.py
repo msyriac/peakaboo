@@ -77,7 +77,7 @@ class PeakabooPipeline(object):
     def __init__(self,estimator,PathConfig,inp_dir,out_dir,Nmax,recon_section,
                  experiment,recon_config_file="input/recon.ini",
                  mpi_comm=None,
-                 bin_section=None,verbose=False):
+                 bin_section=None,verbose=False,debug=False):
         
         self.Config = io.config_from_file(recon_config_file)
         assert estimator=="TT" or estimator=="EB"
@@ -253,10 +253,12 @@ class PeakabooPipeline(object):
             io.mkdir(self.result_dir)
         except:
             pass
-        try:
-            io.mkdir(self.plot_dir)
-        except:
-            pass
+
+        if debug:
+            try:
+                io.mkdir(self.plot_dir)
+            except:
+                pass
 
 
         cents,Nlkk = self.lbinner.bin(Nlkk2d)
