@@ -35,7 +35,7 @@ class LiuConvergence(object):
     def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/"):
         self.root = root_dir
         size_deg = 3.5
-        Npix = 2048.
+        Npix = 512.
         px = size_deg*60./Npix
         self.px = px
         self.shape, self.wcs = maps.rect_geometry(width_deg = size_deg,px_res_arcmin=px,proj="CAR",pol=False)

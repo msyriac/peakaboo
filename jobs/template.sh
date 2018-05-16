@@ -3,8 +3,8 @@
 #SBATCH -n  272 #
 ### SBATCH -J PDF
 #SBATCH -t 4:00:00 #
-#SBATCH --output=logs/PDF_%j.out
-#SBATCH --error=logs/PDF_%j.err
+#SBATCH --output=/work/02977/jialiu/PipelineJL/cmb-software/peakaboo/jobs/logs/PDF_%j.out
+#SBATCH --error=/work/02977/jialiu/PipelineJL/cmb-software/peakaboo/jobs/logs/PDF_%j.err
 #SBATCH --mail-type=all
 #SBATCH --mail-user=jia@astro.princeton.edu 
 #SBATCH -A TG-AST140041
