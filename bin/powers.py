@@ -297,54 +297,12 @@ for k,i in enumerate(my_tasks):
     if rank==0 and (k+1)%1==0: print( "Rank 0 done with "+str(k+1)+ " / "+str( len(my_tasks))+ " tasks.")
     
 
-if rank==0:
-    print ('collecting results')
 
 mpibox.get_stats(verbose=False)
 
 if rank==0:
+    print ('collecting results')
     
-    ########## make sanity check plots
-    rcrc = mpibox.stats["rcrc"]["mean"]
-    icig = mpibox.stats["icig"]["mean"]
-    rcig = mpibox.stats["rcig"]["mean"]
-    rcig_err = mpibox.stats["rcig"]["err"]
-    inputk = mpibox.stats["icic"]["mean"]
-    cross = mpibox.stats["rcic"]["mean"]
-    cross_err = mpibox.stats["rcic"]["err"]
-
-    # print (inputk)
-    # print (cross)
-    
-    pdiff = (cross-inputk)/inputk
-    
-    pl = io.Plotter(xlabel="$\\ell$",ylabel="$\\Delta C_{\ell}/C_{\ell}$")
-    pl.add(cents,pdiff,color="k")
-    pl.hline()
-    #pl._ax.set_ylim(-2,1)
-    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
-    pl.done(io.dout_dir+"pdiff.png")
-
-
-    pl = io.Plotter(xlabel="$\\ell$",ylabel="$C_{\ell}$",yscale='log')
-    pl.add(cents,inputk,color="k",label="ixi")
-    pl.add(cents,Nlkk,ls="--",label="nlkk")
-    pl.add(cents,Nlkk+inputk,ls="-",label="nlkk+clkk")
-    pl.add(cents,rcrc,marker="o",ls="none",label="rxr")
-    pl.add_err(cents,cross,yerr=cross_err,marker="o",label="rxi")
-    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
-    pl.legend()
-    pl.done(io.dout_dir+"clkk.png")
-
-    
-    pl = io.Plotter(xlabel="$\\ell$",ylabel="$\\ell C_{\ell}$")
-    pl.add(cents,icig*cents,color="k")
-    pl.add_err(cents,rcig*cents,yerr=rcig_err*cents,marker="o")
-    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
-    pl.hline()
-    pl.done(io.dout_dir+"galcross.png")
-
-
     ############ start collecting stats
     scmb = smoothings_cmb[0]
     arr = mpibox.vectors["cmb_pdf_%s" % scmb]
@@ -409,7 +367,46 @@ if rank==0:
             arr = mpibox.vectors["igalXigal_2dpdf_%.2f_%.2f_%s" %(z,z2,sgal)]
             np.save(save_dir+"ALL_igalXigal_2dpdf_z"+str(z)+"_z2"+str(z2)+"_sg"+str(sgal)+".npy",arr)
 
+        
 
+
+    ########## make sanity check plots
+    rcrc = mpibox.stats["rcrc"]["mean"]
+    icig = mpibox.stats["icig"]["mean"]
+    rcig = mpibox.stats["rcig"]["mean"]
+    rcig_err = mpibox.stats["rcig"]["err"]
+    inputk = mpibox.stats["icic"]["mean"]
+    cross = mpibox.stats["rcic"]["mean"]
+    cross_err = mpibox.stats["rcic"]["err"]
+
+    os.system('mkdir -pv %s'%(io.dout_dir))
+    pdiff = (cross-inputk)/inputk
+    
+    pl = io.Plotter(xlabel="$\\ell$",ylabel="$\\Delta C_{\ell}/C_{\ell}$")
+    pl.add(cents,pdiff,color="k")
+    pl.hline()
+    #pl._ax.set_ylim(-2,1)
+    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
+    pl.done(io.dout_dir+"pdiff.png")
+
+    pl = io.Plotter(xlabel="$\\ell$",ylabel="$C_{\ell}$",yscale='log')
+    pl.add(cents,inputk,color="k",label="ixi")
+    pl.add(cents,Nlkk,ls="--",label="nlkk")
+    pl.add(cents,Nlkk+inputk,ls="-",label="nlkk+clkk")
+    pl.add(cents,rcrc,marker="o",ls="none",label="rxr")
+    pl.add_err(cents,cross,yerr=cross_err,marker="o",label="rxi")
+    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
+    pl.legend()
+    pl.done(io.dout_dir+"clkk.png")
+
+    
+    pl = io.Plotter(xlabel="$\\ell$",ylabel="$\\ell C_{\ell}$")
+    pl.add(cents,icig*cents,color="k")
+    pl.add_err(cents,rcig*cents,yerr=rcig_err*cents,marker="o")
+    pl._ax.set_xlim(lbin_edges[0],lbin_edges[-1])
+    pl.hline()
+    pl.done(io.dout_dir+"galcross.png")
+    
     # Delete everything else
     
     # cmd = "rm %s*_????.npy"%(save_dir)
