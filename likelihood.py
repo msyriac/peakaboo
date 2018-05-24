@@ -18,8 +18,11 @@ def compute_average(i):
             idata = load(stats_fn(iALL, ieb, icosmo))
             j=0
             for k in (1000, 3000, 5000):
+                print j,j+k
                 save(isavedir+iALL[:-4]+'_%sk_%s'%(k/1000,ieb), mean(idata[j:j+k],axis=0) )
                 j+=k
+            for k in range(9):
+                save(isavedir+iALL[:-4]+'_1k%i_%s'%(k,ieb), mean(idata[k*1000:(k+1)*1000],axis=0) )
             save(isavedir+iALL[:-4]+'_10k_%s'%(ieb), mean(idata,axis=0) )
 
 pool=MPIPool()
