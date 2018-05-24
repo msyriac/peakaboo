@@ -35,7 +35,7 @@ class LiuConvergence(object):
     def __init__(self,root_dir="/gpfs01/astro/workarea/msyriac/data/sims/jia/"):
         self.root = root_dir
         size_deg = 3.5
-        Npix = 2048.
+        Npix = 512.
         px = size_deg*60./Npix
         self.px = px
         self.shape, self.wcs = maps.rect_geometry(width_deg = size_deg,px_res_arcmin=px,proj="CAR",pol=False)
@@ -77,7 +77,7 @@ class PeakabooPipeline(object):
     def __init__(self,estimator,PathConfig,inp_dir,out_dir,Nmax,recon_section,
                  experiment,recon_config_file="input/recon.ini",
                  mpi_comm=None,
-                 bin_section=None,verbose=False):
+                 bin_section=None,verbose=False,debug=False):
         
         self.Config = io.config_from_file(recon_config_file)
         assert estimator=="TT" or estimator=="EB"
@@ -253,10 +253,12 @@ class PeakabooPipeline(object):
             io.mkdir(self.result_dir)
         except:
             pass
-        try:
-            io.mkdir(self.plot_dir)
-        except:
-            pass
+
+        if debug:
+            try:
+                io.mkdir(self.plot_dir)
+            except:
+                pass
 
 
         cents,Nlkk = self.lbinner.bin(Nlkk2d)

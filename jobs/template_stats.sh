@@ -2,9 +2,9 @@
 #SBATCH -N 4 # node count 
 #SBATCH -n  272 #
 ### SBATCH -J PDF
-#SBATCH -t 4:00:00 #
-#SBATCH --output=/work/02977/jialiu/PipelineJL/cmb-software/peakaboo/jobs/logs/PDF_%j.out
-#SBATCH --error=/work/02977/jialiu/PipelineJL/cmb-software/peakaboo/jobs/logs/PDF_%j.err
+#SBATCH -t 8:00:00 #
+#SBATCH --output=/scratch/02977/jialiu/logs_peakaboo/PDF_%j.out
+#SBATCH --error=/scratch/02977/jialiu/logs_peakaboo/PDF_%j.err
 #SBATCH --mail-type=all
 #SBATCH --mail-user=jia@astro.princeton.edu 
 #SBATCH -A TG-AST140041
