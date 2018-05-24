@@ -10,6 +10,7 @@ stats_dir = '/scratch/02977/jialiu/peakaboo/stats_avg/'
 
 def compute_average(i):
     icosmo = fn_list[i]
+    print icosmo
     isavedir = stats_dir+icosmo+'/'
     os.system('mkdir -pv %s'%(icosmo))
     for ieb in ['output_eb_5000_s4', 'output_tt_3000_s4']:        
@@ -26,6 +27,6 @@ if not pool.is_master():
     pool.wait()
     sys.exit(0)
     
-pool.map(compute_average, range(len(fn_list))
+pool.map(compute_average, range(len(fn_list)))
 
 print 'DONE-DONE-DONE'
