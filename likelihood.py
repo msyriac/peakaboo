@@ -12,7 +12,7 @@ def compute_average(i):
     icosmo = fn_list[i]
     print icosmo
     isavedir = stats_dir+icosmo+'/'
-    os.system('mkdir -pv %s'%(icosmo))
+    os.system('mkdir -pv %s'%(stats_dir))
     for ieb in ['output_eb_5000_s4', 'output_tt_3000_s4']:        
         for iALL in ALL_fn:
             idata = load(stats_fn(iALL, ieb, icosmo))
