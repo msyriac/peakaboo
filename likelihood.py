@@ -15,6 +15,7 @@ def compute_average(icosmo):
             for k in (1000, 3000, 5000):
                 save(stats_dir+icosmo+iALLL[:-4]+'_%s'(k), mean(idata[j:j+k],axis=0) )
                 j+=k
+            save(stats_dir+icosmo+iALLL[:-4]+'_10k', mean(idata,axis=0) )
 
 pool=MPIPool()
 if not pool.is_master():
