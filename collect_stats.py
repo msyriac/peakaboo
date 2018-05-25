@@ -25,20 +25,24 @@ def compute_average(i):
             for k in range(10):
                 save(isavedir+iALL[:-4]+'_1k%i'%(k), mean(idata[k*1000:(k+1)*1000],axis=0) )
 
+idx=[range(k*1000,(k+1)*1000) for k in range(10)]
+idx+=[range(5000),range(5000,1000),range(10000)]
+
 def compute_average_bystats(iALL):
     print iALL
     for ieb in ['output_eb_5000_s4', 'output_tt_3000_s4']: 
         isavedir = stats_dir+ieb+'/'
         isavedir_1k = stats1k_dir+ieb+'/'
         #os.system('mkdir -pv %s; mkdir -pv %s'%(isavedir, isavedir_1k))
-        idatagen = lambda icosmo: load(stats_fn(iALL, ieb, icosmo))
+        def idatagen(icosmo): 
+            idata = load(stats_fn(iALL, ieb, icosmo))
+            return [mean(idata[iidx],axis=0) for iidx in idx]        
         idata = array(map(idatagen, fn_list))
-        save(isavedir+iALL[:-4]+'_10k', mean(idata,axis=1) )
-        save(isavedir+iALL[:-4]+'_5ka', mean(idata[:5000],axis=1) )
-        save(isavedir+iALL[:-4]+'_5kb', mean(idata[5000:],axis=1) )
         for k in range(10):
-            save(isavedir_1k+iALL[:-4]+'_1k%i'%(k), mean(idata[k*1000:(k+1)*1000],axis=1) )
-
+            save(isavedir_1k+iALL[:-4]+'_1k%i'%(k), idata[:,k])
+        save(isavedir+iALL[:-4]+'_10k', idata[:,-1])
+        save(isavedir+iALL[:-4]+'_5ka', idata[:,-2])
+        save(isavedir+iALL[:-4]+'_5kb', idata[:,-3])
         
 pool=MPIPool()
 if not pool.is_master():
