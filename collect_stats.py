@@ -32,7 +32,7 @@ def compute_average_bystats(iALL):
         isavedir_1k = stats1k_dir+ieb+'/'
         #os.system('mkdir -pv %s; mkdir -pv %s'%(isavedir, isavedir_1k))
         idatagen = lambda icosmo: load(stats_fn(iALL, ieb, icosmo))
-        all_idata = array(map(idatagen, fn_list))
+        idata = array(map(idatagen, fn_list))
         save(isavedir+iALL[:-4]+'_10k', mean(idata,axis=1) )
         save(isavedir+iALL[:-4]+'_5ka', mean(idata[:5000],axis=1) )
         save(isavedir+iALL[:-4]+'_5kb', mean(idata[5000:],axis=1) )
