@@ -31,7 +31,7 @@ def compute_average_bystats(iALL):
         isavedir = stats_dir+ieb+'/'
         isavedir_1k = stats1k_dir+ieb+'/'
         #os.system('mkdir -pv %s; mkdir -pv %s'%(isavedir, isavedir_1k))
-        idatagen = lambda icosmo: laod(stats_fn(iALL, ieb, icosmo))
+        idatagen = lambda icosmo: load(stats_fn(iALL, ieb, icosmo))
         all_idata = array(map(idatagen, fn_list))
         save(isavedir+iALL[:-4]+'_10k', mean(idata,axis=1) )
         save(isavedir+iALL[:-4]+'_5ka', mean(idata[:5000],axis=1) )
@@ -46,7 +46,7 @@ if not pool.is_master():
     sys.exit(0)
     
 #pool.map(compute_average, range(len(fn_list)))
-pool.map(compute_average_bystats, range(len(ALL_fn)))
+pool.map(compute_average_bystats, ALL_fn)
 
 pool.close()
 print 'DONE-DONE-DONE'
