@@ -31,4 +31,5 @@ if not pool.is_master():
     
 pool.map(compute_average, range(len(fn_list)))
 
+pool.close()
 print 'DONE-DONE-DONE'
