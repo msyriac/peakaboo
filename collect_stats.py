@@ -18,7 +18,7 @@ def compute_average(i):
             idata = load(stats_fn(iALL, ieb, icosmo))
             j=0
             for k in (1000, 3000, 5000):
-                print j,j+k
+                #print j,j+k
                 save(isavedir+iALL[:-4]+'_%sk_%s'%(k/1000,ieb), mean(idata[j:j+k],axis=0) )
                 j+=k
             for k in range(9):
