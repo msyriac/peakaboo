@@ -2,9 +2,10 @@ from scipy import *
 from emcee.utils import MPIPool 
 import os
 
-ALL_fn = genfromtxt('ALL_fn.txt',dtype='string')
-fn_list = genfromtxt('cosmo_params_all.txt',usecols=1, dtype='string')
-fnjia_list = genfromtxt('cosmo_params_all.txt',usecols=0, dtype='string')
+peaka_dir = '/home1/02977/jialiu/peakaboo/'
+ALL_fn = genfromtxt(peaka_dir+'ALL_fn.txt',dtype='string')
+fn_list = genfromtxt(peaka_dir+'cosmo_params_all.txt',usecols=1, dtype='string')
+fnjia_list = genfromtxt(peaka_dir+'cosmo_params_all.txt',usecols=0, dtype='string')
 stats_fn = lambda iALL, ieb, icosmo: '/scratch/02977/jialiu/peakaboo/stats/'+icosmo+'/1024b512/'+ieb+'/seed0/'+iALL
 stats_dir = '/scratch/02977/jialiu/peakaboo/stats_avg/'
 
