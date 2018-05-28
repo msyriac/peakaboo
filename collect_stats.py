@@ -26,7 +26,7 @@ def compute_average(i):
                 save(isavedir+iALL[:-4]+'_1k%i'%(k), mean(idata[k*1000:(k+1)*1000],axis=0) )
 
 idx=[range(k*1000,(k+1)*1000) for k in range(10)]
-idx+=[range(5000),range(5000,1000),range(10000)]
+idx+=[range(5000),range(5000,10000),range(10000)]
 
 def compute_average_bystats(iALL):
     print iALL
