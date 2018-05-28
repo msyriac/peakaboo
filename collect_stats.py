@@ -33,7 +33,7 @@ def compute_average_bystats(iALL):
     for ieb in ['output_eb_5000_s4', 'output_tt_3000_s4']: 
         isavedir = stats_dir+ieb+'/'
         isavedir_1k = stats1k_dir+ieb+'/'
-        #os.system('mkdir -pv %s; mkdir -pv %s'%(isavedir, isavedir_1k))
+        os.system('mkdir -pv %s; mkdir -pv %s'%(isavedir, isavedir_1k))
         def idatagen(icosmo): 
             idata = load(stats_fn(iALL, ieb, icosmo))
             return [mean(idata[iidx],axis=0) for iidx in idx]        
