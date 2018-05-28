@@ -87,13 +87,16 @@ hist2d_bin_edges_cmb = {}
 ihist_bin_edges_cmb = {}
 ihist2d_bin_edges_cmb = {}
 
+filtermapjia = lambda recon: fmaps.filter_map(recon, fmaps.mask_kspace(recon.shape,recon.wcs,lmax=lbin_edges[-1]))
+## if I wanna turn back on gaussian smoothing, it is easy to replace above line by (but I have to suffer to use the same smoothing for CMB and gal):
+## filtermapjia = lambda recon: enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
+
 ######### calculate CMB lensing bin edges
 for p,scmb in enumerate(smoothings_cmb):
     recon = enmap.read_map(file_root_smooth(0))
     if p==0: shape,wcs = recon.shape, recon.wcs
-    if scmb>1.e-5: recon = enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
-        #kmask = fmaps.mask_kspace(recon.shape,recon.wcs,lmax=lbin_edges[-1])
-        #recon = fmaps.filter_map(recon,kmask)
+    if scmb>1.e-5: ## recon = enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
+        recon = filtermapjia(recon)
     sigma_cmb = np.sqrt(np.var(recon))
     hist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_cmb
     hist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*sigma_cmb
@@ -127,7 +130,7 @@ for k,z in enumerate(galzs):
     for sgal in smoothings_gal:
 
         galkappa_noisy = galkappa + ngs[k].get_map(seed=(k))
-        if sgal>1.e-5: galkappa_noisy = enmap.smooth_gauss(galkappa_noisy,sgal*np.pi/180./60.)
+        if sgal>1.e-5: galkappa_noisy = filtermapjia(galkappa_noisy)#enmap.smooth_gauss(galkappa_noisy,sgal*np.pi/180./60.)
         sigma_gal = np.sqrt(np.var(galkappa_noisy))
         isigma_gal = np.sqrt(np.var(galkappa))
         #print(sigma_gal)
@@ -157,12 +160,12 @@ for k,i in enumerate(my_tasks):
     recon_smoothed = {}
     inputc_smoothed = {}
     for scmb in smoothings_cmb:
-        recon_smoothed[str(scmb)] = enmap.smooth_gauss(recon.copy(),scmb*np.pi/180./60.)
+        recon_smoothed[str(scmb)] = filtermapjia(recon.copy())#enmap.smooth_gauss(recon.copy(),scmb*np.pi/180./60.)
         recon_smoothed[str(scmb)] -= recon_smoothed[str(scmb)].mean()
         cmb_pdf,_ = np.histogram(recon_smoothed[str(scmb)].ravel(),hist_bin_edges_cmb[str(scmb)])
         mpibox.add_to_stats("cmb_pdf_%s" % scmb, cmb_pdf)
 
-        inputc_smoothed[str(scmb)] = enmap.smooth_gauss(input_k.copy(),scmb*np.pi/180./60.)
+        inputc_smoothed[str(scmb)] = filtermapjia(input_k.copy())#enmap.smooth_gauss(input_k.copy(),scmb*np.pi/180./60.)
         inputc_smoothed[str(scmb)] -= inputc_smoothed[str(scmb)].mean()
         icmb_pdf,_ = np.histogram(inputc_smoothed[str(scmb)].ravel(),ihist_bin_edges_cmb[str(scmb)])
         mpibox.add_to_stats("icmb_pdf_%s" % scmb, icmb_pdf)
@@ -223,14 +226,14 @@ for k,i in enumerate(my_tasks):
         sgal = smoothings_gal[0]
 
         # Noisy 1d pdf
-        gkappa_noisy = enmap.smooth_gauss(galkappa_noisy.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa_noisy.copy()
+        gkappa_noisy = filtermapjia(galkappa_noisy.copy())#enmap.smooth_gauss(galkappa_noisy.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa_noisy.copy()
         gkappa_noisy -= gkappa_noisy.mean()
         gal_pdf,_ = np.histogram(gkappa_noisy.ravel(),hist_bin_edges_gals[j][str(sgal)])
         mpibox.add_to_stats("gal_pdf_%.2f_%s" %(z,sgal), gal_pdf)
         if i==0: np.save(save_dir+"ALL_gal_pdf_z"+str(z)+"_sg"+str(sgal)+"_bin_edges.npy",hist_bin_edges_gals[j][str(sgal)])
 
         # Noiseless 1d pdf
-        gkappa = enmap.smooth_gauss(galkappa.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa.copy()
+        gkappa = filtermapjia(galkappa.copy())#enmap.smooth_gauss(galkappa.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa.copy()
         gkappa -= gkappa.mean()
         gal_pdf,_ = np.histogram(gkappa.ravel(),ihist_bin_edges_gals[j][str(sgal)])
         mpibox.add_to_stats("igal_pdf_%.2f_%s" %(z,sgal), gal_pdf)
@@ -270,9 +273,9 @@ for k,i in enumerate(my_tasks):
 
 
             # Smooth
-            gkappa_noisy2 = enmap.smooth_gauss(galkappa_noisy2.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa_noisy2.copy()
+            gkappa_noisy2 = filtermapjia(galkappa_noisy2.copy())#enmap.smooth_gauss(galkappa_noisy2.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa_noisy2.copy()
             gkappa_noisy2 -= gkappa_noisy2.mean()
-            gkappa2 = enmap.smooth_gauss(galkappa2.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa2.copy()
+            gkappa2 = filtermapjia(galkappa2.copy())#enmap.smooth_gauss(galkappa2.copy(),sgal*np.pi/180./60.) if sgal>1.e-5 else galkappa2.copy()
             gkappa2 -= gkappa2.mean()
             
             # Noisy 2D cross gal pdf
