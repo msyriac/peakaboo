@@ -2,7 +2,7 @@
 #SBATCH -N 4 # node count 
 #SBATCH -n  272 #
 ### SBATCH -J PDF
-#SBATCH -t 8:00:00 #
+#SBATCH -t 2:00:00 #
 #SBATCH --output=/scratch/02977/jialiu/logs_peakaboo/PDF_%j.out
 #SBATCH --error=/scratch/02977/jialiu/logs_peakaboo/PDF_%j.err
 #SBATCH --mail-type=all
