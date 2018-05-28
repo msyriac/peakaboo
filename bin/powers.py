@@ -92,6 +92,8 @@ for p,scmb in enumerate(smoothings_cmb):
     recon = enmap.read_map(file_root_smooth(0))
     if p==0: shape,wcs = recon.shape, recon.wcs
     if scmb>1.e-5: recon = enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
+        #kmask = fmaps.mask_kspace(recon.shape,recon.wcs,lmax=lbin_edges[-1])
+        #recon = fmaps.filter_map(recon,kmask)
     sigma_cmb = np.sqrt(np.var(recon))
     hist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_cmb
     hist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*sigma_cmb
