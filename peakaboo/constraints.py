@@ -81,12 +81,19 @@ covIpdf2dN = mat(covpdf2dN).I
 ###### build emulator ###############
 #####################################
 
+params = genfromtxt('cosmo_params_all.txt',usecols=[2,3,4])
+fidu_params = array([0.1,0.3,2.1])
+
 ######## pick the good cosmology, where std/P among 10 1k models is <1%, and remove the first cosmology, 0eV one
 psI1k_std = std(psI1ks,axis=0)
 frac_diff = psI1k_std/psI[:,1].reshape(Nz,1,20)
 idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:] 
 
 stats = [psI_flat, pdf1dN_flat, pdf2dN_flat]
+obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
 covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
 
-#WLanalysis.buildInterpolator(istats[idx_good], params[idx_good])
+emulators = [WLanalysis.buildInterpolator(istats[idx_good], params[idx_good]) for istats in stats]
+
+chisq = lambda obs, model, covI: mat(obs-model)*covI*mat(obs-model).T
+
