@@ -5,18 +5,26 @@ import WLanalysis
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
 
+#####################################
+######## set up folders #############
+#####################################
+
 ######## stampede2
 #stats_dir = '/scratch/02977/jialiu/peakaboo/'
 #ebcov_dir = stats_dir+'stats/Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0'
 
 ######### local
-stats_dir = ''
-ebcov_dir = 'box5/output_eb_5000_s4/seed0'
+stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
+ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
 
 eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
 eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
 
-###### power spectrum
+#####################################
+##### initiate avg statistics #######
+#####################################
+
+###### PS
 psI = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{0}_10k.npy'.format(iz)) for iz in z_arr])
 psN = array( [load(eb_dir+'ALL_galXgal_z{0}_z{0}_10k.npy'.format(iz)) for iz in z_arr])
 
@@ -62,8 +70,9 @@ pdf2dI1ks = array( [[load(eb1k_dir+'ALL_igalXigal_2dpdf_z{0}_z{1}_sg1.0_1k{2}.np
 pdf2dN1ks = array( [[load(eb1k_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_1k{2}.npy'.format(z_arr[i],z_arr[j], ik)) 
                  for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
 
-
-###### covariances stats
+#####################################
+###### covariances stats ############
+#####################################
 
 ##### PS
 
