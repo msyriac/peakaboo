@@ -36,60 +36,42 @@ pdf1dN = array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for
 pdf1dN1ks = array( [[load(eb1k_dir+'ALL_gal_pdf_z{0}_sg1.0_1k{1}.npy'.format(iz,ik)) for iz in z_arr] 
                  for ik in range(10)])
 
-#pdf1dI = array([load(eb_dir+'ALL_igal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for iz in z_arr])
-#pdf1dI1ks = array( [[load(eb1k_dir+'ALL_igal_pdf_z{0}_sg1.0_1k{1}.npy'.format(iz,ik)) for iz in z_arr] 
-#                 for ik in range(10)])
-
 #### 2d PDF shape:(10, 101, 27, 27)
 pdf2dN = array( [load(eb_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(z_arr[i],z_arr[j],Nk)) 
                  for i in range(Nz) for j in range(i+1,Nz)])
 pdf2dN1ks = array( [[load(eb1k_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_1k{2}.npy'.format(z_arr[i],z_arr[j], ik)) 
                  for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
 
-#pdf2dI = array( [load(eb_dir+'ALL_igalXigal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(z_arr[i],z_arr[j],Nk)) 
-                 #for i in range(Nz) for j in range(i+1,Nz)])
-#pdf2dI1ks = array( [[load(eb1k_dir+'ALL_igalXigal_2dpdf_z{0}_z{1}_sg1.0_1k{2}.npy'.format(z_arr[i],z_arr[j], ik)) 
-                 #for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
-
 #####################################
 ###### covariances stats ############
 #####################################
 
-##### PS
+##### PS shape:(101,100)
 psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
-psI1k_flats = [swapaxes(ips,0,1).reshape(101,-1) for ips in psI1ks]
+psI1k_flats = array([swapaxes(ips,0,1).reshape(101,-1) for ips in psI1ks])
 
 psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{0}.npy'.format(iz)) for iz in z_arr]),0,1).reshape(10000,-1)
 covpsN = cov(psN_cov,rowvar=0)*12.25/2e4
 covIpsN = mat(covpsN).I
 
-#psI_cov = swapaxes(array( [load(ebcov_dir+'ALL_igalXigal_z{0}_z{0}.npy'.format(iz)) for iz in z_arr]),0,1).reshape(10000,-1)
-#covpsI = cov(psI_cov,rowvar=0)*12.25/2e4
-#covIpsI = mat(covpsI).I
-
 ###### PDF 1D
-idxt=where(pdf1dN[:,1]>5)#range(10, 20)#range(10,30)
+idxt=where(pdf1dN[:,1]>5)#range(10, 20)#
 
-pdf1dI_flats = [swapaxes(ips[:,:,idxt],0,1).reshape(101,-1) for ips in [pdf1dI, pdf1dI5ka, pdf1dI5kb]]
-pdf1dN_flats= [swapaxes(ips[:,:,idxt],0,1).reshape(101,-1) for ips in [pdf1dN, pdf1dN5ka, pdf1dN5kb]]
-#pdf1dI1k_flats = [swapaxes(ips[:,:,idxt],0,1).reshape(101,-1) for ips in pdf1dI1ks]
-#pdf1dN1k_flats = [swapaxes(ips[:,:,idxt],0,1).reshape(101,-1) for ips in pdf1dN1ks]
+pdf1dN_flats= swapaxes(pdf1dN[idxt[0],:,idxt[1]],0,1).reshape(101,-1) 
+pdf1dN1k_flats = array([swapaxes(ips[idxt[0],:,idxt[1]],0,1).reshape(101,-1) for ips in pdf1dN1ks])
 
-pdf1dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format(iz))[:,idxt] for iz in z_arr]),0,1).reshape(10000,-1)
+pdf1dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format(iz)) for iz in z_arr])[idxt[0],:,idxt[1]],0,1).reshape(10000,-1)
 covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
-
-#covIpdf1dN = mat(covpdf1dN).I
-#pdf1dI_cov = swapaxes(array( [load(ebcov_dir+'ALL_igal_pdf_z{0}_sg1.0.npy'.format(iz))[:,idxt] for iz in z_arr]),0,1).reshape(10000,-1)
-#covpdf1dI = cov(pdf1dI_cov,rowvar=0)*12.25/2e4
-#covIpdf1dI = mat(covpdf1dI).I
+covIpdf1dN = mat(covpdf1dN).I
 
 ###### PDF 2D
-
 idxt2=where(pdf2dN[:,1]>5)
-pdf2dN_flats= array([swapaxes(ips,0,1)[:,idxt2[0],idxt2[1],idxt2[2]] for ips in [pdf2dN, pdf2dN5ka, pdf2dN5kb]])
+
+pdf2dN_flats= swapaxes(pdf2dN,0,1)[:,idxt2[0],idxt2[1],idxt2[2]]
+pdf2dN1k_flats= array([swapaxes(ips,0,1)[:,idxt2[0],idxt2[1],idxt2[2]] for ips in pdf2dN1ks])
 
 pdf2dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[j]))
-                             for i in range(Nz) for j in range(i+1,Nz)]),0,1)[:,idxt2[0],idxt2[1],idxt2[2]]
+                             for i in range(Nz) for j in range(i+1,Nz)]),0,1)[:,idxt2[0],idxt2[1],idxt2[2]].reshape(10000,-1)
 
 covpdf2dN = cov(pdf2dN_cov,rowvar=0)*12.25/2e4
 covIpdf2dN = mat(covpdf2dN).I
