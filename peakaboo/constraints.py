@@ -99,7 +99,7 @@ emulators = [WLanalysis.buildInterpolator(istats[idx_good], params[idx_good]) fo
 
 chisq = lambda obs, model, covI: mat(obs-model)*covI*mat(obs-model).T
 
-Ngrid = 50
+Ngrid = 20
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
@@ -110,14 +110,14 @@ for i in range(3):
     print i
     obs, covI, emulator = stats[i][1], covIs[i], emulators[i]
     def ichisq (param):
-        print param
+        #print param
         return float(chisq(obs,emulator(param),covI))
 
     pool=MPIPool()
     if not pool.is_master():
         pool.wait()
         sys.exit(0)
-    igrid = array(pool.map(ichisq, params_list)).reshape(Ngrid, Ngrid+1, Ngrid+2)
+    igrid = array(pool.map(ichisq, params_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 
     save(stats_dir+'likelihood/test%s'%(i),igrid)
 
