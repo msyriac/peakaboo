@@ -122,4 +122,4 @@ for i in range(3):
     save(stats_dir+'likelihood/test%s'%(i),igrid)
 
     pool.close()
-    print 'done done done',%i
+    print 'done done done',i
