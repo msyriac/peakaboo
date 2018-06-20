@@ -82,7 +82,7 @@ covIpdf2dN = mat(covpdf2dN).I
 ###### build emulator ###############
 #####################################
 
-params = genfromtxt('cosmo_params_all.txt',usecols=[2,3,4])
+params = genfromtxt(stats_dir+'cosmo_params_all.txt',usecols=[2,3,4])
 fidu_params = array([0.1,0.3,2.1])
 
 ######## pick the good cosmology, where std/P among 10 1k models is <1%, and remove the first cosmology, 0eV one
