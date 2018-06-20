@@ -107,6 +107,10 @@ param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in rang
 params_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2])).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
 
+pool=MPIPool()
+if not pool.is_master():
+    pool.wait()
+    sys.exit(0)
 
 for i in range(3):
     
@@ -117,13 +121,9 @@ for i in range(3):
         #print param
         return float(chisq(obs,emulator(param),covI))
 
-    pool=MPIPool()
-    if not pool.is_master():
-        pool.wait()
-        sys.exit(0)
     igrid = array(pool.map(ichisq, params_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 
     save(stats_dir+'likelihood/test%s'%(i),igrid.reshape(Ngrid, Ngrid+1, Ngrid+2))
     print 'done done done',i
     
-    pool.close()
+pool.close()
