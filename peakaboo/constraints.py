@@ -2,6 +2,7 @@ from scipy import *
 import numpy as np
 import WLanalysis
 from emcee.utils import MPIPool 
+import sys
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
