@@ -15,8 +15,8 @@ stats_dir = '/scratch/02977/jialiu/peakaboo/'
 ebcov_dir = stats_dir+'stats/Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0'
 
 ######### local
-stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
-ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
+#stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
+#ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
 
 eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
 eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
