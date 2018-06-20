@@ -97,3 +97,24 @@ emulators = [WLanalysis.buildInterpolator(istats[idx_good], params[idx_good]) fo
 
 chisq = lambda obs, model, covI: mat(obs-model)*covI*mat(obs-model).T
 
+Ngrid = 10
+param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
+
+pool=MPIPool()
+if not pool.is_master():
+    pool.wait()
+    sys.exit(0)
+    
+def prob_grid (obs, covI, emulator, param_range):
+    param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
+    params_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2])).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
+    def ichisq (param):
+        return float(chisq(obs,emulator(param),covI))
+    igrid = array(pool.map(ichisq, params_list)).reshape(Ngrid, Ngrid+1, Ngrid+2)
+    return igrid
+
+obs, covI, emulator = psI_flat[1], covIs[0], emulators[0]
+test = prob_grid(obs, covI, emulator,param_range)
+
+pool.close()
+print 'done done done'
