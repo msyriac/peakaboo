@@ -10,8 +10,8 @@ Nz = len(z_arr)
 #####################################
 
 ######## stampede2
-#stats_dir = '/scratch/02977/jialiu/peakaboo/'
-#ebcov_dir = stats_dir+'stats/Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0'
+stats_dir = '/scratch/02977/jialiu/peakaboo/'
+ebcov_dir = stats_dir+'stats/Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0'
 
 ######### local
 stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
@@ -115,6 +115,7 @@ def prob_grid (obs, covI, emulator, param_range):
 
 obs, covI, emulator = psI_flat[1], covIs[0], emulators[0]
 test = prob_grid(obs, covI, emulator,param_range)
+save(stats_dir+'likelihood/test',test)
 
 pool.close()
 print 'done done done'
