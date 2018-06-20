@@ -102,15 +102,14 @@ chisq = lambda obs, model, covI: mat(obs-model)*covI*mat(obs-model).T
 
 Ngrid = 20
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
-
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
 params_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2])).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
 #obs, emulator, covI = stats[i][1], emulators[i], covIs[i]
 def ichisq (param):
-    #print param
+    print param
     #return float(chisq(obs,emulator(param),covI))
-    return [float(chisq(stats[i][1], emulators[i], covIs[i])) for i in range(len(covIs))]
+    return [float(chisq(stats[i][1], emulators[i](param), covIs[i])) for i in range(len(covIs))]
 
 pool=MPIPool()
 if not pool.is_master():
