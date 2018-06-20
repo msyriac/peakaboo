@@ -97,7 +97,7 @@ emulators = [WLanalysis.buildInterpolator(istats[idx_good], params[idx_good]) fo
 
 chisq = lambda obs, model, covI: mat(obs-model)*covI*mat(obs-model).T
 
-Ngrid = 10
+Ngrid = 100
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 
 pool=MPIPool()
