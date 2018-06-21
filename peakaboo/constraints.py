@@ -121,7 +121,7 @@ if not pool.is_master():
     sys.exit(0)
 igrid = array(pool.map(ichisq, params_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 
-save(stats_dir+'likelihood/prob_grid_{0}'.(Nk),igrid)
+save(stats_dir+'likelihood/prob_grid_{0}'.format(Nk),igrid)
 print 'done done done'
 
 pool.close()
