@@ -107,7 +107,7 @@ chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
 
 
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
-param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
+param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid) for i in range(3)]
 param_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2],indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
 def ichisq (param):
