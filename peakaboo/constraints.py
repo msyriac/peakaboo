@@ -4,6 +4,7 @@ import WLanalysis
 from emcee.utils import MPIPool 
 import sys, itertools
 
+Ngrid = 50
 Nk='10k' # '5ka', '5kb'
 
 try:
@@ -105,10 +106,10 @@ emulators = [WLanalysis.buildInterpolator(istats[idx_good], params[idx_good]) fo
 
 chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
 
-Ngrid = 20
+
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
-param_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2],indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
+param_list = [[ip1,ip2,ip3] for ip1 in param_arr[0] for ip2 in param_arr[1] for ip3 in param_arr[2]] ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
 def ichisq (param):
     return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(len(covIs))]
