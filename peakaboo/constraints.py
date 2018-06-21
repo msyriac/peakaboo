@@ -110,13 +110,13 @@ param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid) for i in range(3)]
 param_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2],indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
-#def ichisq (param):
-    #return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(len(covIs)-1)]
+def ichisq (param):
+    return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(2)]
 
 ############### batch emulator ##########
 idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
 chisq_batch = lambda obs, model1, model2, covI: float(mat(obs-model1)*covI*mat(obs-model2).T)
-emul_batch  = [[WLanalysis.buildInterpolator(istats[i][idx_good], params[idx_good]) for i in range(10)] for istats in [psI1k_flat, pdf1dN1k_flat]#, pdf2dN1k_flat]] ## shape (3,10) emulators
+emul_batch  = [[WLanalysis.buildInterpolator(istats[i][idx_good], params[idx_good]) for i in range(10)] for istats in [psI1k_flat, pdf1dN1k_flat]]#, pdf2dN1k_flat]] ## shape (3,10) emulators
 
 def ichisq_batch (param):
     chi2_arr = array([mean(array([chisq_batch(stats[i][1], emul_batch[i][idx[0]](param), emul_batch[i][idx[1]](param), covIs[i]) for idx in idx_batch])) for i in range(2)])
