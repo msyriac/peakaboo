@@ -141,7 +141,7 @@ if not pool.is_master():
 print Nk, Ngrid
 
 pool.map(ichisq, idx_list)#.reshape(Ngrid, Ngrid+1, Ngrid+2)
-print 'grids done',igrid.shape
+print 'grids done'
 
 save(stats_dir+'likelihood/prob_ps_{0}_N{1}'.format(Nk,Ngrid),grid_ps)
 save(stats_dir+'likelihood/prob_pdf1d_{0}_N{1}'.format(Nk,Ngrid),grid_pdf1d)
