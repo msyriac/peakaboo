@@ -7,6 +7,13 @@ import sys
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
 
+Nk='10k' # '5ka', '5kb'
+
+try:
+    Nk = str(sys.argv[1])
+except Exception:
+    pass
+
 #####################################
 ######## set up folders #############
 #####################################
@@ -26,7 +33,6 @@ eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
 #####################################
 ##### initiate avg statistics #######
 #####################################
-Nk='10k' # '5ka', '5kb'
 
 ###### PS shape:(5, 101, 20)
 psI = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{0}_{1}.npy'.format(iz,Nk)) for iz in z_arr])
@@ -100,15 +106,13 @@ emulators = [WLanalysis.buildInterpolator(istats[idx_good], params[idx_good]) fo
 
 chisq = lambda obs, model, covI: mat(obs-model)*covI*mat(obs-model).T
 
-Ngrid = 20
+Ngrid = 100
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
 params_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2])).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
-#obs, emulator, covI = stats[i][1], emulators[i], covIs[i]
 def ichisq (param):
-    print param
-    #return float(chisq(obs,emulator(param),covI))
+    #print param
     return [float(chisq(stats[i][1], emulators[i](param), covIs[i])) for i in range(len(covIs))]
 
 pool=MPIPool()
@@ -117,7 +121,7 @@ if not pool.is_master():
     sys.exit(0)
 igrid = array(pool.map(ichisq, params_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 
-save(stats_dir+'likelihood/test',igrid)
+save(stats_dir+'likelihood/prob_grid_{0}'.(Nk),igrid)
 print 'done done done'
 
 pool.close()
