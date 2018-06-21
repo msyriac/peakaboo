@@ -118,8 +118,8 @@ def ichisq (ijk):
     #print param
     i,j,k=ijk
     param=param_arr[0][i],param_arr[1][j],param_arr[2][k]
-    grid_ps[i,j,k],grid_pdf1d[i,j,k],grid_pdf2d[i,j,k]=[float(chisq(stats[i][1], emulators[i](param), covIs[i])) 
-                                                        for i in range(len(covIs))]
+    grid_ps[i,j,k],grid_pdf1d[i,j,k],grid_pdf2d[i,j,k]=[float(chisq(stats[m][1], emulators[m](param), covIs[m])) 
+                                                        for m in range(len(covIs))]
 
 ############### batch emulator ##########
 #idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
