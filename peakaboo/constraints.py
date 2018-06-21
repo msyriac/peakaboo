@@ -108,18 +108,10 @@ chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
 Ngrid = 20
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
-idx_list = array(meshgrid(range(Ngrid),range(Ngrid+1),range(Ngrid+2), indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
+param_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2],indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
-grid_ps = zeros(shape=(Ngrid,Ngrid+1,Ngrid+2))
-grid_pdf1d = zeros(shape=(Ngrid,Ngrid+1,Ngrid+2))
-grid_pdf2d = zeros(shape=(Ngrid,Ngrid+1,Ngrid+2))
-
-def ichisq (ijk):
-    #print param
-    i,j,k=ijk
-    param=param_arr[0][i],param_arr[1][j],param_arr[2][k]
-    grid_ps[i,j,k],grid_pdf1d[i,j,k],grid_pdf2d[i,j,k]=[float(chisq(stats[m][1], emulators[m](param), covIs[m])) 
-                                                        for m in range(len(covIs))]
+def ichisq (param):
+    return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(len(covIs))]
 
 ############### batch emulator ##########
 #idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
@@ -140,12 +132,10 @@ if not pool.is_master():
 
 print Nk, Ngrid
 
-pool.map(ichisq, idx_list)#.reshape(Ngrid, Ngrid+1, Ngrid+2)
+out=array(pool.map(ichisq, param_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 print 'grids done'
 
-save(stats_dir+'likelihood/prob_ps_{0}_N{1}'.format(Nk,Ngrid),grid_ps)
-save(stats_dir+'likelihood/prob_pdf1d_{0}_N{1}'.format(Nk,Ngrid),grid_pdf1d)
-save(stats_dir+'likelihood/prob_pdf2d_{0}_N{1}'.format(Nk,Ngrid),grid_pdf2d)
+save(stats_dir+'likelihood/prob_{0}_N{1}'.format(Nk,Ngrid),out)
 
 print 'done done done'
 
