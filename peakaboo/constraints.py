@@ -11,8 +11,6 @@ try:
 except Exception:
     pass
 
-print Nk
-
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
 #####################################
@@ -120,6 +118,8 @@ pool=MPIPool()
 if not pool.is_master():
     pool.wait()
     sys.exit(0)
+
+print Nk
 
 igrid = array(pool.map(ichisq, params_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 print 'igrid done',igrid.shape
