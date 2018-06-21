@@ -2,7 +2,7 @@ from scipy import *
 import numpy as np
 import WLanalysis
 from emcee.utils import MPIPool 
-import sys
+import sys, itertools
 
 Nk='10k' # '5ka', '5kb'
 
@@ -18,13 +18,13 @@ Nz = len(z_arr)
 #####################################
 
 ######## stampede2
-stats_dir = '/scratch/02977/jialiu/peakaboo/'
-ebcov_dir = stats_dir+'stats/Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0/'
+#stats_dir = '/scratch/02977/jialiu/peakaboo/'
+#ebcov_dir = stats_dir+'stats/Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0/'
 
     
 ######### local
-#stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
-#ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
+stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
+ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
 
 eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
 eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
@@ -103,16 +103,34 @@ covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
 
 emulators = [WLanalysis.buildInterpolator(istats[idx_good], params[idx_good]) for istats in stats]
 
-chisq = lambda obs, model, covI: mat(obs-model)*covI*mat(obs-model).T
+chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
 
-Ngrid = 50
+Ngrid = 20
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid+i) for i in range(3)]
-params_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2])).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
+idx_list = array(meshgrid(range(Ngrid),range(Ngrid+1),range(Ngrid+2), indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
-def ichisq (param):
+grid_ps = zeros(shape=(Ngrid,Ngrid+1,Ngrid+2))
+grid_pdf1d = zeros(shape=(Ngrid,Ngrid+1,Ngrid+2))
+grid_pdf2d = zeros(shape=(Ngrid,Ngrid+1,Ngrid+2))
+
+def ichisq (ijk):
     #print param
-    return [float(chisq(stats[i][1], emulators[i](param), covIs[i])) for i in range(len(covIs))]
+    i,j,k=ijk
+    param=param_arr[0][i],param_arr[1][j],param_arr[2][k]
+    grid_ps[i,j,k],grid_pdf1d[i,j,k],grid_pdf2d[i,j,k]=[float(chisq(stats[i][1], emulators[i](param), covIs[i])) for i in range(len(covIs))]
+
+############### batch emulator ##########
+#idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
+#chisq_batch = lambda obs, model1, model2, covI: float(mat(obs-model1)*covI*mat(obs-model2).T)
+#emul_batch  = [[WLanalysis.buildInterpolator(istats[i][idx_good], params[idx_good]) for i in range(10)] for istats in [psI1k_flat, pdf1dN1k_flat, pdf2dN1k_flat]] ## shape (3,10) emulators
+
+#def ichisq_batch (param):
+    #chi2_arr = array([mean(array([chisq_batch(stats[i][1], emul_batch[i][idx[0]](param), emul_batch[i][idx[1]](param), covIs[i]) 
+                       #for idx in idx_batch])) for i in range(3)])
+    #return abs(chi2_arr)
+############################################
+
 
 pool=MPIPool()
 if not pool.is_master():
@@ -121,10 +139,13 @@ if not pool.is_master():
 
 print Nk
 
-igrid = array(pool.map(ichisq, params_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
-print 'igrid done',igrid.shape
+pool.map(ichisq, idx_list)#.reshape(Ngrid, Ngrid+1, Ngrid+2)
+print 'grids done',igrid.shape
 
-save(stats_dir+'likelihood/prob_grid_{0}'.format(Nk),igrid)
+save(stats_dir+'likelihood/prob_ps_{0}_N{}'.format(Nk,Ngrid),grid_ps)
+save(stats_dir+'likelihood/prob_pdf1d_{0}_N{}'.format(Nk,Ngrid),grid_pdf1d)
+save(stats_dir+'likelihood/prob_pdf2d_{0}_N{}'.format(Nk,Ngrid),grid_pdf2d)
+
 print 'done done done'
 
 pool.close()
