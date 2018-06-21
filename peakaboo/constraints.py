@@ -118,7 +118,8 @@ def ichisq (ijk):
     #print param
     i,j,k=ijk
     param=param_arr[0][i],param_arr[1][j],param_arr[2][k]
-    grid_ps[i,j,k],grid_pdf1d[i,j,k],grid_pdf2d[i,j,k]=[float(chisq(stats[i][1], emulators[i](param), covIs[i])) for i in range(len(covIs))]
+    grid_ps[i,j,k],grid_pdf1d[i,j,k],grid_pdf2d[i,j,k]=[float(chisq(stats[i][1], emulators[i](param), covIs[i])) 
+                                                        for i in range(len(covIs))]
 
 ############### batch emulator ##########
 #idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
@@ -142,9 +143,9 @@ print Nk, Ngrid
 pool.map(ichisq, idx_list)#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 print 'grids done',igrid.shape
 
-save(stats_dir+'likelihood/prob_ps_{0}_N{}'.format(Nk,Ngrid),grid_ps)
-save(stats_dir+'likelihood/prob_pdf1d_{0}_N{}'.format(Nk,Ngrid),grid_pdf1d)
-save(stats_dir+'likelihood/prob_pdf2d_{0}_N{}'.format(Nk,Ngrid),grid_pdf2d)
+save(stats_dir+'likelihood/prob_ps_{0}_N{1}'.format(Nk,Ngrid),grid_ps)
+save(stats_dir+'likelihood/prob_pdf1d_{0}_N{1}'.format(Nk,Ngrid),grid_pdf1d)
+save(stats_dir+'likelihood/prob_pdf2d_{0}_N{1}'.format(Nk,Ngrid),grid_pdf2d)
 
 print 'done done done'
 
