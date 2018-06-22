@@ -116,7 +116,7 @@ def ichisq (param):
 ############### batch emulator ##########
 stats_batch = [psI1k_flat, pdf1dN1k_flat]
 idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
-chisq_batch = lambda obs1, obs2, model1, model2, covI: float(mat(obs-model1)*covI*mat(obs-model2).T)
+chisq_batch = lambda obs1, obs2, model1, model2, covI: float(mat(obs1-model1)*covI*mat(obs2-model2).T)
 emul_batch  = [[WLanalysis.buildInterpolator(istats[i][idx_good], params[idx_good]) for i in range(10)] for istats in stats_batch]#, pdf2dN1k_flat]] ## shape (3,10) emulators
 
 def ichisq_batch (param):
