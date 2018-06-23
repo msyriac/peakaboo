@@ -100,7 +100,7 @@ idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:]
 ############## test 6/23, use different IC for building emulator ########
 np.random.seed(10027)
 idx10 = list(np.random.randint(0,10, 101))
-stats = [psI1k_flat[idx10], pdf1dN1k_flat[idx10], pdf2dN1k_flat[idx10]]
+stats = [[istats[idx10[i],i] for i in range(101)] for istats in [psI1k_flat, pdf1dN1k_flat, pdf2dN1k_flat]]
 ######################################
 #stats = [psI_flat, pdf1dN_flat, pdf2dN_flat]
 obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
