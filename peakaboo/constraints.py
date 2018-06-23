@@ -119,16 +119,16 @@ def ichisq (param):
     return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(2)]
 
 ############### batch emulator ##########
-stats_batch = [psI1k_flat, pdf1dN1k_flat]
-idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
-chisq_batch = lambda obs1, obs2, model1, model2, covI: float(mat(obs1-model1)*covI*mat(obs2-model2).T)
-emul_batch  = [[WLanalysis.buildInterpolator(istats[i][idx_good], params[idx_good]) for i in range(10)] for istats in stats_batch]#, pdf2dN1k_flat]] ## shape (3,10) emulators
+#stats_batch = [psI1k_flat, pdf1dN1k_flat]
+#idx_batch = [list(x) for x in itertools.combinations(range(10), 2)]
+#chisq_batch = lambda obs1, obs2, model1, model2, covI: float(mat(obs1-model1)*covI*mat(obs2-model2).T)
+#emul_batch  = [[WLanalysis.buildInterpolator(istats[i][idx_good], params[idx_good]) for i in range(10)] for istats in stats_batch]#, pdf2dN1k_flat]] ## shape (3,10) emulators
 
-def ichisq_batch (param):
-    chi2_arr = array([mean(array([chisq_batch(stats_batch[i][idx[0]][1], stats_batch[i][idx[1]][1],
-                    emul_batch[i][idx[0]](param), emul_batch[i][idx[1]](param), covIs[i]) 
-                    for idx in idx_batch])) for i in range(2)])
-    return abs(chi2_arr)
+#def ichisq_batch (param):
+    #chi2_arr = array([mean(array([chisq_batch(stats_batch[i][idx[0]][1], stats_batch[i][idx[1]][1],
+                    #emul_batch[i][idx[0]](param), emul_batch[i][idx[1]](param), covIs[i]) 
+                    #for idx in idx_batch])) for i in range(2)])
+    #return abs(chi2_arr)
 
 pool=MPIPool()
 if not pool.is_master():
@@ -136,11 +136,11 @@ if not pool.is_master():
     sys.exit(0)
 
 print Nk, Ngrid
-#out=array(pool.map(ichisq_batch, param_list))
-out=array(pool.map(ichisq_batch, param_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
+out=array(pool.map(ichisq, param_list))
+#out=array(pool.map(ichisq_batch, param_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 print 'grids done'
 
-save(stats_dir+'likelihood/prob_{0}_N{1}_2stats'.format(Nk,Ngrid),out)
+save(stats_dir+'likelihood/prob_{0}_N{1}_2stats_rand10'.format(Nk,Ngrid),out)
 
 print 'done done done'
 
