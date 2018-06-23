@@ -3,7 +3,6 @@ import numpy as np
 import WLanalysis
 from emcee.utils import MPIPool 
 import sys, itertools
-from random import seed
 
 Nk='10k' # '5ka', '5kb'
 Ngrid = 50
@@ -99,8 +98,8 @@ frac_diff = psI1k_std/psI[:,1].reshape(Nz,1,20)
 idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:] 
 
 ############## test 6/23, use different IC for building emulator ########
-seed(10027)
-idx10 = list(randint(0,10, 101))
+np.random.seed(10027)
+idx10 = list(np.random.randint(0,10, 101))
 stats = [psI1k_flat[idx10], pdf1dN1k_flat[idx10], pdf2dN1k_flat[idx10]]
 ######################################
 #stats = [psI_flat, pdf1dN_flat, pdf2dN_flat]
