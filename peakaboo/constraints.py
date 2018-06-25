@@ -140,7 +140,7 @@ out=array(pool.map(ichisq, param_list))
 #out=array(pool.map(ichisq_batch, param_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 print 'grids done'
 
-save(stats_dir+'likelihood/prob_{0}_N{1}_2stats_GPcubic'.format(Nk,Ngrid),out)
+save(stats_dir+'likelihood/prob_{0}_N{1}_2stats_GPdefault'.format(Nk,Ngrid),out)
 
 print 'done done done'
 
