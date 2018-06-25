@@ -23,8 +23,8 @@ ebcov_dir = stats_dir+'stats/Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.0000
 
     
 ######### local
-#stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
-#ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
+stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
+ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
 
 eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
 eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
@@ -106,7 +106,7 @@ stats = [psI_flat, pdf1dN_flat, pdf2dN_flat]
 obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
 covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
 
-emulators = [WLanalysis.buildInterpolator(array(istats)[idx_good], params[idx_good], function='linear') for istats in stats]
+emulators = [WLanalysis.buildInterpolator(array(istats)[idx_good], params[idx_good], function='GP') for istats in stats]
 
 chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
 
@@ -140,7 +140,7 @@ out=array(pool.map(ichisq, param_list))
 #out=array(pool.map(ichisq_batch, param_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
 print 'grids done'
 
-save(stats_dir+'likelihood/prob_{0}_N{1}_2stats_linear'.format(Nk,Ngrid),out)
+save(stats_dir+'likelihood/prob_{0}_N{1}_2stats_GP'.format(Nk,Ngrid),out)
 
 print 'done done done'
 
