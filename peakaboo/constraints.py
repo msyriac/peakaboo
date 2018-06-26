@@ -3,6 +3,7 @@ import numpy as np
 import WLanalysis
 from emcee.utils import MPIPool 
 import sys, itertools
+import emcee
 
 Nk='10k' # '5ka', '5kb'
 Ngrid = 50
