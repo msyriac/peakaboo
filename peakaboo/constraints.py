@@ -6,8 +6,10 @@ import sys, itertools
 
 Nk='10k' # '5ka', '5kb'
 Ngrid = 50
+Nchain = 100
 try:
     Nk = str(sys.argv[1])
+    jjj = int(sys.argv[2])
 except Exception:
     pass
 
@@ -46,9 +48,9 @@ pdf1dN1ks = array( [[load(eb1k_dir+'ALL_gal_pdf_z{0}_sg1.0_1k{1}.npy'.format(iz,
 
 #### 2d PDF shape:(10, 101, 27, 27)
 pdf2dN = array( [load(eb_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(z_arr[i],z_arr[j],Nk)) 
-                 for i in range(Nz) for j in range(i+1,Nz)])
+                for i in range(Nz) for j in range(i+1,Nz)])
 pdf2dN1ks = array( [[load(eb1k_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_1k{2}.npy'.format(z_arr[i],z_arr[j], ik)) 
-                 for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
+                for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
 
 #####################################
 ###### covariances stats ############
@@ -93,30 +95,33 @@ params = genfromtxt(stats_dir+'cosmo_params_all.txt',usecols=[2,3,4])
 fidu_params = array([0.1,0.3,2.1])
 
 ######## pick the good cosmology, where std/P among 10 1k models is <1%, and remove the first cosmology, 0eV one
-psI1k_std = std(psI1ks,axis=0)
-frac_diff = psI1k_std/psI[:,1].reshape(Nz,1,20)
-idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:] 
+#psI1k_std = std(psI1ks,axis=0)
+#frac_diff = psI1k_std/psI[:,1].reshape(Nz,1,20)
+#idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:] 
 
 ############## test 6/23, use different IC for building emulator ########
 #np.random.seed(10027)
 #idx10 = list(np.random.randint(0,10, 101))
 #stats = [array([istats[idx10[i],i] for i in range(101)]) for istats in [psI1k_flat, pdf1dN1k_flat, pdf2dN1k_flat]]
 ######################################
-stats = [psI_flat, pdf1dN_flat, pdf2dN_flat]
+
+#stats = [psI_flat, pdf1dN_flat, pdf2dN_flat]
 obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
 covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
 
-emulators = [WLanalysis.buildInterpolator(array(istats)[idx_good], params[idx_good], function='GP') for istats in stats]
+emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+             for istats in [psI_flat, pdf1dN_flat, pdf2dN_flat]]
 
 chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
-
 
 param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
 param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid) for i in range(3)]
 param_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2],indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
-def ichisq (param):
-    return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(2)]
+################# for brute force grid method #############
+#def ichisq (param):
+    #return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(2)]
+###########################################################
 
 ############### batch emulator ##########
 #stats_batch = [psI1k_flat, pdf1dN1k_flat]
@@ -130,17 +135,58 @@ def ichisq (param):
                     #for idx in idx_batch])) for i in range(2)])
     #return abs(chi2_arr)
 
+#########
+def lnprob(p,jjj):
+    '''log likelihood of 
+    '''
+    diff = emulators[jjj](p)-obss[jjj]
+    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)
+
+
+
 pool=MPIPool()
 if not pool.is_master():
     pool.wait()
     sys.exit(0)
 
-print Nk, Ngrid
-out=array(pool.map(ichisq, param_list))
-#out=array(pool.map(ichisq_batch, param_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
-print 'grids done'
+print Nk
 
-save(stats_dir+'likelihood/prob_{0}_N{1}_2stats_GPdefault'.format(Nk,Ngrid),out)
+print 'PS'
+nwalkers=250
+ndim=3
+p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+
+sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
+pos, prob, state = sampler.run_mcmc(p0, 100)
+sampler.reset()
+sampler.run_mcmc(pos, Nchain)
+save('MC_ps_%s.npy'%(Nk), sampler.flatchain)
+
+print 'PDF 1D'
+sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
+pos, prob, state = sampler.run_mcmc(p0, 100)
+sampler.reset()
+sampler.run_mcmc(pos, Nchain)
+save('MC_pdf1d_%s.npy'%(Nk), sampler.flatchain)
+
+
+#print 'PDF 2D'
+#nwalkers=4000
+#p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+#sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
+#pos, prob, state = sampler.run_mcmc(p0, 100)
+#sampler.reset()
+#sampler.run_mcmc(pos, Nchain)
+#save('MC_pdf2d_%s.npy'%(Nk), sampler.flatchain)
+
+#############
+
+#print Nk, Ngrid
+#out=array(pool.map(ichisq, param_list))
+##out=array(pool.map(ichisq_batch, param_list))#.reshape(Ngrid, Ngrid+1, Ngrid+2)
+#print 'grids done'
+
+#save(stats_dir+'likelihood/prob_{0}_N{1}_2stats_GPdefault'.format(Nk,Ngrid),out)
 
 print 'done done done'
 
