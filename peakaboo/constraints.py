@@ -165,15 +165,15 @@ print 'PDF 2D'
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
-sampler.run_mcmc(pos, Nchain)
+sampler.run_mcmc(pos, Nchain*5)
 save(stats_dir+'likelihood/MC_pdf2d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
-print 'PS'
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
+#print 'PS'
+#sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
+#pos, prob, state = sampler.run_mcmc(p0, 100)
+#sampler.reset()
+#sampler.run_mcmc(pos, Nchain*5)
+#save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 #################################
 ########### grid method #########
