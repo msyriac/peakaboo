@@ -165,7 +165,7 @@ nwalkers=4000
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
 sampler.run_mcmc(pos, Nchain/2)
-save('MC_pdf2d_%s.npy'%(Nk), sampler.flatchain)
+save(stats_dir+'likelihood/MC_pdf2d_%s.npy'%(Nk), sampler.flatchain)
 
 #################################
 ########### grid method #########
