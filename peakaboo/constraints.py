@@ -6,8 +6,9 @@ import sys, itertools
 import emcee
 
 Nk='10k' # '5ka', '5kb'
+testfn = 'test'
 Ngrid = 50
-Nchain = 5000
+Nchain = 100
 try:
     Nk = str(sys.argv[1])
 except Exception:
@@ -153,19 +154,19 @@ p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_pa
 
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
 sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_ps_%s.npy'%(Nk), sampler.flatchain)
+save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 print 'PDF 1D'
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
 sampler.run_mcmc(pos, Nchain*5)
-save(stats_dir+'likelihood/MC_pdf1d_%s.npy'%(Nk), sampler.flatchain)
+save(stats_dir+'likelihood/MC_pdf1d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 print 'PDF 2D'
 nwalkers=4000
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
 sampler.run_mcmc(pos, Nchain/2)
-save(stats_dir+'likelihood/MC_pdf2d_%s.npy'%(Nk), sampler.flatchain)
+save(stats_dir+'likelihood/MC_pdf2d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 #################################
 ########### grid method #########
