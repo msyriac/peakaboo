@@ -9,7 +9,6 @@ Ngrid = 50
 Nchain = 100
 try:
     Nk = str(sys.argv[1])
-    jjj = int(sys.argv[2])
 except Exception:
     pass
 
@@ -114,10 +113,6 @@ emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], functio
 
 chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
 
-param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
-param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid) for i in range(3)]
-param_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2],indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
-
 ################# for brute force grid method #############
 #def ichisq (param):
     #return [float(chisq(stats[m][1], emulators[m](param), covIs[m])) for m in range(2)]
@@ -160,15 +155,14 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save('MC_ps_%s.npy'%(Nk), sampler.flatchain)
+save(stats_dir+'likelihood/MC_ps_%s.npy'%(Nk), sampler.flatchain)
 
 print 'PDF 1D'
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save('MC_pdf1d_%s.npy'%(Nk), sampler.flatchain)
-
+sampler.run_mcmc(pos, Nchain+1)
+save(stats_dir+'likelihood/MC_pdf1d_%s.npy'%(Nk), sampler.flatchain)
 
 #print 'PDF 2D'
 #nwalkers=4000
@@ -179,7 +173,13 @@ save('MC_pdf1d_%s.npy'%(Nk), sampler.flatchain)
 #sampler.run_mcmc(pos, Nchain)
 #save('MC_pdf2d_%s.npy'%(Nk), sampler.flatchain)
 
-#############
+#################################
+########### grid method #########
+#################################
+
+#param_range = [[0,0.35],[0.28, 0.32],[1.9,2.3]]
+#param_arr = [linspace(param_range[i][0],param_range[i][1],Ngrid) for i in range(3)]
+#param_list = array(meshgrid(param_arr[0],param_arr[1],param_arr[2],indexing='ij')).reshape(3,-1).T ## shape: Ngrid x (Ngrid+1) x (Ngrid+2), 3
 
 #print Nk, Ngrid
 #out=array(pool.map(ichisq, param_list))
