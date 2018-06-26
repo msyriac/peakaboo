@@ -7,7 +7,7 @@ import emcee
 
 Nk='10k' # '5ka', '5kb'
 Ngrid = 50
-Nchain = 10000
+Nchain = 5000
 try:
     Nk = str(sys.argv[1])
 except Exception:
@@ -139,7 +139,6 @@ def lnprob(p,jjj):
     return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)
 
 
-
 pool=MPIPool()
 if not pool.is_master():
     pool.wait()
@@ -153,25 +152,19 @@ ndim=3
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
 sampler.run_mcmc(pos, Nchain)
 save(stats_dir+'likelihood/MC_ps_%s.npy'%(Nk), sampler.flatchain)
 
 print 'PDF 1D'
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 1000)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain*10)
+sampler.run_mcmc(pos, Nchain*5)
 save(stats_dir+'likelihood/MC_pdf1d_%s.npy'%(Nk), sampler.flatchain)
 
 print 'PDF 2D'
 nwalkers=4000
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, Nchain)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
+sampler.run_mcmc(pos, Nchain/2)
 save('MC_pdf2d_%s.npy'%(Nk), sampler.flatchain)
 
 #################################
