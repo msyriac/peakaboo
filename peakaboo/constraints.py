@@ -66,7 +66,7 @@ covpsN = cov(psN_cov,rowvar=0)*12.25/2e4
 covIpsN = mat(covpsN).I
 
 ###### PDF 1D
-idxt=where(pdf1dN[:,1]>=0)#range(10, 20)#
+idxt=where(pdf1dN[:,1]>0)#range(10, 20)#
 
 pdf1dN_flat= swapaxes(pdf1dN[idxt[0],:,idxt[1]],0,1).reshape(101,-1) 
 pdf1dN1k_flat = array([swapaxes(ips[idxt[0],:,idxt[1]],0,1).reshape(101,-1) for ips in pdf1dN1ks])
@@ -74,12 +74,12 @@ pdf1dN1k_flat = array([swapaxes(ips[idxt[0],:,idxt[1]],0,1).reshape(101,-1) for 
 pdf1dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format(iz)) for iz in z_arr])[idxt[0],:,idxt[1]],0,1).reshape(10000,-1)
 covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
 ########### artificially inflat the zeros bins ############
-covpdf1dN[covpdf1dN==0]=amax(covpdf1dN)*1e9
+#covpdf1dN[covpdf1dN==0]=amax(covpdf1dN)*1e9
 ###########################################
 covIpdf1dN = mat(covpdf1dN).I
 
 ###### PDF 2D
-idxt2=where(pdf2dN[:,1]>=0)
+idxt2=where(pdf2dN[:,1]>0)
 
 pdf2dN_flat= swapaxes(pdf2dN,0,1)[:,idxt2[0],idxt2[1],idxt2[2]]
 pdf2dN1k_flat= array([swapaxes(ips,0,1)[:,idxt2[0],idxt2[1],idxt2[2]] for ips in pdf2dN1ks])
@@ -89,7 +89,7 @@ pdf2dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.
 
 covpdf2dN = cov(pdf2dN_cov,rowvar=0)*12.25/2e4
 ########### artificially inflat the zeros bins ############
-covpdf2dN[covpdf2dN==0]=amax(covpdf2dN)*1e9
+#covpdf2dN[covpdf2dN==0]=amax(covpdf2dN)*1e9
 ###########################################
 covIpdf2dN = mat(covpdf2dN).I
 
