@@ -175,7 +175,7 @@ print 'PDF 1D'
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
-sampler.run_mcmc(pos, Nchain)
+sampler.run_mcmc(pos, Nchain*10)
 save(stats_dir+'likelihood/MC_pdf1d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 #print 'PDF 2D'
