@@ -158,9 +158,9 @@ if not pool.is_master():
 print Nk
 
 
-nwalkers=272*2
+nwalkers=272
 ndim=3
-np.random.seed(10027)
+np.random.seed(10025)
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 #print 'PS'
@@ -170,19 +170,19 @@ p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_pa
 #sampler.run_mcmc(pos, Nchain)
 #save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
-print 'PDF 1D'
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_pdf1d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
+#print 'PDF 1D'
+#sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
+#pos, prob, state = sampler.run_mcmc(p0, 100)
+#sampler.reset()
+#sampler.run_mcmc(pos, Nchain)
+#save(stats_dir+'likelihood/MC_pdf1d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 print 'PDF 2D'
 #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
-sampler.run_mcmc(pos, Nchain)
+sampler.run_mcmc(pos, Nchain*10)
 save(stats_dir+'likelihood/MC_pdf2d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 
