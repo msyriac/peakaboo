@@ -69,7 +69,7 @@ covpsN = cov(psN_cov,rowvar=0)*12.25/2e4
 covIpsN = mat(covpsN).I
 
 ###### PDF 1D
-idxt=where(pdf1dN[:,5]>0)#range(10, 20)#
+idxt=where(pdf1dN[:,5]>5)#range(10, 20)#
 
 pdf1dN_flat= swapaxes(pdf1dN[idxt[0],:,idxt[1]],0,1).reshape(101,-1) 
 #pdf1dN1k_flat = array([swapaxes(ips[idxt[0],:,idxt[1]],0,1).reshape(101,-1) for ips in pdf1dN1ks])
@@ -82,7 +82,7 @@ covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
 covIpdf1dN = mat(covpdf1dN).I
 
 ###### PDF 2D
-idxt2=where(pdf2dN[:,5]>0)
+idxt2=where(pdf2dN[:,5]>5)
 
 pdf2dN_flat= swapaxes(pdf2dN,0,1)[:,idxt2[0],idxt2[1],idxt2[2]]
 #pdf2dN1k_flat= array([swapaxes(ips,0,1)[:,idxt2[0],idxt2[1],idxt2[2]] for ips in pdf2dN1ks])
