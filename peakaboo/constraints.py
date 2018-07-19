@@ -7,7 +7,7 @@ import emcee
 
 Nk='10k' # '5ka', '5kb'
 Nmin=1e-3
-testfn = 'collapsed2'
+testfn = 'collapsed_mean_cov'
 Ngrid = 50
 Nchain = 1000
 try:
