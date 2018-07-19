@@ -56,7 +56,7 @@ pdf2dN = array( [load(eb_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(
 #pdf2dN1ks = array( [[load(eb1k_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_1k{2}.npy'.format(z_arr[i],z_arr[j], ik)) 
                 #for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
 
-########## test collapsed 1d PDF from 2d shape:(5, 101, 27)
+########## test collapsed 1d PDF from 2d shape:(5, 101, 27), mean
 pdf1dN = array([sum(pdf2dN[i],axis=-1) for i in [0,4,7,9] ] + [sum(pdf2dN[-1],axis=-2)])
 
 #####################################
@@ -94,7 +94,7 @@ pdf2dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.
 covpdf2dN = cov(pdf2dN_cov,rowvar=0)*12.25/2e4
 covIpdf2dN = mat(covpdf2dN).I
 
-############### test collapsed 1d PDF from 2d
+############### test collapsed 1d PDF from 2d, covariance
 
 #pdf1dN_cov = array([sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[i+1])),axis=-1) for i in range(4) ] + [sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z2.0_z2.5_sg1.0.npy'),axis=-2)])[idxt[0],:,idxt[1]].T
 #covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
