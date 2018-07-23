@@ -87,24 +87,28 @@ hist2d_bin_edges_cmb = {}
 ihist_bin_edges_cmb = {}
 ihist2d_bin_edges_cmb = {}
 
-filtermapjia = lambda recon: fmaps.filter_map(recon, fmaps.mask_kspace(recon.shape,recon.wcs,lmax=lbin_edges[-1]))
+filtermapjia = lambda recon: fmaps.filter_map(recon, 
+   fmaps.mask_kspace(recon.shape,recon.wcs,lmax=lbin_edges[-1]))
+padedge = lambda a: np.concatenate([[-100,],a,[100,]])
 ## if I wanna turn back on gaussian smoothing, it is easy to replace above line by (but I have to suffer to use the same smoothing for CMB and gal):
 ## filtermapjia = lambda recon: enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
 
 ######### calculate CMB lensing bin edges
+
 for p,scmb in enumerate(smoothings_cmb):
     recon = enmap.read_map(file_root_smooth(0))
     if p==0: shape,wcs = recon.shape, recon.wcs
     if scmb>1.e-5: ## recon = enmap.smooth_gauss(recon,scmb*np.pi/180./60.)
         recon = filtermapjia(recon)
     sigma_cmb = np.sqrt(np.var(recon))
-    hist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_cmb
-    hist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*sigma_cmb
-
-    input_k = enmap.ndmap(resample.resample_fft(LCSmooth.get_kappa(1,z=1100),shape),wcs)
+    hist_bin_edges_cmb[str(scmb)] = padedge(io.bin_edges_from_config(Config,args.bin_section_hist_1d))*sigma_cmb
+    hist2d_bin_edges_cmb[str(scmb)] = padedge(io.bin_edges_from_config(Config,hist2d_cmb_bin_section))*sigma_cmb
+    
+    input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(1,z=1100),shape),wcs)
+    
     isigma_cmb = np.sqrt(np.var(input_k))
-    ihist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*isigma_cmb
-    ihist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*isigma_cmb
+    ihist_bin_edges_cmb[str(scmb)] = padedge(io.bin_edges_from_config(Config,args.bin_section_hist_1d))*isigma_cmb
+    ihist2d_bin_edges_cmb[str(scmb)] = padedge(io.bin_edges_from_config(Config,hist2d_cmb_bin_section))*isigma_cmb
     
     
 bincents = lambda x: (x[1:]+x[:-1])/2.
@@ -134,10 +138,10 @@ for k,z in enumerate(galzs):
         sigma_gal = np.sqrt(np.var(galkappa_noisy))
         isigma_gal = np.sqrt(np.var(galkappa))
         #print(sigma_gal)
-        hist_bin_edges_gals[k][str(sgal)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_gal 
-        hist2d_bin_edges_gals[k][str(sgal)] =  io.bin_edges_from_config(Config,hist2d_gal_bin_section )*sigma_gal 
-        ihist_bin_edges_gals[k][str(sgal)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*isigma_gal 
-        ihist2d_bin_edges_gals[k][str(sgal)] =  io.bin_edges_from_config(Config,hist2d_gal_bin_section )*isigma_gal 
+        hist_bin_edges_gals[k][str(sgal)] = padedge(io.bin_edges_from_config(Config,args.bin_section_hist_1d))*sigma_gal 
+        hist2d_bin_edges_gals[k][str(sgal)] =  padedge(io.bin_edges_from_config(Config,hist2d_gal_bin_section ))*sigma_gal 
+        ihist_bin_edges_gals[k][str(sgal)] = padedge(io.bin_edges_from_config(Config,args.bin_section_hist_1d))*isigma_gal 
+        ihist2d_bin_edges_gals[k][str(sgal)] =  padedge(io.bin_edges_from_config(Config,hist2d_gal_bin_section ))*isigma_gal 
 
 ####### now do all the statistics
 for k,i in enumerate(my_tasks):
