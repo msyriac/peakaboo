@@ -1,6 +1,6 @@
 #!/bin/bash 
-#SBATCH -N 4 # node count 
-#SBATCH -n  272 #
+#SBATCH -N 2 # node count 
+#SBATCH -n  136 #
 ### SBATCH -J PDF
 #SBATCH -t 2:00:00 #
 #SBATCH --output=/scratch/02977/jialiu/logs_peakaboo/PDF_%j.out

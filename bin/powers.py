@@ -101,7 +101,7 @@ for p,scmb in enumerate(smoothings_cmb):
     hist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*sigma_cmb
     hist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*sigma_cmb
 
-    input_k = enmap.ndmap(resample.resample_fft(LC.get_kappa(1,z=1100),shape),wcs)
+    input_k = enmap.ndmap(resample.resample_fft(LCSmooth.get_kappa(1,z=1100),shape),wcs)
     isigma_cmb = np.sqrt(np.var(input_k))
     ihist_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,args.bin_section_hist_1d)*isigma_cmb
     ihist2d_bin_edges_cmb[str(scmb)] = io.bin_edges_from_config(Config,hist2d_cmb_bin_section)*isigma_cmb
