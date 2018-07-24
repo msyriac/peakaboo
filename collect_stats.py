@@ -13,7 +13,7 @@ stats1k_dir = '/scratch/02977/jialiu/peakaboo/stats_avg_1k/'
 def compute_average(i):
     icosmo = fn_list[i]
     print icosmo
-    for ieb in ['output_eb_5000_s4', 'output_tt_3000_s4']:    
+    for ieb in ['output_eb_5000_s4',]:# 'output_tt_3000_s4']:    
         isavedir = stats_dir+icosmo+'/'+ieb+'/'
         os.system('mkdir -pv %s'%(isavedir))
         for iALL in ALL_fn:
@@ -30,7 +30,7 @@ idx+=[range(5000),range(5000,10000),range(10000)]
 
 def compute_average_bystats(iALL):
     print iALL
-    for ieb in ['output_eb_5000_s4', 'output_tt_3000_s4']: 
+    for ieb in ['output_eb_5000_s4',]:# 'output_tt_3000_s4']: 
         isavedir = stats_dir+ieb+'/'
         isavedir_1k = stats1k_dir+ieb+'/'
         os.system('mkdir -pv %s; mkdir -pv %s'%(isavedir, isavedir_1k))
