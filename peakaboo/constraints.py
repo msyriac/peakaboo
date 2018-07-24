@@ -114,10 +114,11 @@ fidu_params = array([0.1,0.3,2.1])
 #frac_diff = psI1k_std/psI[:,1].reshape(Nz,1,20)
 #idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:] 
 
-correction2covI = lambda covI: (1e4-array(covI).shape[0]-2.0)/9999.0*covI
+#correction2covI = lambda covI: (1e4-array(covI).shape[0]-2.0)/9999.0*covI
     
 obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
-covIs = map(correction2covI,[covIpsN, covIpdf1dN, covIpdf2dN])
+#covIs = map(correction2covI,[covIpsN, covIpdf1dN, covIpdf2dN])
+covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
 
 emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
              for istats in [psI_flat, pdf1dN_flat, pdf2dN_flat]]
