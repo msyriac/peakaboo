@@ -193,7 +193,7 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]):
 
 MC_arr = [load(stats_dir+'likelihood/MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
                ['pdf1d','pdf2d']]
-MC_arr = [load(stats_dir+'likelihood/MC_ps_10k%s.npy'%(ips) for ips in
+MC_arr = [load(stats_dir+'likelihood/MC_ps_10k%s.npy'%(ips)) for ips in
                ['auto','cross']] + MC_arr
 
 f,ax=subplots(3,3,figsize=(6,6))
