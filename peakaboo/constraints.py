@@ -148,12 +148,12 @@ ndim=3
 np.random.seed(10025)
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
-print 'PS'
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
+#print 'PS'
+#sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
+#pos, prob, state = sampler.run_mcmc(p0, 100)
+#sampler.reset()
+#sampler.run_mcmc(pos, Nchain)
+#save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 print 'PDF 1D'
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
@@ -181,7 +181,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import *
 
 fidu_params = array([0.1,0.3,2.1])
-colors=['c','y','r']
+colors=['c','y','r','b']
 proxy=[plt.Rectangle((0,0),1,0.5,ec=icolor, fc = icolor) for icolor in colors]
 
 stats_dir = '/scratch/02977/jialiu/peakaboo/'
@@ -192,12 +192,14 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]):
                   truth_color="k",fill_contours=1)
 
 MC_arr = [load(stats_dir+'likelihood/MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
-               ['ps','pdf1d','pdf2d']]
+               ['pdf1d','pdf2d']]
+MC_arr = [load(stats_dir+'likelihood/MC_ps_10k%s.npy'%(ips) for ips in
+               ['auto','cross']] + MC_arr
 
 f,ax=subplots(3,3,figsize=(6,6))
-for j in range(3):
+for j in range(len(MC_arr)):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
-ax[0,1].legend(proxy,['ps (auto+cross)','pdf1d','pdf2d'],fontsize=8)
+ax[0,1].legend(proxy,['ps(auto)', 'ps (auto+cross)','pdf1d','pdf2d'],fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
 fnfig='contour_%s%s.jpg'%(testfn,Nk)
 fnpath=stats_dir+'likelihood/plots/'+fnfig
