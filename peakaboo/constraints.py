@@ -6,7 +6,7 @@ import sys, itertools
 import emcee
 
 Nk='10k' # '5ka', '5kb'
-Nmin=0.1 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=1e-3 ###### minimum counts in that bin to get included in PDF calculation
 testfn = ''#'collapsed'
 Nchain = 1000
 try:
@@ -114,23 +114,21 @@ fidu_params = array([0.1,0.3,2.1])
 #frac_diff = psI1k_std/psI[:,1].reshape(Nz,1,20)
 #idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:] 
 
-#correction2covI = lambda covI: (1e4-array(covI).shape[0]-2.0)/9999.0*covI
-    
+   
 obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
-#covIs = map(correction2covI,[covIpsN, covIpdf1dN, covIpdf2dN])
+
 covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
+rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
 
 emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
              for istats in [psI_flat, pdf1dN_flat, pdf2dN_flat]]
-
-chisq = lambda obs, model, covI: float(mat(obs-model)*covI*mat(obs-model).T)
 
 #########
 def lnprob(p,jjj):
     '''log likelihood of 
     '''
     diff = emulators[jjj](p)-obss[jjj]
-    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)
+    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
 
 
 pool=MPIPool()
