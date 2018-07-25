@@ -199,7 +199,7 @@ MC_arr = [load(stats_dir+'likelihood/MC_ps_10k%s.npy'%(ips)) for ips in
 f,ax=subplots(3,3,figsize=(6,6))
 for j in range(len(MC_arr)):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
-ax[0,1].legend(proxy,['ps(auto)', 'ps (auto+cross)','pdf1d','pdf2d'],fontsize=8)
+ax[0,1].legend(proxy,['ps(auto)', 'ps(auto+cross)','pdf1d','pdf2d'],fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
 fnfig='contour_%s%s.jpg'%(testfn,Nk)
 fnpath=stats_dir+'likelihood/plots/'+fnfig
