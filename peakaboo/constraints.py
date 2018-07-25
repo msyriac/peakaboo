@@ -8,9 +8,10 @@ import emcee
 Nk='10k' # '5ka', '5kb'
 Nmin=0.1 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'
-testfn = collapse+'Nmin%sR'%(Nmin)#
-
 Nchain = 100
+
+testfn = collapse+'Nmin%sR_Nchain%i'%(Nmin,Nchain)#
+
 try:
     Nk = str(sys.argv[1])
 except Exception:
@@ -194,7 +195,7 @@ MC_arr = [load(stats_dir+'likelihood/MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
                ['ps','pdf1d','pdf2d']]
 
 f,ax=subplots(3,3,figsize=(6,6))
-for j in [0,]:
+for j in range(3):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
 ax[0,1].legend(proxy,['ps (auto+cross)','pdf1d','pdf2d'],fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
