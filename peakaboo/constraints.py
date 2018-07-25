@@ -118,7 +118,7 @@ fidu_params = array([0.1,0.3,2.1])
 obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
 
 covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
-rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
+#rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
 
 emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
              for istats in [psI_flat, pdf1dN_flat, pdf2dN_flat]]
@@ -130,7 +130,7 @@ def lnprob(p,jjj):
     if p[0]<0: ####### force neutrino mass to be positive
         return -np.inf
     diff = emulators[jjj](p)-obss[jjj]
-    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
+    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)#*rDH[jjj]
 
 
 pool=MPIPool()
