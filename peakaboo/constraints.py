@@ -7,7 +7,7 @@ import emcee
 
 Nk='10k' # '5ka', '5kb'
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
-collapse=''#'collapsed'#
+collapse='collapsed'#''#
 Nchain = 500
 
 testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#
