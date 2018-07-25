@@ -7,8 +7,10 @@ import emcee
 
 Nk='10k' # '5ka', '5kb'
 Nmin=0.1 ###### minimum counts in that bin to get included in PDF calculation
-testfn = 'Nmin1e-3R'#'collapsed'
-Nchain = 1000
+collapse=''#'collapsed'
+testfn = collapse+'Nmin%sR'%(Nmin)#
+
+Nchain = 100
 try:
     Nk = str(sys.argv[1])
 except Exception:
@@ -58,7 +60,7 @@ pdf2dN = array( [load(eb_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(
                 #for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
 
 ########## test collapsed 1d PDF from 2d shape:(5, 101, 27), mean
-if testfn=='collapsed':
+if collapse=='collapsed':
     pdf1dN = array([sum(pdf2dN[i],axis=-1) for i in [0,4,7,9] ] + [sum(pdf2dN[-1],axis=-2)])
 
 #####################################
@@ -97,7 +99,7 @@ covpdf2dN = cov(pdf2dN_cov,rowvar=0)*12.25/2e4
 covIpdf2dN = mat(covpdf2dN).I
 
 ############### test collapsed 1d PDF from 2d, covariance
-if testfn=='collapsed':
+if collapse=='collapsed':
     pdf1dN_cov = array([sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[i+1])),axis=-1) for i in range(4) ] + [sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z2.0_z2.5_sg1.0.npy'),axis=-2)])[idxt[0],:,idxt[1]].T
     covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
     covIpdf1dN = mat(covpdf1dN).I
@@ -145,12 +147,12 @@ ndim=3
 np.random.seed(10025)
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
-#print 'PS'
-#sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
-#pos, prob, state = sampler.run_mcmc(p0, 100)
-#sampler.reset()
-#sampler.run_mcmc(pos, Nchain)
-#save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
+print 'PS'
+sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[0,], pool=pool)
+pos, prob, state = sampler.run_mcmc(p0, 100)
+sampler.reset()
+sampler.run_mcmc(pos, Nchain)
+save(stats_dir+'likelihood/MC_ps_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 print 'PDF 1D'
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[1,], pool=pool)
@@ -167,6 +169,40 @@ sampler.reset()
 sampler.run_mcmc(pos, Nchain*10)
 save(stats_dir+'likelihood/MC_pdf2d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
+pool.close()
 print 'done done done'
 
-pool.close()
+########### plotting and uploading to dropbox 
+import corner
+from matplotlib import pyplot
+from scipy import *
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import *
+
+fidu_params = array([0.1,0.3,2.1])
+colors=['c','y','r']
+proxy=[plt.Rectangle((0,0),1,0.5,ec=icolor, fc = icolor) for icolor in colors]
+
+stats_dir = '/scratch/02977/jialiu/peakaboo/'
+
+def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]):
+    corner.corner(chain, labels=[r"$M_\nu$", r"$\Omega_m$", r"$A_s$"],levels=[0.67,0.95],color=icolor,
+                  range=range,truths=fidu_params, fig=f, plot_datapoints=0, plot_density=0,
+                  truth_color="k",fill_contours=1)
+
+MC_arr = [load(stats_dir+'likelihood/MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
+               ['ps','pdf1d','pdf2d']]
+
+f,ax=subplots(3,3,figsize=(6,6))
+for j in [0,]:
+    plotmc(MC_arr[j],f=f,icolor=colors[j])
+ax[0,1].legend(proxy,['ps (auto+cross)','pdf1d','pdf2d'],fontsize=8)
+ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
+fnfig='contour_%s%s.jpg'%(testfn,Nk)
+fnpath=stats_dir+'likelihood/plots/'+fnfig
+savefig(fnpath)
+close()
+
+print 'uploading to dropbox'
+import os
+os.system('/work/02977/jialiu/Dropbox-Uploader/dropbox_uploader.sh upload %s %s'%(fnpath,fnfig))
