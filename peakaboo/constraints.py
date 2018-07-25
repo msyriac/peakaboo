@@ -7,10 +7,10 @@ import emcee
 
 Nk='10k' # '5ka', '5kb'
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
-collapse='collapsed'#''#'collapsed'#
-Nchain = 100
+collapse=''#'collapsed'#
+Nchain = 500
 
-testfn = collapse+'mean_Nmin%sR_Nchain%i'%(Nmin,Nchain)#
+testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#
 
 try:
     Nk = str(sys.argv[1])
@@ -100,10 +100,10 @@ covpdf2dN = cov(pdf2dN_cov,rowvar=0)*12.25/2e4
 covIpdf2dN = mat(covpdf2dN).I
 
 ############### test collapsed 1d PDF from 2d, covariance
-#if collapse=='collapsed':
-    #pdf1dN_cov = array([sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[i+1])),axis=-1) for i in range(4) ] + [sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z2.0_z2.5_sg1.0.npy'),axis=-2)])[idxt[0],:,idxt[1]].T
-    #covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
-    #covIpdf1dN = mat(covpdf1dN).I
+if collapse=='collapsed':
+    pdf1dN_cov = array([sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[i+1])),axis=-1) for i in range(4) ] + [sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z2.0_z2.5_sg1.0.npy'),axis=-2)])[idxt[0],:,idxt[1]].T
+    covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
+    covIpdf1dN = mat(covpdf1dN).I
 
 
 #####################################
