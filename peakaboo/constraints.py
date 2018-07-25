@@ -8,7 +8,7 @@ import emcee
 Nk='10k' # '5ka', '5kb'
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse='collapsed'#''#
-Nchain = 500
+Nchain = 1000
 
 testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#
 
@@ -62,7 +62,7 @@ pdf2dN = array( [load(eb_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(
 
 ########## test collapsed 1d PDF from 2d shape:(5, 101, 27), mean
 if collapse=='collapsed':
-    pdf1dN = array([sum(pdf2dN[i],axis=-1) for i in [0,4,7,9] ] + [sum(pdf2dN[-1],axis=-2)])
+    pdf1dNb = array([sum(pdf2dN[i],axis=-1) for i in [0,4,7,9] ] + [sum(pdf2dN[-1],axis=-2)])
 
 #####################################
 ###### covariances stats ############
@@ -146,7 +146,7 @@ print Nk
 
 nwalkers=272
 ndim=3
-np.random.seed(10025)#10025
+np.random.seed(10088)#10025
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 #print 'PS'
