@@ -6,9 +6,9 @@ import sys, itertools
 import emcee
 
 Nk='10k' # '5ka', '5kb'
-Nmin=0.01 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=1.0 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 1000
+Nchain = 100
 
 testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#
 
