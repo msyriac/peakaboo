@@ -7,7 +7,7 @@ cd ${peakapath}/jobs
 
 while read cosmodir
 do 
-cp template_stats.sh stats/${cosmodir}_stats.sh
+cp template_stats.sh stats/${cosmodir}_stats_1z.sh
 
 echo ${cosmodir}
 
