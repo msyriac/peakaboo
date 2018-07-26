@@ -19,5 +19,5 @@ ibrun -n 136 -o 0 python -W ignore bin/powers.py   ${cosmodir}/1024b512 output_e
 
 #ibrun -n 136 -o 136 python -W ignore bin/powers.py   ${cosmodir}/1024b512 output_tt_3000_s4 default_1d_bin default_hist_bin coarse_hist_bin_cmb,coarse_hist_bin_gal ${fidudir}/1024b512 -G 0.5,1,1.5,2,2.5 -x 5 -y 1 -N 10000 &
 
-#wait" >> stats/${cosmodir}_stats.sh
+#wait" >> stats/${cosmodir}_stats_1z.sh
 done < ${peakapath}/cosmo_dir.ls
