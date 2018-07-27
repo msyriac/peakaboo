@@ -146,6 +146,7 @@ rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ##
 emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
              for istats in [psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]]
 
+
 #########
 def lnprob(p,jjj):
     '''log likelihood of 
@@ -168,6 +169,11 @@ p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_pa
 
 fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
 
+for i in range(len(covIs)):
+    print fn_arr[i]
+    print 'cov shape',covIs[i].shape
+    print 'stats shape',[psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat][i].shape
+    
 i=0
 print fn_arr[i]
 sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
