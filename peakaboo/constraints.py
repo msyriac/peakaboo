@@ -142,7 +142,7 @@ covIs = [covIpsNauto, covIpsN, covIpdf1dN, covIcomb_auto, covIcomb_cros]
 rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
 
 emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
-             for istats in psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]
+             for istats in [psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]]
 
 #########
 def lnprob(p,jjj):
