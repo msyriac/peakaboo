@@ -8,7 +8,7 @@ import emcee
 Nk='10k' # '5ka', '5kb'
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 1000
+Nchain = 5000
 
 testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#''#
 
@@ -163,7 +163,7 @@ print Nk
 
 nwalkers=544
 ndim=3
-np.random.seed(10027)#
+np.random.seed(10025)#
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
