@@ -27,6 +27,8 @@ Nz = len(z_arr)
 ######## stampede2
 stats_dir = '/scratch/02977/jialiu/peakaboo/stats_tomo/'
 ebcov_dir = stats_dir+'Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0/'
+params = genfromtxt('/scratch/02977/jialiu/peakaboo/cosmo_params_all.txt',usecols=[2,3,4])
+
 
 ######### local
 #stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
@@ -124,7 +126,6 @@ covIcomb_cros = covgen(comb_cov_cros)
 ###### build emulator ###############
 #####################################
 
-params = genfromtxt(stats_dir+'cosmo_params_all.txt',usecols=[2,3,4])
 fidu_params = array([0.1,0.3,2.1])
 
 ######## pick the good cosmology, where std/P among 10 1k models is <1%, and remove the first cosmology, 0eV one
