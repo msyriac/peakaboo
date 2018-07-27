@@ -6,11 +6,11 @@ import sys, itertools
 import emcee
 
 Nk='10k' # '5ka', '5kb'
-Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=1 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 5000
+Nchain = 200
 
-testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#''#
+testfn = collapse+'_Nmin%sR_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 #try:
     #Nk = str(sys.argv[1])
@@ -174,7 +174,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
 i=1
 print fn_arr[i]
@@ -182,7 +182,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
 i=2
 print fn_arr[i]
@@ -190,7 +190,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
 i=3
 print fn_arr[i]
@@ -198,7 +198,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
 i=4
 print fn_arr[i]
@@ -206,7 +206,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
 #print 'PDF 2D'
 ##p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
@@ -214,7 +214,7 @@ save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
 #pos, prob, state = sampler.run_mcmc(p0, 100)
 #sampler.reset()
 #sampler.run_mcmc(pos, Nchain*10)
-#save(like_dir+'MC_pdf2d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
+#save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
 pool.close()
 print 'done done done'
@@ -239,7 +239,7 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]):
                   plot_datapoints=0, plot_density=0,
                   truth_color="k",fill_contours=1)#
 
-MC_arr = [load(like_dir+'MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
+MC_arr = [load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
                fn_arr]
 
 f,ax=subplots(3,3,figsize=(6,6))
