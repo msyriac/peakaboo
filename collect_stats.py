@@ -3,7 +3,9 @@ from emcee.utils import MPIPool
 import os
 
 peaka_dir = '/home1/02977/jialiu/peakaboo/'
-ALL_fn = genfromtxt(peaka_dir+'ALL_fn.txt',dtype='string')
+ifn = 'ALL_1z.txt'#'ALL_fn.txt'#
+
+ALL_fn = genfromtxt(peaka_dir+ifn,dtype='string')
 fn_list = genfromtxt(peaka_dir+'cosmo_params_all.txt',usecols=1, dtype='string')
 fnjia_list = genfromtxt(peaka_dir+'cosmo_params_all.txt',usecols=0, dtype='string')
 stats_fn = lambda iALL, ieb, icosmo: '/scratch/02977/jialiu/peakaboo/stats/'+icosmo+'/1024b512/'+ieb+'/seed0/'+iALL
