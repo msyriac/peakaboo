@@ -6,16 +6,17 @@ import sys, itertools
 import emcee
 
 Nk='10k' # '5ka', '5kb'
+try:
+    Nk = str(sys.argv[1])
+except Exception:
+    pass
+
 Nmin=1 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 200
+np.random.seed(10025)#
 
 testfn = collapse+'_Nmin%sR_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
-
-#try:
-    #Nk = str(sys.argv[1])
-#except Exception:
-    #pass
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -163,7 +164,6 @@ print Nk
 
 nwalkers=544
 ndim=3
-np.random.seed(10025)#
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
