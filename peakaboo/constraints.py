@@ -8,7 +8,7 @@ import emcee
 Nk='10k' # '5ka', '5kb'
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 100
+Nchain = 1000
 
 testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#''#
 
@@ -233,9 +233,11 @@ proxy=[plt.Rectangle((0,0),1,0.5,ec=icolor, fc = icolor) for icolor in colors]
 stats_dir = '/scratch/02977/jialiu/peakaboo/'
 
 def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]):
-    corner.corner(chain, labels=[r"$M_\nu$", r"$\Omega_m$", r"$A_s$"],levels=[0.95,],color=icolor,
-                  range=range,truths=fidu_params, fig=f, plot_datapoints=0, plot_density=0,
-                  truth_color="k",fill_contours=0)#levels=[0.67,0.95]
+    corner.corner(chain, labels=[r"$M_\nu$", r"$\Omega_m$", r"$A_s$"],
+                  levels=[0.67,0.95],color=icolor,
+                  range=range,truths=fidu_params, fig=f, 
+                  plot_datapoints=0, plot_density=0,
+                  truth_color="k",fill_contours=1)#
 
 MC_arr = [load(like_dir+'MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
                fn_arr]
