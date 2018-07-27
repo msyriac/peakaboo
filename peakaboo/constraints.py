@@ -253,7 +253,7 @@ for j in range(len(MC_arr)):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
 ax[0,1].legend(proxy,fn_arr,fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
-fnfig='contour_%s%s.jpg'%(testfn,Nk)
+fnfig='contour_%s.jpg'%(testfn)
 fnpath=like_dir+'plots/'+fnfig
 savefig(fnpath)
 close()
