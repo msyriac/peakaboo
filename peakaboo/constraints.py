@@ -25,6 +25,7 @@ Nz = len(z_arr)
 #####################################
 
 ######## stampede2
+like_dir='/scratch/02977/jialiu/peakaboo/likelihood_tomo/'
 stats_dir = '/scratch/02977/jialiu/peakaboo/stats_tomo/'
 ebcov_dir = stats_dir+'Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0/'
 params = genfromtxt('/scratch/02977/jialiu/peakaboo/cosmo_params_all.txt',usecols=[2,3,4])
@@ -160,7 +161,7 @@ if not pool.is_master():
 
 print Nk
 
-nwalkers=272
+nwalkers=544
 ndim=3
 np.random.seed(10027)#
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
@@ -173,7 +174,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
 
 i=1
 print fn_arr[i]
@@ -181,7 +182,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
 
 i=2
 print fn_arr[i]
@@ -189,7 +190,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
 
 i=3
 print fn_arr[i]
@@ -197,7 +198,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
 
 i=4
 print fn_arr[i]
@@ -205,7 +206,7 @@ sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
 pos, prob, state = sampler.run_mcmc(p0, 100)
 sampler.reset()
 sampler.run_mcmc(pos, Nchain)
-save(stats_dir+'likelihood/MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
+save(like_dir+'MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatchain)
 
 #print 'PDF 2D'
 ##p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
@@ -213,7 +214,7 @@ save(stats_dir+'likelihood/MC_%s_%s%s.npy'%(fn_arr[i],Nk,testfn), sampler.flatch
 #pos, prob, state = sampler.run_mcmc(p0, 100)
 #sampler.reset()
 #sampler.run_mcmc(pos, Nchain*10)
-#save(stats_dir+'likelihood/MC_pdf2d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
+#save(like_dir+'MC_pdf2d_%s%s.npy'%(Nk,testfn), sampler.flatchain)
 
 pool.close()
 print 'done done done'
@@ -236,7 +237,7 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]):
                   range=range,truths=fidu_params, fig=f, plot_datapoints=0, plot_density=0,
                   truth_color="k",fill_contours=0)#levels=[0.67,0.95]
 
-MC_arr = [load(stats_dir+'likelihood/MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
+MC_arr = [load(like_dir+'MC_%s_%s%s.npy'%(ips,Nk,testfn)) for ips in
                fn_arr]
 
 f,ax=subplots(3,3,figsize=(6,6))
@@ -245,7 +246,7 @@ for j in range(len(MC_arr)):
 ax[0,1].legend(proxy,fn_arr,fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
 fnfig='contour_%s%s.jpg'%(testfn,Nk)
-fnpath=stats_dir+'likelihood/plots/'+fnfig
+fnpath=like_dir+'plots/'+fnfig
 savefig(fnpath)
 close()
 
