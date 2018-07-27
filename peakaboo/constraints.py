@@ -10,7 +10,7 @@ Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 100
 
-testfn = ''#collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#
+testfn = collapse+'_Nmin%sR_Nchain%i'%(Nmin,Nchain)#''#
 
 #try:
     #Nk = str(sys.argv[1])
