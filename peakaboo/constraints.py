@@ -99,8 +99,8 @@ covIpdf1dN = covgen(pdf1dN_cov)
 comb_auto_flat = concatenate([psIauto_flat, pdf1dN_flat], axis=-1)
 comb_cros_flat = concatenate([psI_flat, pdf1dN_flat], axis=-1)
 
-comb_cov_auto = concatenate([psN_cov,pdf1dN_cov],axis=-1)
-comb_cov_cros = concatenate([psNauto_cov,pdf1dN_cov],axis=-1)
+comb_cov_auto = concatenate([psNauto_cov,pdf1dN_cov],axis=-1)
+comb_cov_cros = concatenate([psN_cov,pdf1dN_cov],axis=-1)
 covIcomb_auto = covgen(comb_cov_auto)
 covIcomb_cros = covgen(comb_cov_cros)
 
