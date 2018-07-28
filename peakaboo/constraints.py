@@ -16,7 +16,7 @@ collapse=''#'collapsed'#
 Nchain = 200
 np.random.seed(10025)#
 
-testfn = collapse+'diagcov_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'x1e-12_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -71,7 +71,7 @@ pdf1dN = array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for
 ###### covariances stats ############
 #####################################
 
-covgen = lambda psN_cov:mat(cov(psN_cov,rowvar=0)*12.25/2e4).I
+covIgen = lambda psN_cov:mat(cov(psN_cov,rowvar=0)*12.25/2e4).I
 def covgen_diag (psN_cov): ##### test zero out off-diag terms
     covfull = cov(psN_cov,rowvar=0)*12.25/2e4
     ######### last 94 are pdf
@@ -88,12 +88,12 @@ psIauto_flat = swapaxes(psIauto,0,1).reshape(101,-1)
 
 psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
                            for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
-covIpsN = covgen(psN_cov)
+covIpsN = covIgen(psN_cov)
 
 
 psNauto_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{0}.npy'.format(z_arr[i]))
                            for i in range(Nz)]),0,1).reshape(10000,-1)
-covIpsNauto = covgen(psNauto_cov)
+covIpsNauto = covIgen(psNauto_cov)
 
 ###### PDF 1D
 idxt=where(pdf1dN[:,5]>Nmin)
@@ -102,18 +102,19 @@ pdf1dN_flat= swapaxes(pdf1dN[idxt[0],:,idxt[1]],0,1).reshape(101,-1)
 ##pdf1dN1k_flat = array([swapaxes(ips[idxt[0],:,idxt[1]],0,1).reshape(101,-1) for ips in pdf1dN1ks])
 
 pdf1dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format(iz)) for iz in z_arr])[idxt[0],:,idxt[1]],0,1).reshape(10000,-1)
-covIpdf1dN = covgen(pdf1dN_cov)
+covIpdf1dN = covIgen(pdf1dN_cov)
 
 ###### combined ps + pdf, for both auto and cross
-comb_auto_flat = concatenate([psIauto_flat, pdf1dN_flat], axis=-1)
-comb_cros_flat = concatenate([psI_flat, pdf1dN_flat], axis=-1)
+comb_auto_flat = concatenate([psIauto_flat, pdf1dN_flat*1e-12], axis=-1)
+comb_cros_flat = concatenate([psI_flat, pdf1dN_flat*1e-12], axis=-1)
 
-comb_cov_auto = concatenate([psNauto_cov,pdf1dN_cov],axis=-1)
-comb_cov_cros = concatenate([psN_cov,pdf1dN_cov],axis=-1)
-#covIcomb_auto = covgen(comb_cov_auto)
-#covIcomb_cros = covgen(comb_cov_cros)
-covIcomb_auto = covgen_diag(comb_cov_auto)
-covIcomb_cros = covgen_diag(comb_cov_cros)
+comb_cov_auto = concatenate([psNauto_cov,pdf1dN_cov*1e-12],axis=-1)
+comb_cov_cros = concatenate([psN_cov,pdf1dN_cov*1e-12],axis=-1)
+covIcomb_auto = covIgen(comb_cov_auto)
+covIcomb_cros = covIgen(comb_cov_cros)
+
+#covIcomb_auto = covgen_diag(comb_cov_auto)
+#covIcomb_cros = covgen_diag(comb_cov_cros)
 
 ###### PDF 2D
 #idxt2=where(pdf2dN[:,5]>Nmin)
