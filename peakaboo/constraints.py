@@ -16,7 +16,7 @@ collapse=''#'collapsed'#
 Nchain = 200
 np.random.seed(10025)#
 
-testfn = collapse+'x1e-12_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -105,11 +105,11 @@ pdf1dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format
 covIpdf1dN = covIgen(pdf1dN_cov)
 
 ###### combined ps + pdf, for both auto and cross
-comb_auto_flat = concatenate([psIauto_flat, pdf1dN_flat*1e-12], axis=-1)
-comb_cros_flat = concatenate([psI_flat, pdf1dN_flat*1e-12], axis=-1)
+comb_auto_flat = concatenate([psIauto_flat, pdf1dN_flat], axis=-1)
+comb_cros_flat = concatenate([psI_flat, pdf1dN_flat], axis=-1)
 
-comb_cov_auto = concatenate([psNauto_cov,pdf1dN_cov*1e-12],axis=-1)
-comb_cov_cros = concatenate([psN_cov,pdf1dN_cov*1e-12],axis=-1)
+comb_cov_auto = concatenate([psNauto_cov,pdf1dN_cov],axis=-1)
+comb_cov_cros = concatenate([psN_cov,pdf1dN_cov],axis=-1)
 covIcomb_auto = covIgen(comb_cov_auto)
 covIcomb_cros = covIgen(comb_cov_cros)
 
