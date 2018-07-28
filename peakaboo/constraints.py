@@ -16,7 +16,7 @@ collapse=''#'collapsed'#
 Nchain = 200
 np.random.seed(10025)#
 
-testfn = collapse+'_Nmin%sR_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'noR_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -154,7 +154,7 @@ def lnprob(p,jjj):
     if p[0]<0: ####### force neutrino mass to be positive
         return -np.inf
     diff = emulators[jjj](p)-obss[jjj]
-    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
+    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)#*rDH[jjj]
 
 pool=MPIPool()
 if not pool.is_master():
@@ -168,6 +168,7 @@ ndim=3
 p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
+print 'rDH',rDH
 
 for i in range(len(covIs)):
     print fn_arr[i]
