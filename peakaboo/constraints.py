@@ -16,7 +16,7 @@ collapse=''#'collapsed'#
 Nchain = 200
 np.random.seed(10025)#
 
-testfn = collapse+'noR_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'diagcov_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -72,7 +72,15 @@ pdf1dN = array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for
 #####################################
 
 covgen = lambda psN_cov:mat(cov(psN_cov,rowvar=0)*12.25/2e4).I
-
+def covgen_diag (psN_cov): ##### test zero out off-diag terms
+    covfull = cov(psN_cov,rowvar=0)*12.25/2e4
+    ######### last 94 are pdf
+    covdiag = zeros(shape=covfull.shape)
+    covdiag[:-94,:-94]=1
+    covdiag[-94:,-94:]=1
+    covdiag*=covfull
+    return mat(covdiag).I
+    
 ##### PS shape:(101,100)
 psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
 psIauto_flat = swapaxes(psIauto,0,1).reshape(101,-1) 
@@ -102,8 +110,10 @@ comb_cros_flat = concatenate([psI_flat, pdf1dN_flat], axis=-1)
 
 comb_cov_auto = concatenate([psNauto_cov,pdf1dN_cov],axis=-1)
 comb_cov_cros = concatenate([psN_cov,pdf1dN_cov],axis=-1)
-covIcomb_auto = covgen(comb_cov_auto)
-covIcomb_cros = covgen(comb_cov_cros)
+#covIcomb_auto = covgen(comb_cov_auto)
+#covIcomb_cros = covgen(comb_cov_cros)
+covIcomb_auto = covgen_diag(comb_cov_auto)
+covIcomb_cros = covgen_diag(comb_cov_cros)
 
 ###### PDF 2D
 #idxt2=where(pdf2dN[:,5]>Nmin)
@@ -154,7 +164,7 @@ def lnprob(p,jjj):
     if p[0]<0: ####### force neutrino mass to be positive
         return -np.inf
     diff = emulators[jjj](p)-obss[jjj]
-    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)#*rDH[jjj]
+    return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
 
 pool=MPIPool()
 if not pool.is_master():
@@ -169,7 +179,6 @@ p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_pa
 
 fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
 print 'rDH',rDH
-
 for i in range(len(covIs)):
     print fn_arr[i]
     print 'cov shape',covIs[i].shape
