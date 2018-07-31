@@ -13,10 +13,10 @@ except Exception:
 
 Nmin=1 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 200
+Nchain = 400
 np.random.seed(10025)#
 
-testfn = collapse+'widerInitGuess_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'widerInitGuess6_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -183,7 +183,7 @@ print Nk
 nwalkers=544
 ndim=3
 #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
-p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([4, 3, 2]) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+p0 = (array([ (rand(nwalkers, ndim) -0.5) * 6 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 
 fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
