@@ -186,7 +186,7 @@ def lnprob(p,jjj):
 #p0 = (array([ (rand(nwalkers, ndim) -0.5) * 6 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 
-#fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
+fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
 #print 'rDH',rDH
 #for i in range(len(covIs)):
     #print fn_arr[i]
