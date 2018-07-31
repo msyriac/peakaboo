@@ -16,7 +16,7 @@ collapse=''#'collapsed'#
 Nchain = 200
 np.random.seed(10025)#
 
-testfn = collapse+'R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'splitemu_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -154,8 +154,14 @@ obss = [psIauto_flat[1], psI_flat[1], pdf1dN_flat[1], comb_auto_flat[1],comb_cro
 covIs = [covIpsNauto, covIpsN, covIpdf1dN, covIcomb_auto, covIcomb_cros]
 rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
 
-emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
-             for istats in [psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]]
+emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+             for istats in [psIauto_flat, psI_flat, pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
+emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[2](p)])
+emucomb_cross = lambda p: concatenate([emusingle[1](p),emusingle[2](p)])
+emulators= emusingle+[emucomb_auto,emucomb_cross]
+
+#emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+#             for istats in [psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]]
 
 
 #########
