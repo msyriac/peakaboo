@@ -16,6 +16,7 @@ collapse=''#'collapsed'#
 Nchain = 1000
 np.random.seed(10026)#
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
+Nmin*=iscale
 testfn = collapse+'diag_scaled%s_p0fix_R_Nmin%s_Nchain%i_%s'%(iscale,Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
@@ -88,7 +89,7 @@ psNauto_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{0}.npy'.format
 covIpsNauto = covIgen(psNauto_cov)
 
 ###### PDF 1D
-idxt=where(pdf1dN[:,1]>Nmin*iscale)
+idxt=where(pdf1dN[:,1]>Nmin)
 
 pdf1dN_flat= swapaxes(pdf1dN[idxt[0],:,idxt[1]],0,1).reshape(101,-1) 
 ##pdf1dN1k_flat = array([swapaxes(ips[idxt[0],:,idxt[1]],0,1).reshape(101,-1) for ips in pdf1dN1ks])
