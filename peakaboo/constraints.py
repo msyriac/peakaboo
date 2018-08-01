@@ -53,7 +53,7 @@ psIauto = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{0}_{1}.npy'.format(iz,Nk)) f
 #psN = array( [load(eb_dir+'ALL_galXgal_z{0}_z{0}_{1}.npy'.format(iz,Nk)) for iz in z_arr])
 
 ##### 1d PDF shape:(5, 101, 27)
-pdf1dN = array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for iz in z_arr])
+pdf1dN = iscale*array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for iz in z_arr])
 #pdf1dN1ks = array( [[load(eb1k_dir+'ALL_gal_pdf_z{0}_sg1.0_1k{1}.npy'.format(iz,ik)) for iz in z_arr] 
                  #for ik in range(10)])
 
@@ -78,7 +78,7 @@ psI_flat = swapaxes(psI,0,1).reshape(101,-1)
 psIauto_flat = swapaxes(psIauto,0,1).reshape(101,-1) 
 #psI1k_flat = array([swapaxes(ips,0,1).reshape(101,-1) for ips in psI1ks])
 
-psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
+psN_cov = iscale*swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
                            for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
 covIpsN = covIgen(psN_cov)
 
@@ -108,11 +108,11 @@ def covIgen_diag (psN_cov, N=pdf1dN_flat.shape[-1]): ##### test zero out off-dia
     return mat(covdiag).I
 
 
-comb_auto_flat = concatenate([psIauto_flat, iscale*pdf1dN_flat], axis=-1)
-comb_cros_flat = concatenate([psI_flat, iscale*pdf1dN_flat], axis=-1)
+comb_auto_flat = concatenate([psIauto_flat, pdf1dN_flat], axis=-1)
+comb_cros_flat = concatenate([psI_flat, pdf1dN_flat], axis=-1)
 
-comb_cov_auto = concatenate([psNauto_cov,iscale*pdf1dN_cov],axis=-1)
-comb_cov_cros = concatenate([psN_cov,iscale*pdf1dN_cov],axis=-1)
+comb_cov_auto = concatenate([psNauto_cov,pdf1dN_cov],axis=-1)
+comb_cov_cros = concatenate([psN_cov,pdf1dN_cov],axis=-1)
 
 #covIcomb_auto = covIgen(comb_cov_auto)
 #covIcomb_cros = covIgen(comb_cov_cros)
@@ -159,8 +159,8 @@ fidu_params = array([0.1,0.3,2.1])
 
 #emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
              #for istats in [psIauto_flat, psI_flat, pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
-#emucomb_auto = lambda p: concatenate([emusingle[0](p),iscale*emusingle[2](p)])
-#emucomb_cross = lambda p: concatenate([emusingle[1](p),iscale*emusingle[2](p)])
+#emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[2](p)])
+#emucomb_cross = lambda p: concatenate([emusingle[1](p),emusingle[2](p)])
 #emulators= emusingle+[emucomb_auto,emucomb_cross]
 
 #emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
@@ -171,7 +171,7 @@ covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
 
 emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
              for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
-emucomb_auto = lambda p: concatenate([emusingle[0](p),iscale*emusingle[2](p)])
+emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
 emulators= emusingle+[emucomb_auto,]
 
 #########
