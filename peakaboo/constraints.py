@@ -15,8 +15,8 @@ Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 1000
 np.random.seed(10026)#
-iscale = 1e-14 ## rescale the PDF so it has similar magnitude as the power spectrum
-testfn = collapse+'scaled%s_p0fix_R_Nmin%s_Nchain%i_%s'%(iscale,Nmin,Nchain,Nk)#''#
+iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
+testfn = collapse+'diag_scaled%s_p0fix_R_Nmin%s_Nchain%i_%s'%(iscale,Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -72,12 +72,12 @@ pdf1dN = array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for
 #####################################
 
 covIgen = lambda psN_cov:mat(cov(psN_cov,rowvar=0)*12.25/2e4).I
-def covgen_diag (psN_cov): ##### test zero out off-diag terms
+def covIgen_diag (psN_cov, N=pdf1dN_flat.shape[-1]): ##### test zero out off-diag terms
     covfull = cov(psN_cov,rowvar=0)*12.25/2e4
-    ######### last 94 are pdf
+    ######### last ? are pdf
     covdiag = zeros(shape=covfull.shape)
-    covdiag[:-94,:-94]=1
-    covdiag[-94:,-94:]=1
+    covdiag[:-N,:-N]=1
+    covdiag[-N:,-N:]=1
     covdiag*=covfull
     return mat(covdiag).I
     
@@ -110,11 +110,12 @@ comb_cros_flat = concatenate([psI_flat, iscale*pdf1dN_flat], axis=-1)
 
 comb_cov_auto = concatenate([psNauto_cov,iscale*pdf1dN_cov],axis=-1)
 comb_cov_cros = concatenate([psN_cov,iscale*pdf1dN_cov],axis=-1)
-covIcomb_auto = covIgen(comb_cov_auto)
-covIcomb_cros = covIgen(comb_cov_cros)
 
-#covIcomb_auto = covgen_diag(comb_cov_auto)
-#covIcomb_cros = covgen_diag(comb_cov_cros)
+#covIcomb_auto = covIgen(comb_cov_auto)
+#covIcomb_cros = covIgen(comb_cov_cros)
+
+covIcomb_auto = covIgen_diag(comb_cov_auto)
+covIcomb_cros = covIgen_diag(comb_cov_cros)
 
 ###### PDF 2D
 #idxt2=where(pdf2dN[:,5]>Nmin)
