@@ -17,7 +17,7 @@ Nchain = 1000
 np.random.seed(10026)#
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
-testfn = collapse+'diag_scaled%s_p0fix_R_Nmin%s_Nchain%i_%s'%(iscale,Nmin,Nchain,Nk)#''#
+testfn = collapse+'lnlik2_scaled%s_p0fix_R_Nmin%s_Nchain%i_%s'%(iscale,Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -186,6 +186,11 @@ def lnprob(p,jjj):
     diff = emulators[jjj](p)-obss[jjj]
     return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
 
+def lnprob_sanity(p):
+    '''log likelihood of 
+    '''
+    return lnprob(p,0)+lnprob(p,1)
+
 #fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
 fn_arr = ['psAuto','pdf1d','combAuto']
 
@@ -228,7 +233,8 @@ if not plot_only:
 
     i=2
     print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity, args=[i,], pool=pool)
     pos, prob, state = sampler.run_mcmc(p0, 100)
     sampler.reset()
     sampler.run_mcmc(pos, Nchain)
