@@ -10,7 +10,7 @@ try:
     Nk = str(sys.argv[1])
 except Exception:
     pass
-
+plot_only = 1
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 50000
@@ -173,76 +173,77 @@ def lnprob(p,jjj):
     diff = emulators[jjj](p)-obss[jjj]
     return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
 
-pool=MPIPool()
-if not pool.is_master():
-    pool.wait()
-    sys.exit(0)
+if not plot_only:
+    pool=MPIPool()
+    if not pool.is_master():
+        pool.wait()
+        sys.exit(0)
 
-print Nk
+    print Nk
 
-nwalkers=544
-ndim=3
-#p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
-p0 = (array([ (rand(nwalkers, ndim) -0.5) * 6 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    nwalkers=544
+    ndim=3
+    #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    p0 = (array([ (rand(nwalkers, ndim) -0.5) * 6 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
 
-fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
-print 'rDH',rDH
-for i in range(len(covIs)):
+    fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
+    print 'rDH',rDH
+    for i in range(len(covIs)):
+        print fn_arr[i]
+        print 'cov shape',covIs[i].shape
+        print 'stats shape',[psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat][i].shape
+        
+    i=0
     print fn_arr[i]
-    print 'cov shape',covIs[i].shape
-    print 'stats shape',[psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat][i].shape
-    
-i=0
-print fn_arr[i]
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    pos, prob, state = sampler.run_mcmc(p0, 100)
+    sampler.reset()
+    sampler.run_mcmc(pos, Nchain)
+    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-i=1
-print fn_arr[i]
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    i=1
+    print fn_arr[i]
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    pos, prob, state = sampler.run_mcmc(p0, 100)
+    sampler.reset()
+    sampler.run_mcmc(pos, Nchain)
+    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-i=2
-print fn_arr[i]
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    i=2
+    print fn_arr[i]
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    pos, prob, state = sampler.run_mcmc(p0, 100)
+    sampler.reset()
+    sampler.run_mcmc(pos, Nchain)
+    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-i=3
-print fn_arr[i]
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    i=3
+    print fn_arr[i]
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    pos, prob, state = sampler.run_mcmc(p0, 100)
+    sampler.reset()
+    sampler.run_mcmc(pos, Nchain)
+    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-i=4
-print fn_arr[i]
-sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-pos, prob, state = sampler.run_mcmc(p0, 100)
-sampler.reset()
-sampler.run_mcmc(pos, Nchain)
-save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    i=4
+    print fn_arr[i]
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    pos, prob, state = sampler.run_mcmc(p0, 100)
+    sampler.reset()
+    sampler.run_mcmc(pos, Nchain)
+    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-#print 'PDF 2D'
-##p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
-#sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
-#pos, prob, state = sampler.run_mcmc(p0, 100)
-#sampler.reset()
-#sampler.run_mcmc(pos, Nchain*10)
-#save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    #print 'PDF 2D'
+    ##p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[2,], pool=pool)
+    #pos, prob, state = sampler.run_mcmc(p0, 100)
+    #sampler.reset()
+    #sampler.run_mcmc(pos, Nchain*10)
+    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-pool.close()
-print 'done done done'
+    pool.close()
+    print 'done done done'
 
 ########### plotting and uploading to dropbox 
 import corner
@@ -257,7 +258,7 @@ proxy=[plt.Rectangle((0,0),1,0.5,ec=icolor, fc = icolor) for icolor in colors]
 
 stats_dir = '/scratch/02977/jialiu/peakaboo/'
 #range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]
-def plotmc(chain, f=None, icolor='k',range=[[0,0.6],[0.25,0.35],[1.5,3.0]]):
+def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
     corner.corner(chain, labels=[r"$M_\nu$", r"$\Omega_m$", r"$A_s$"],
                   levels=[0.67,0.95],color=icolor,
                   range=range,truths=fidu_params, fig=f, 
@@ -272,7 +273,7 @@ for j in range(len(MC_arr)):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
 ax[0,1].legend(proxy,fn_arr,fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
-fnfig='contour_%s.jpg'%(testfn)
+fnfig='contour_%sb.jpg'%(testfn)
 fnpath=like_dir+'plots/'+fnfig
 savefig(fnpath)
 close()
