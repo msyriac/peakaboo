@@ -215,26 +215,26 @@ if not plot_only:
         #print 'cov shape',covIs[i].shape
         #print 'stats shape',[psIauto_flat,  pdf1dN_flat, comb_auto_flat][i].shape
         
-    i=0
-    print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    #i=0
+    #print fn_arr[i]
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #pos, prob, state = sampler.run_mcmc(p0, 100)
+    #sampler.reset()
+    #sampler.run_mcmc(pos, Nchain)
+    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-    i=1
-    print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    #i=1
+    #print fn_arr[i]
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #pos, prob, state = sampler.run_mcmc(p0, 100)
+    #sampler.reset()
+    #sampler.run_mcmc(pos, Nchain)
+    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
     i=2
     print fn_arr[i]
     #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity, args=[i,], pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity, pool=pool)
     pos, prob, state = sampler.run_mcmc(p0, 100)
     sampler.reset()
     sampler.run_mcmc(pos, Nchain)
