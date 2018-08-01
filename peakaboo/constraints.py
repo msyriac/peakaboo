@@ -11,7 +11,7 @@ try:
 except Exception:
     pass
 plot_only = 1
-Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=1 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 50000
 np.random.seed(10023)#
@@ -273,7 +273,7 @@ for j in range(len(MC_arr)):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
 ax[0,1].legend(proxy,fn_arr,fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
-fnfig='contour_%sb.jpg'%(testfn)
+fnfig='contour_%s.jpg'%(testfn)
 fnpath=like_dir+'plots/'+fnfig
 savefig(fnpath)
 close()
