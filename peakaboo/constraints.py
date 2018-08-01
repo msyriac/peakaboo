@@ -173,6 +173,8 @@ def lnprob(p,jjj):
     diff = emulators[jjj](p)-obss[jjj]
     return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
 
+fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
+
 if not plot_only:
     pool=MPIPool()
     if not pool.is_master():
@@ -186,8 +188,6 @@ if not plot_only:
     #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
     p0 = (array([ (rand(nwalkers, ndim) -0.5) * 6 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
 
-
-    fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
     print 'rDH',rDH
     for i in range(len(covIs)):
         print fn_arr[i]
