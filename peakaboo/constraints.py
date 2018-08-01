@@ -15,8 +15,8 @@ Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 1000
 np.random.seed(10026)#
-iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
-testfn = collapse+'scaled_p0fix_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+iscale = 1e-14 ## rescale the PDF so it has similar magnitude as the power spectrum
+testfn = collapse+'scaled%s_p0fix_R_Nmin%s_Nchain%i_%s'%(iscale,Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
