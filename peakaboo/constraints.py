@@ -11,7 +11,7 @@ try:
 except Exception:
     pass
 plot_only = 0
-Nmin=1 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 50000
 np.random.seed(10023)#
