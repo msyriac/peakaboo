@@ -13,8 +13,8 @@ except Exception:
 plot_only = 0
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 5000
-np.random.seed(10023)#
+Nchain = 50000
+np.random.seed(10026)#
 
 testfn = collapse+'widerInitGuess6_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
