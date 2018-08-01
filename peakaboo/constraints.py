@@ -151,21 +151,29 @@ fidu_params = array([0.1,0.3,2.1])
 #obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
 #covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
 
-obss = [psIauto_flat[1], psI_flat[1], pdf1dN_flat[1], comb_auto_flat[1],comb_cros_flat[1]]
-covIs = [covIpsNauto, covIpsN, covIpdf1dN, covIcomb_auto, covIcomb_cros]
-rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
+#obss = [psIauto_flat[1], psI_flat[1], pdf1dN_flat[1], comb_auto_flat[1],comb_cros_flat[1]]
+#covIs = [covIpsNauto, covIpsN, covIpdf1dN, covIcomb_auto, covIcomb_cros]
 
-emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
-             for istats in [psIauto_flat, psI_flat, pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
-emucomb_auto = lambda p: concatenate([emusingle[0](p),iscale*emusingle[2](p)])
-emucomb_cross = lambda p: concatenate([emusingle[1](p),iscale*emusingle[2](p)])
-emulators= emusingle+[emucomb_auto,emucomb_cross]
+#emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+             #for istats in [psIauto_flat, psI_flat, pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
+#emucomb_auto = lambda p: concatenate([emusingle[0](p),iscale*emusingle[2](p)])
+#emucomb_cross = lambda p: concatenate([emusingle[1](p),iscale*emusingle[2](p)])
+#emulators= emusingle+[emucomb_auto,emucomb_cross]
 
 #emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
 #             for istats in [psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]]
 
+obss = [psIauto_flat[1], pdf1dN_flat[1], comb_auto_flat[1]]
+covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
+
+emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+             for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
+emucomb_auto = lambda p: concatenate([emusingle[0](p),iscale*emusingle[2](p)])
+emulators= emusingle+[emucomb_auto,]
 
 #########
+rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
+
 def lnprob(p,jjj):
     '''log likelihood of 
     '''
@@ -174,7 +182,8 @@ def lnprob(p,jjj):
     diff = emulators[jjj](p)-obss[jjj]
     return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
 
-fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
+#fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
+fn_arr = ['psAuto','pdf1d','combAuto']
 
 if not plot_only:
     pool=MPIPool()
@@ -191,11 +200,11 @@ if not plot_only:
     p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
     p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
 
-    print 'rDH',rDH
-    for i in range(len(covIs)):
-        print fn_arr[i]
-        print 'cov shape',covIs[i].shape
-        print 'stats shape',[psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat][i].shape
+    #print 'rDH',rDH
+    #for i in range(len(covIs)):
+        #print fn_arr[i]
+        #print 'cov shape',covIs[i].shape
+        #print 'stats shape',[psIauto_flat,  pdf1dN_flat, comb_auto_flat][i].shape
         
     i=0
     print fn_arr[i]
@@ -221,21 +230,21 @@ if not plot_only:
     sampler.run_mcmc(pos, Nchain)
     save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-    i=3
-    print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    #i=3
+    #print fn_arr[i]
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #pos, prob, state = sampler.run_mcmc(p0, 100)
+    #sampler.reset()
+    #sampler.run_mcmc(pos, Nchain)
+    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-    i=4
-    print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    #i=4
+    #print fn_arr[i]
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #pos, prob, state = sampler.run_mcmc(p0, 100)
+    #sampler.reset()
+    #sampler.run_mcmc(pos, Nchain)
+    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
     #print 'PDF 2D'
     ##p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
@@ -274,7 +283,7 @@ MC_arr = [load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
 f,ax=subplots(3,3,figsize=(6,6))
 for j in range(len(MC_arr)):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
-ax[0,1].legend(proxy,fn_arr,fontsize=8)
+ax[0,1].legend(proxy[:len(fn_arr)],fn_arr,fontsize=8)
 ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
 fnfig='contour_%s.jpg'%(testfn)
 fnpath=like_dir+'plots/'+fnfig
