@@ -10,7 +10,7 @@ try:
     Nk = str(sys.argv[1])
 except Exception:
     pass
-plot_only = 1
+plot_only = 0
 Nmin=1 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 50000
