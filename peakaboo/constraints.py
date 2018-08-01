@@ -13,10 +13,10 @@ except Exception:
 plot_only = 0
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 50000
+Nchain = 5000
 np.random.seed(10026)#
 
-testfn = collapse+'widerInitGuess6_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'p0fix_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -186,7 +186,9 @@ if not plot_only:
     nwalkers=544
     ndim=3
     #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
-    p0 = (array([ (rand(nwalkers, ndim) -0.5) * 6 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    #p0 = (array([ (rand(nwalkers, ndim) -0.5) * 6 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
+    p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
 
     print 'rDH',rDH
     for i in range(len(covIs)):
