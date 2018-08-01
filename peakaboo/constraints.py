@@ -71,7 +71,7 @@ pdf1dN = iscale*array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,N
 ###### covariances stats ############
 #####################################
 
-covIgen = lambda psN_cov:mat(cov(psN_cov,rowvar=0)*12.25/2e4).I
+covIgen = lambda ips_cov:mat(cov(ips_cov,rowvar=0)*12.25/2e4).I
     
 ##### PS shape:(101,100)
 psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
