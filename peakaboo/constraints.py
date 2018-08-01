@@ -78,7 +78,7 @@ psI_flat = swapaxes(psI,0,1).reshape(101,-1)
 psIauto_flat = swapaxes(psIauto,0,1).reshape(101,-1) 
 #psI1k_flat = array([swapaxes(ips,0,1).reshape(101,-1) for ips in psI1ks])
 
-psN_cov = iscale*swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
+psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
                            for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
 covIpsN = covIgen(psN_cov)
 
@@ -88,12 +88,12 @@ psNauto_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{0}.npy'.format
 covIpsNauto = covIgen(psNauto_cov)
 
 ###### PDF 1D
-idxt=where(pdf1dN[:,5]>Nmin)
+idxt=where(pdf1dN[:,1]>Nmin*iscale)
 
 pdf1dN_flat= swapaxes(pdf1dN[idxt[0],:,idxt[1]],0,1).reshape(101,-1) 
 ##pdf1dN1k_flat = array([swapaxes(ips[idxt[0],:,idxt[1]],0,1).reshape(101,-1) for ips in pdf1dN1ks])
 
-pdf1dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format(iz)) for iz in z_arr])[idxt[0],:,idxt[1]],0,1).reshape(10000,-1)
+pdf1dN_cov = iscale*swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format(iz)) for iz in z_arr])[idxt[0],:,idxt[1]],0,1).reshape(10000,-1)
 covIpdf1dN = covIgen(pdf1dN_cov)
 
 ###### combined ps + pdf, for both auto and cross
