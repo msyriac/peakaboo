@@ -72,14 +72,6 @@ pdf1dN = array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for
 #####################################
 
 covIgen = lambda psN_cov:mat(cov(psN_cov,rowvar=0)*12.25/2e4).I
-def covIgen_diag (psN_cov, N=pdf1dN_flat.shape[-1]): ##### test zero out off-diag terms
-    covfull = cov(psN_cov,rowvar=0)*12.25/2e4
-    ######### last ? are pdf
-    covdiag = zeros(shape=covfull.shape)
-    covdiag[:-N,:-N]=1
-    covdiag[-N:,-N:]=1
-    covdiag*=covfull
-    return mat(covdiag).I
     
 ##### PS shape:(101,100)
 psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
@@ -105,6 +97,17 @@ pdf1dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_gal_pdf_z{0}_sg1.0.npy'.format
 covIpdf1dN = covIgen(pdf1dN_cov)
 
 ###### combined ps + pdf, for both auto and cross
+
+def covIgen_diag (psN_cov, N=pdf1dN_flat.shape[-1]): ##### test zero out off-diag terms
+    covfull = cov(psN_cov,rowvar=0)*12.25/2e4
+    ######### last ? are pdf
+    covdiag = zeros(shape=covfull.shape)
+    covdiag[:-N,:-N]=1
+    covdiag[-N:,-N:]=1
+    covdiag*=covfull
+    return mat(covdiag).I
+
+
 comb_auto_flat = concatenate([psIauto_flat, iscale*pdf1dN_flat], axis=-1)
 comb_cros_flat = concatenate([psI_flat, iscale*pdf1dN_flat], axis=-1)
 
