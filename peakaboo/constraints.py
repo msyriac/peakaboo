@@ -262,10 +262,10 @@ stats_dir = '/scratch/02977/jialiu/peakaboo/'
 #range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]
 def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
     corner.corner(chain, labels=[r"$M_\nu$", r"$\Omega_m$", r"$A_s$"],
-                  levels=[0.67,0.95],color=icolor,
+                  levels=[0.95,],color=icolor,
                   range=range,truths=fidu_params, fig=f, 
                   plot_datapoints=0, plot_density=0,
-                  truth_color="k",fill_contours=1)#
+                  truth_color="k",fill_contours=0)#0.67,
 
 MC_arr = [load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
                fn_arr]
