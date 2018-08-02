@@ -15,9 +15,9 @@ Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 1000
 np.random.seed(10026)#
-iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
+iscale = 1.0#1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
-testfn = collapse+'p0verywide_scaled%s_R_Nmin%s_Nchain%i_%s'%(iscale,Nmin,Nchain,Nk)#''#
+testfn = collapse+'loglik2_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -178,7 +178,10 @@ emulators= emusingle+[emucomb_auto,]
 #########
 rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
 
-def lnprob(p,jjj):
+############# likelihood #######
+from scipy.misc import factorial
+
+def lnprob_gaussian(p,jjj):
     '''log likelihood of 
     '''
     if p[0]<0: ####### force neutrino mass to be positive
@@ -186,10 +189,19 @@ def lnprob(p,jjj):
     diff = emulators[jjj](p)-obss[jjj]
     return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
 
-def lnprob_sanity(p):
+def lnprob_poisson(p,jjj=1):
+    if p[0]<0: ####### force neutrino mass to be positive
+        return -np.inf
+    mu = emulators[jjj](p)
+    n = obss[jjj]
+    return n*log(mu)-mu-log(factorial(n))
+
+def lnprob_sanity(p,jjj=0):
     '''log likelihood of 
     '''
-    return lnprob(p,0)+lnprob(p,1)
+    return lnprob_gaussian(p,0)+lnprob_poisson(p,1)
+
+lnprob = lnprob_gaussian
 
 #fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
 fn_arr = ['psAuto','pdf1d','combAuto']
@@ -226,7 +238,8 @@ if not plot_only:
 
     i=1
     print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
     pos, prob, state = sampler.run_mcmc(p0, 100)
     sampler.reset()
     sampler.run_mcmc(pos, Nchain)
@@ -234,8 +247,8 @@ if not plot_only:
 
     i=2
     print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity, pool=pool)
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity,args=[i,], pool=pool)
     pos, prob, state = sampler.run_mcmc(p0, 100)
     sampler.reset()
     sampler.run_mcmc(pos, Nchain)
