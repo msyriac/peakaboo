@@ -17,7 +17,7 @@ Nchain = 1000
 np.random.seed(10026)#
 iscale = 1.0#1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
-testfn = collapse+'loglik2_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'Possloglik2_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
