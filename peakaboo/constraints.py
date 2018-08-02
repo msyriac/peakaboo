@@ -194,7 +194,7 @@ def lnprob_poisson(p,jjj=1):
         return -np.inf
     mu = emulators[jjj](p)
     n = obss[jjj]
-    return n*log(mu)-mu-log(factorial(n))
+    return sum(n*log(mu)-mu-log(factorial(n)))
 
 def lnprob_sanity(p,jjj=0):
     '''log likelihood of 
