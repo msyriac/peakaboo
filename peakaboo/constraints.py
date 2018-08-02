@@ -17,7 +17,7 @@ Nchain = 1000
 np.random.seed(10026)#
 iscale = 1.0#1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
-testfn = collapse+'Possloglik2_tightball_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -238,8 +238,8 @@ if not plot_only:
 
     i=1
     print fn_arr[i]
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
     pos, prob, state = sampler.run_mcmc(p0, 100)
     sampler.reset()
     sampler.run_mcmc(pos, Nchain)
