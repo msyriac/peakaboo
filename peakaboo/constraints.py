@@ -13,7 +13,7 @@ except Exception:
 plot_only = 0
 Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 5000
+Nchain = 1000
 np.random.seed(10026)#
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
