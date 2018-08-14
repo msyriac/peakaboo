@@ -11,9 +11,9 @@ try:
 except Exception:
     pass
 plot_only = 0
-Nmin=50 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 1000
+Nchain = 500
 np.random.seed(10026)#
 iscale = 1.0#1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
@@ -175,6 +175,9 @@ emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], functio
 emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
 emulators= emusingle+[emucomb_auto,]
 
+#emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+            #for istats in [psIauto_flat, pdf1dN_flat, comb_auto_flat]]
+
 #########
 rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ## 
 
@@ -250,8 +253,8 @@ if not plot_only:
 
     i=2
     print fn_arr[i]
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity,args=[i,], pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity,args=[i,], pool=pool)
     pos, prob, state = sampler.run_mcmc(p0, 100)
     sampler.reset()
     sampler.run_mcmc(pos, Nchain)
