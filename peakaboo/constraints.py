@@ -16,8 +16,9 @@ collapse=''#'collapsed'#
 Nchain = 500
 np.random.seed(10026)#
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
+
+testfn = collapse+'R_Nmin%s_rescale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 Nmin*=iscale
-testfn = collapse+'R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
