@@ -10,7 +10,8 @@ Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 Nchain = 500
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 
-Nmin_scale_arr = [[iNmin, iscale] for iNmin in (5,10,100,500) for iscale in (1e-10,  1e-12, 1e-13, 1)]
+Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-12,  1e-13, 1, 1e-10) 
+                  for iNmin in (5,10,20, 100,500) ]
 try:
     Nk = str(sys.argv[1])
     Nmin,iscale=Nmin_scale_arr [int(sys.argv[2])]
