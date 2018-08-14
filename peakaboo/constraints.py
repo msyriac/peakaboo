@@ -11,7 +11,7 @@ try:
 except Exception:
     pass
 plot_only = 0
-Nmin=50 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=100 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 500
 np.random.seed(10026)#
@@ -234,13 +234,13 @@ if not plot_only:
         #print 'cov shape',covIs[i].shape
         #print 'stats shape',[psIauto_flat,  pdf1dN_flat, comb_auto_flat][i].shape
         
-    i=0
-    print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    #i=0
+    #print fn_arr[i]
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #pos, prob, state = sampler.run_mcmc(p0, 100)
+    #sampler.reset()
+    #sampler.run_mcmc(pos, Nchain)
+    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
     i=1
     print fn_arr[i]
@@ -307,8 +307,9 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
                   plot_datapoints=0, plot_density=0,
                   truth_color="k",fill_contours=0)#0.67,
 
-MC_arr = [load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
-               fn_arr]
+MC_ps = [load(like_dir+'MC_ps_base.npy'),]
+MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
+               fn_arr[1:]]
 
 f,ax=subplots(3,3,figsize=(6,6))
 for j in range(len(MC_arr)):
