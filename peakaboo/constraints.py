@@ -11,11 +11,11 @@ try:
 except Exception:
     pass
 plot_only = 0
-Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=50 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
 Nchain = 500
 np.random.seed(10026)#
-iscale = 1.0#1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
+iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
 testfn = collapse+'R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 
