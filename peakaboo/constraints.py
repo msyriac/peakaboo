@@ -11,9 +11,9 @@ try:
 except Exception:
     pass
 plot_only = 0
-Nmin=50 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 collapse=''#'collapsed'#
-Nchain = 10000
+Nchain = 1000
 np.random.seed(10026)#
 iscale = 1.0#1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 Nmin*=iscale
@@ -217,10 +217,13 @@ if not plot_only:
     nwalkers=544
     ndim=3
     #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
-    p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
-    #p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
+    ########### tight ball
+    #p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    ########## wide
+    p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
+    ########## very wide
     #p0_ranges=array([[-0.2,0.8],[0.2,0.4],[1.3,3.0]])
-    #p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
+    p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
 
     #print 'rDH',rDH
     #for i in range(len(covIs)):
