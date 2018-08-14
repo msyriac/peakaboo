@@ -21,7 +21,7 @@ plot_only = 0
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'R_Nmin%s_rescale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug14_R_Nmin%s_rescale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 Nmin*=iscale
 
 z_arr = arange(0.5,3,0.5)
