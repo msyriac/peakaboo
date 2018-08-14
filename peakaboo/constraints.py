@@ -219,7 +219,7 @@ if not plot_only:
         pool.wait()
         sys.exit(0)
 
-    print Nk
+    print Nk, Nmin, iscale
 
     nwalkers=544
     ndim=3
