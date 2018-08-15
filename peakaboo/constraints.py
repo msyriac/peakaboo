@@ -10,7 +10,7 @@ Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
 Nchain = 500
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 
-Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-12, 1, 1e-10) 
+Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-14, 1e-12, 1, 1e-10) 
                  for iNmin in (1000, 1500, 2000, 3000, 4000, 5000) ]
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-12,  1e-13, 1, 1e-10) 
@@ -24,7 +24,7 @@ plot_only = 0
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug14_R_Nmin%s_rescale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug15_R_Nmin%s_rescale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 Nmin*=iscale
 
 z_arr = arange(0.5,3,0.5)
