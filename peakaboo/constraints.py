@@ -8,16 +8,16 @@ import emcee
 tightball = 0
 add_2dpdf = 0
 plot_only = 0
-
+single_z = 1
 
 Nk='10k' # '5ka', '5kb'
 Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
 Nchain = 500
-iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
+iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
-                for iNmin in (500, 1000, 5000) ]
+                for iNmin in (500, 1000, 5000, 100) ]
 
 try:
     Nk = str(sys.argv[1])
@@ -28,12 +28,11 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug16_fullcov_wideP0_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug16_singlez_fullcov_%s_Nmin%s_iscale%s_Nchain%i_%s'%(['wideP0','tightball'][tightball],Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
 z_arr = arange(0.5,3,0.5)
-Nz = len(z_arr)
 
 #####################################
 ######## set up folders #############
@@ -42,16 +41,22 @@ Nz = len(z_arr)
 ######## stampede2
 like_dir='/scratch/02977/jialiu/peakaboo/likelihood_tomo/'
 stats_dir = '/scratch/02977/jialiu/peakaboo/stats_tomo/'
+
+if single_z:
+    z_arr = [1.0,]
+    like_dir='/scratch/02977/jialiu/peakaboo/likelihood_z1/'
+    stats_dir = '/scratch/02977/jialiu/peakaboo/stats_z1/'
+
+Nz = len(z_arr)
+eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
+#eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
 ebcov_dir = stats_dir+'Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0/'
 params = genfromtxt('/scratch/02977/jialiu/peakaboo/cosmo_params_all.txt',usecols=[2,3,4])
-
 
 ######### local
 #stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
 #ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
 
-eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
-eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
 
 #####################################
 ##### initiate avg statistics #######
@@ -252,22 +257,22 @@ if not plot_only:
         #print 'cov shape',covIs[i].shape
         #print 'stats shape',[psIauto_flat,  pdf1dN_flat, comb_auto_flat][i].shape
         
-    #i=0
-    #print fn_arr[i]
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    #pos, prob, state = sampler.run_mcmc(p0, 100)
-    #sampler.reset()
-    #sampler.run_mcmc(pos, Nchain)
-    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    i=0
+    print fn_arr[i]
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    pos, prob, state = sampler.run_mcmc(p0, 100)
+    sampler.reset()
+    sampler.run_mcmc(pos, Nchain)
+    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-    #i=1
-    #print fn_arr[i]
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    ##sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
-    #pos, prob, state = sampler.run_mcmc(p0, 100)
-    #sampler.reset()
-    #sampler.run_mcmc(pos, Nchain)
-    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    i=1
+    print fn_arr[i]
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
+    pos, prob, state = sampler.run_mcmc(p0, 100)
+    sampler.reset()
+    sampler.run_mcmc(pos, Nchain)
+    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
     i=2
     print fn_arr[i]
@@ -325,11 +330,15 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
                   plot_datapoints=0, plot_density=0,
                   truth_color="k",fill_contours=0)#0.67,
 
-MC_ps = [load(like_dir+'MC_ps_base.npy'),]
-MC_arr = MC_ps + [load(like_dir+'MC_pdf1d_Aug16_tightball_R_Nmin500_Nchain500_10k.npy'),]
-#MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
-#               fn_arr[1:]]
-MC_arr = MC_arr + [load(like_dir+'MC_%s_%s.npy'%(fn_arr[2],testfn)),]
+#MC_ps = [load(like_dir+'MC_ps_base.npy'),]
+##MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
+##               fn_arr[1:]]
+
+#MC_arr = MC_ps + [load(like_dir+'MC_pdf1d_Aug16_tightball_R_Nmin500_Nchain500_10k.npy'),]
+#MC_arr = MC_arr + [load(like_dir+'MC_%s_%s.npy'%(fn_arr[2],testfn)),]
+
+MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
+               fn_arr]
 
 f,ax=subplots(3,3,figsize=(6,6))
 for j in range(len(MC_arr)):
