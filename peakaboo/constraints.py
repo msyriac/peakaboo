@@ -6,25 +6,26 @@ import sys, itertools
 import emcee
 
 Nk='10k' # '5ka', '5kb'
-Nmin=5 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
+Nmin2=20
 Nchain = 500
-iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
+iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
-Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-14, 1e-12, 1, 1e-10) 
-                 for iNmin in (1000, 1500, 2000, 3000, 4000, 5000) ]
+#Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-14, 1e-12, 1, 1e-10) 
+#                 for iNmin in (1000, 1500, 2000, 3000, 4000, 5000) ]
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-12,  1e-13, 1, 1e-10) 
 #                  for iNmin in (5,10,20, 100,500) ]
 try:
     Nk = str(sys.argv[1])
-    Nmin,iscale=Nmin_scale_arr [int(sys.argv[2])]
+    #Nmin,iscale=Nmin_scale_arr [int(sys.argv[2])]
 except Exception:
     pass
 plot_only = 0
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug15_R_Nmin%s_rescale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug16_tightball_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
 Nmin*=iscale
 
 z_arr = arange(0.5,3,0.5)
@@ -67,14 +68,14 @@ pdf1dN = iscale*array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,N
                  #for ik in range(10)])
 
 #### 2d PDF shape:(10, 101, 27, 27)
-#pdf2dN = array( [load(eb_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(z_arr[i],z_arr[j],Nk)) 
-                #for i in range(Nz) for j in range(i+1,Nz)])
+pdf2dN = array( [load(eb_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_{2}.npy'.format(z_arr[i],z_arr[j],Nk)) 
+                for i in range(Nz) for j in range(i+1,Nz)])
 ##pdf2dN1ks = array( [[load(eb1k_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0_1k{2}.npy'.format(z_arr[i],z_arr[j], ik)) 
                 ##for i in range(Nz) for j in range(i+1,Nz)] for ik in range(10)])
 
 ########### test collapsed 1d PDF from 2d shape:(5, 101, 27), mean
-#if collapse=='collapsed':
-    #pdf1dNb = array([sum(pdf2dN[i],axis=-1) for i in [0,4,7,9] ] + [sum(pdf2dN[-1],axis=-2)])
+if collapse=='collapsed':
+    pdf1dNb = array([sum(pdf2dN[i],axis=-1) for i in [0,4,7,9] ] + [sum(pdf2dN[-1],axis=-2)])
 
 #####################################
 ###### covariances stats ############
@@ -130,22 +131,22 @@ covIcomb_auto = covIgen_diag(comb_cov_auto)
 covIcomb_cros = covIgen_diag(comb_cov_cros)
 
 ###### PDF 2D
-#idxt2=where(pdf2dN[:,5]>Nmin)
+idxt2=where(pdf2dN[:,5]>Nmin2)
 
-#pdf2dN_flat= swapaxes(pdf2dN,0,1)[:,idxt2[0],idxt2[1],idxt2[2]]
-##pdf2dN1k_flat= array([swapaxes(ips,0,1)[:,idxt2[0],idxt2[1],idxt2[2]] for ips in pdf2dN1ks])
+pdf2dN_flat= swapaxes(pdf2dN,0,1)[:,idxt2[0],idxt2[1],idxt2[2]]
+#pdf2dN1k_flat= array([swapaxes(ips,0,1)[:,idxt2[0],idxt2[1],idxt2[2]] for ips in pdf2dN1ks])
 
-#pdf2dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[j]))
-                             #for i in range(Nz) for j in range(i+1,Nz)]),0,1)[:,idxt2[0],idxt2[1],idxt2[2]].reshape(10000,-1)
+pdf2dN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[j]))
+                             for i in range(Nz) for j in range(i+1,Nz)]),0,1)[:,idxt2[0],idxt2[1],idxt2[2]].reshape(10000,-1)
 
-#covpdf2dN = cov(pdf2dN_cov,rowvar=0)*12.25/2e4
-#covIpdf2dN = mat(covpdf2dN).I
+covpdf2dN = cov(pdf2dN_cov,rowvar=0)*12.25/2e4
+covIpdf2dN = mat(covpdf2dN).I
 
-################ test collapsed 1d PDF from 2d, covariance
-#if collapse=='collapsed':
-    #pdf1dN_cov = array([sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[i+1])),axis=-1) for i in range(4) ] + [sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z2.0_z2.5_sg1.0.npy'),axis=-2)])[idxt[0],:,idxt[1]].T
-    #covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
-    #covIpdf1dN = mat(covpdf1dN).I
+############### test collapsed 1d PDF from 2d, covariance
+if collapse=='collapsed':
+    pdf1dN_cov = array([sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z{0}_z{1}_sg1.0.npy'.format(z_arr[i],z_arr[i+1])),axis=-1) for i in range(4) ] + [sum(load(ebcov_dir+'ALL_galXgal_2dpdf_z2.0_z2.5_sg1.0.npy'),axis=-2)])[idxt[0],:,idxt[1]].T
+    covpdf1dN = cov(pdf1dN_cov,rowvar=0)*12.25/2e4
+    covIpdf1dN = mat(covpdf1dN).I
 
 
 #####################################
@@ -229,12 +230,12 @@ if not plot_only:
     ndim=3
     #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
     ########### tight ball
-    #p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
     ########## wide
-    p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
-    ########## very wide
-    #p0_ranges=array([[-0.2,0.8],[0.2,0.4],[1.3,3.0]])
-    p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
+    #p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
+    ########### very wide
+    #####p0_ranges=array([[-0.2,0.8],[0.2,0.4],[1.3,3.0]])
+    #p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
 
     #print 'rDH',rDH
     #for i in range(len(covIs)):
