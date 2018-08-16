@@ -11,17 +11,16 @@ Nmin2=20
 Nchain = 500
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 add_2dpdf = 0
-#Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-14, 1e-12, 1, 1e-10) 
-#                 for iNmin in (1000, 1500, 2000, 3000, 4000, 5000) ]
+plot_only = 1
+Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14, 1e-10) 
+                for iNmin in (500, 1000, 200, 400, 2000, 5000) ]
 
-#Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-12,  1e-13, 1, 1e-10) 
-#                  for iNmin in (5,10,20, 100,500) ]
 try:
     Nk = str(sys.argv[1])
-    #Nmin,iscale=Nmin_scale_arr [int(sys.argv[2])]
+    Nmin,iscale=Nmin_scale_arr [int(sys.argv[2])]
 except Exception:
     pass
-plot_only = 0
+
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
@@ -220,7 +219,7 @@ def lnprob_sanity(p,jjj=0):
 lnprob = lnprob_gaussian
 
 #fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
-fn_arr = ['psAuto','pdf1d','combAuto','pdf2d','comb2d']
+fn_arr = ['psAuto','pdf1d','combAuto']#,'pdf2d','comb2d']
 
 if not plot_only:
     pool=MPIPool()
