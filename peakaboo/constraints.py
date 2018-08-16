@@ -4,6 +4,7 @@ import WLanalysis
 from emcee.utils import MPIPool 
 import sys, itertools
 import emcee
+import os
 
 tightball = 0
 add_2dpdf = 0
