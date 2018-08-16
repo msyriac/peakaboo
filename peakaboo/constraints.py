@@ -8,7 +8,7 @@ import os
 
 tightball = 0
 add_2dpdf = 0
-plot_only = 1
+plot_only = 0
 single_z = 1
 
 Nk='10k' # '5ka', '5kb'
