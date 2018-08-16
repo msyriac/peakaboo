@@ -259,29 +259,33 @@ if not plot_only:
         
     i=0
     print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
+    if not os.path.isfile(ifn):
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        pos, prob, state = sampler.run_mcmc(p0, 100)
+        sampler.reset()
+        sampler.run_mcmc(pos, Nchain)
+        save(ifn, sampler.flatchain)
 
     i=1
     print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
+    if not os.path.isfile(ifn):
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        pos, prob, state = sampler.run_mcmc(p0, 100)
+        sampler.reset()
+        sampler.run_mcmc(pos, Nchain)
+        save(ifn, sampler.flatchain)
 
     i=2
     print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_sanity,args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
+    if not os.path.isfile(ifn):
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        pos, prob, state = sampler.run_mcmc(p0, 100)
+        sampler.reset()
+        sampler.run_mcmc(pos, Nchain)
+        save(ifn, sampler.flatchain)
 
     #i=3
     #print fn_arr[i]
