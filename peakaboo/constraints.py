@@ -25,7 +25,7 @@ plot_only = 0
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug16_fullcov_tightball_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug16_fullcov_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
@@ -234,12 +234,12 @@ if not plot_only:
     ndim=3
     #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
     ########### tight ball
-    p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    #p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
     ########## wide
-    #p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
+    p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
     ########### very wide
     #####p0_ranges=array([[-0.2,0.8],[0.2,0.4],[1.3,3.0]])
-    #p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
+    p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
 
     #print 'rDH',rDH
     #for i in range(len(covIs)):
