@@ -5,15 +5,19 @@ from emcee.utils import MPIPool
 import sys, itertools
 import emcee
 
+tightball = 1
+add_2dpdf = 0
+plot_only = 0
+
+
 Nk='10k' # '5ka', '5kb'
 Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
 Nchain = 500
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
-add_2dpdf = 0
-plot_only = 1
-#Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14, 1e-10) 
-                #for iNmin in (500, 1000, 200, 400, 2000, 5000) ]
+
+Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
+                for iNmin in (500, 5, 1000, 5000) ]
 
 try:
     Nk = str(sys.argv[1])
@@ -24,7 +28,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug16_fullcov_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug16_fullcov_tightball_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
@@ -234,14 +238,16 @@ if not plot_only:
     nwalkers=544
     ndim=3
     #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
-    ########### tight ball
-    #p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    
     ########## wide
     p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
     ########### very wide
     #####p0_ranges=array([[-0.2,0.8],[0.2,0.4],[1.3,3.0]])
     p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
-
+    ########### tight ball
+    if tightball:
+        p0 = (array([ (rand(nwalkers, ndim) -0.5) * 1e-2 * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
+    
     #print 'rDH',rDH
     #for i in range(len(covIs)):
         #print fn_arr[i]
@@ -256,14 +262,14 @@ if not plot_only:
     #sampler.run_mcmc(pos, Nchain)
     #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
-    i=1
-    print fn_arr[i]
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
-    pos, prob, state = sampler.run_mcmc(p0, 100)
-    sampler.reset()
-    sampler.run_mcmc(pos, Nchain)
-    save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    #i=1
+    #print fn_arr[i]
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+    ##sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob_poisson, args=[i,], pool=pool)
+    #pos, prob, state = sampler.run_mcmc(p0, 100)
+    #sampler.reset()
+    #sampler.run_mcmc(pos, Nchain)
+    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
     i=2
     print fn_arr[i]
@@ -322,9 +328,10 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
                   truth_color="k",fill_contours=0)#0.67,
 
 MC_ps = [load(like_dir+'MC_ps_base.npy'),]
-
-MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
-               fn_arr[1:]]
+MC_arr = MC_ps + [load(like_dir+'MC_combAuto_Aug16_tightball_R_Nmin500_Nchain500_10k.npy'),]
+#MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
+#               fn_arr[1:]]
+MC_arr = MC_arr + [load(like_dir+'MC_%s_%s.npy'%(fn_arr[2],testfn)),]
 
 f,ax=subplots(3,3,figsize=(6,6))
 for j in range(len(MC_arr)):
