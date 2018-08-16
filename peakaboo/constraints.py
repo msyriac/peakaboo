@@ -12,8 +12,8 @@ Nchain = 500
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 add_2dpdf = 0
 plot_only = 1
-Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14, 1e-10) 
-                for iNmin in (500, 1000, 200, 400, 2000, 5000) ]
+#Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14, 1e-10) 
+                #for iNmin in (500, 1000, 200, 400, 2000, 5000) ]
 
 try:
     Nk = str(sys.argv[1])
@@ -27,6 +27,8 @@ np.random.seed(10026)#
 testfn = collapse+'Aug16_fullcov_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
+
+print testfn
 
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
@@ -320,10 +322,7 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
                   truth_color="k",fill_contours=0)#0.67,
 
 MC_ps = [load(like_dir+'MC_ps_base.npy'),]
-#if add_2dpdf:
-    #MC_arr = MC_ps + [load(like_dir+'MC_%s_%s.npy'%(ips,testfn0)) for ips in
-               #fn_arr[1:-1]]
-#else:
+
 MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
                fn_arr[1:]]
 
