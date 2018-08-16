@@ -326,7 +326,7 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
                   truth_color="k",fill_contours=0)#0.67,
 
 MC_ps = [load(like_dir+'MC_ps_base.npy'),]
-MC_arr = MC_ps + [load(like_dir+'MC_combAuto_Aug16_tightball_R_Nmin500_Nchain500_10k.npy'),]
+MC_arr = MC_ps + [load(like_dir+'MC_pdf1d_Aug16_tightball_R_Nmin500_Nchain500_10k.npy'),]
 #MC_arr = MC_ps+[load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
 #               fn_arr[1:]]
 MC_arr = MC_arr + [load(like_dir+'MC_%s_%s.npy'%(fn_arr[2],testfn)),]
