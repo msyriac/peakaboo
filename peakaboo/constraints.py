@@ -5,7 +5,7 @@ from emcee.utils import MPIPool
 import sys, itertools
 import emcee
 
-tightball = 1
+tightball = 0
 add_2dpdf = 0
 plot_only = 0
 
@@ -17,7 +17,7 @@ Nchain = 500
 iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
-                for iNmin in (500, 5, 1000, 5000) ]
+                for iNmin in (500, 1000, 5000) ]
 
 try:
     Nk = str(sys.argv[1])
@@ -28,7 +28,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug16_fullcov_tightball_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug16_fullcov_wideP0_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
