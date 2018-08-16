@@ -32,8 +32,6 @@ testfn = collapse+'Aug16_fullcov_tightball_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,is
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
-print testfn
-
 z_arr = arange(0.5,3,0.5)
 Nz = len(z_arr)
 
@@ -233,7 +231,7 @@ if not plot_only:
         pool.wait()
         sys.exit(0)
 
-    print Nk, int(Nmin/iscale), iscale
+    print Nk, int(Nmin/iscale), iscale, testfn
 
     nwalkers=544
     ndim=3
