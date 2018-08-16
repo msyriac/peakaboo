@@ -9,7 +9,7 @@ Nk='10k' # '5ka', '5kb'
 Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
 Nchain = 500
-iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
+iscale = 1e-12 ## rescale the PDF so it has similar magnitude as the power spectrum
 add_2dpdf = 0
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1e-14, 1e-12, 1, 1e-10) 
 #                 for iNmin in (1000, 1500, 2000, 3000, 4000, 5000) ]
@@ -25,7 +25,7 @@ plot_only = 0
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug16_fullcov_tightball_R_Nmin%s_Nchain%i_%s'%(Nmin,Nchain,Nk)#''#
+testfn = collapse+'Aug16_fullcov_tightball_Nmin%s_iscale%s_Nchain%i_%s'%(Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
