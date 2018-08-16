@@ -8,7 +8,7 @@ import os
 
 tightball = 0
 add_2dpdf = 0
-plot_only = 0
+plot_only = 1
 single_z = 1
 
 Nk='10k' # '5ka', '5kb'
@@ -342,8 +342,7 @@ def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
 #MC_arr = MC_ps + [load(like_dir+'MC_pdf1d_Aug16_tightball_R_Nmin500_Nchain500_10k.npy'),]
 #MC_arr = MC_arr + [load(like_dir+'MC_%s_%s.npy'%(fn_arr[2],testfn)),]
 
-MC_arr = [load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in
-               fn_arr]
+MC_arr = [load(like_dir+'MC_%s_%s.npy'%(ips,testfn)) for ips in fn_arr]
 
 f,ax=subplots(3,3,figsize=(6,6))
 for j in range(len(MC_arr)):
