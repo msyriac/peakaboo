@@ -9,27 +9,30 @@ import os
 tightball = 0
 add_2dpdf = 0
 plot_only = 0
-single_z = 1
+single_z = 0
 
+upload_MCMC=1
 Nk='10k' # '5ka', '5kb'
-Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=1000 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 500
+Nchain = 3000
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
-Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
-                for iNmin in (500, 1000, 5000, 100) ]
+#Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
+                #for iNmin in (500, 1000, 5000, 100) ]
 
 try:
     Nk = str(sys.argv[1])
-    Nmin,iscale=Nmin_scale_arr [int(sys.argv[2])]
+    single_z=int(sys.argv[2])
+    #Nmin,iscale=Nmin_scale_arr [int(sys.argv[2])]
+    
 except Exception:
     pass
 
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug16_singlez_fullcov_%s_Nmin%s_iscale%s_Nchain%i_%s'%(['wideP0','tightball'][tightball],Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug17_%s_fullcov_%s_Nmin%s_iscale%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
@@ -357,3 +360,7 @@ close()
 print 'uploading to dropbox'
 import os
 os.system('/work/02977/jialiu/Dropbox-Uploader/dropbox_uploader.sh upload %s %s'%(fnpath,fnfig))
+if upload_MCMC:
+    for ips in fn_arr:
+        ifn='MC_%s_%s.npy'%(ips,testfn)
+        os.system('/work/02977/jialiu/Dropbox-Uploader/dropbox_uploader.sh upload %s %s'%(like_dir+ifn,ifn))
