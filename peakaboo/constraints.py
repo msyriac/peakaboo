@@ -7,15 +7,15 @@ import emcee
 import os
 
 tightball = 0
-add_2dpdf = 0
+add_2dpdf = 1
 plot_only = 0
 single_z = 0
 
-upload_MCMC=1
+upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
-Nmin=1000 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 3000
+Nchain = 500
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
@@ -32,7 +32,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug17_%s_fullcov_%s_Nmin%s_iscale%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Aug22_%s_fullcov_%s_Nmin%s_iscale%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nmin,iscale,Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
@@ -199,7 +199,10 @@ emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], functio
 emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
 emulators= emusingle+[emucomb_auto,]
 
-
+if add_2dpdf:
+    obss += [pdf2dN_flat,]
+    covIs +=[covIpdf2dN,]
+    emulators += [WLanalysis.buildInterpolator(array(pdf2dN_flat)[1:], params[1:], function='GP'),]
 #emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
             #for istats in [psIauto_flat, pdf1dN_flat, comb_auto_flat]]
 
@@ -233,7 +236,8 @@ lnprob = lnprob_gaussian
 
 #fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
 fn_arr = ['psAuto','pdf1d','combAuto']#,'pdf2d','comb2d']
-
+if add_2dpdf:
+    fn_arr += ['pdf2d',]
 if not plot_only:
     pool=MPIPool()
     if not pool.is_master():
@@ -291,13 +295,14 @@ if not plot_only:
         sampler.run_mcmc(pos, Nchain)
         save(ifn, sampler.flatchain)
 
-    #i=3
-    #print fn_arr[i]
-    #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-    #pos, prob, state = sampler.run_mcmc(p0, 100)
-    #sampler.reset()
-    #sampler.run_mcmc(pos, Nchain)
-    #save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
+    if add_2dpdf:
+        i=3
+        print fn_arr[i]
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        pos, prob, state = sampler.run_mcmc(p0, 100)
+        sampler.reset()
+        sampler.run_mcmc(pos, Nchain)
+        save(like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn), sampler.flatchain)
 
     #i=4
     #print fn_arr[i]
