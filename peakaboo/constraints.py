@@ -6,7 +6,7 @@ import sys, itertools
 import emcee
 import os
 
-tightball = 0
+tightball = 1
 add_2dpdf = 0
 plot_only = 0
 single_z = 0
