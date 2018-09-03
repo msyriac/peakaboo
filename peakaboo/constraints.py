@@ -7,9 +7,11 @@ import emcee
 import os
 
 tightball = 0
-add_2dpdf = 1
+add_2dpdf = 0
 plot_only = 0
 single_z = 0
+test_cross = 1
+very_wide = 0
 
 upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
@@ -32,7 +34,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Aug22_%s_fullcov_%s_Nmin%s_iscale%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nmin,iscale,Nchain,Nk)#''#
+testfn = collapse+'Sep3_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
@@ -69,6 +71,7 @@ params = genfromtxt('/scratch/02977/jialiu/peakaboo/cosmo_params_all.txt',usecol
 ###### PS shape:(15, 101, 20)
 psI = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{1}_{2}.npy'.format(z_arr[i],z_arr[j],Nk))
               for i in range(Nz) for j in range(i,Nz)])
+
 # auto's only
 psIauto = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{0}_{1}.npy'.format(iz,Nk)) for iz in z_arr])
 #psI1ks = array( [[load(eb1k_dir+'ALL_igalXigal_z{0}_z{0}_1k{1}.npy'.format(iz,ik)) for iz in z_arr] 
@@ -191,13 +194,27 @@ fidu_params = array([0.1,0.3,2.1])
 #emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
 #             for istats in [psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]]
 
-obss = [psIauto_flat[1], pdf1dN_flat[1], comb_auto_flat[1]]
-covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
+if test_cross:
+    psIcross = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{1}_{2}.npy'.format(z_arr[i],z_arr[j],Nk))
+              for i in range(Nz-1) for j in range(i+1,Nz)])
+    psIcross_flat = swapaxes(psIcross,0,1).reshape(101,-1) 
+    psNcross_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
+                           for i in range(Nz-1) for j in range(i+1,Nz)]),0,1).reshape(10000,-1)
+    
+    covIpsNcross = covIgen(psNcross_cov)
+    obss = [psIauto_flat[1],psIcross_flat[1],psI_flat[1]]
+    covIs = [covIpsNauto, covIpsNcross, covIpsN]
+    emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+                for istats in [psIauto_flat,  psIcross_flat, psI_flat]]
+    
+else:
+    obss = [psIauto_flat[1], pdf1dN_flat[1], comb_auto_flat[1]]
+    covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
 
-emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
-             for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
-emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
-emulators= emusingle+[emucomb_auto,]
+    emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+                for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
+    emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
+    emulators= emusingle+[emucomb_auto,]
 
 if add_2dpdf:
     obss += [pdf2dN_flat,]
@@ -235,7 +252,10 @@ def lnprob_sanity(p,jjj=0):
 lnprob = lnprob_gaussian
 
 #fn_arr = ['psAuto','psCross','pdf1d','combAuto','combCross']
-fn_arr = ['psAuto','pdf1d','combAuto']#,'pdf2d','comb2d']
+if not test_cross:
+    fn_arr = ['psAuto','pdf1d','combAuto']#,'pdf2d','comb2d']
+else:
+    fn_arr = ['psAuto','psCross','Auto+cross']
 if add_2dpdf:
     fn_arr += ['pdf2d',]
 if not plot_only:
@@ -253,7 +273,8 @@ if not plot_only:
     ########## wide
     p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
     ########### very wide
-    #####p0_ranges=array([[-0.2,0.8],[0.2,0.4],[1.3,3.0]])
+    if very_wide:
+        p0_ranges=array([[0.0,1.0],[0.1,0.6],[1.2,3.0]])
     p0=rand(nwalkers,ndim)*(p0_ranges[:,1]-p0_ranges[:,0]).reshape(1,3)+p0_ranges[:,0].reshape(1,3)
     ########### tight ball
     if tightball:
