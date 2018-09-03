@@ -8,7 +8,7 @@ import os
 
 tightball = 1
 add_2dpdf = 0
-plot_only = 1
+plot_only = 0
 single_z = 0
 test_cross = 1
 very_wide = 1
@@ -17,7 +17,7 @@ upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
 Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 1500
+Nchain = 5000
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
