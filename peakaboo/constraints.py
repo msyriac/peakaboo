@@ -8,7 +8,7 @@ import os
 
 tightball = 1
 add_2dpdf = 0
-plot_only = 0
+plot_only = 1
 single_z = 0
 test_cross = 1
 very_wide = 1
@@ -361,6 +361,7 @@ proxy=[plt.Rectangle((0,0),1,0.5,ec=icolor, fc = icolor) for icolor in colors]
 stats_dir = '/scratch/02977/jialiu/peakaboo/'
 #range=[[-0.1,0.45],[0.28,0.32],[1.8,2.7]]
 def plotmc(chain, f=None, icolor='k',range=[[-0.1,0.5],[0.27,0.33],[1.7,2.7]]):
+    chain = chain[len(chain)/3:]
     corner.corner(chain, labels=[r"$M_\nu$", r"$\Omega_m$", r"$A_s$"],
                   levels=[0.95,],color=icolor,
                   range=range,truths=fidu_params, fig=f, 
