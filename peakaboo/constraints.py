@@ -15,7 +15,7 @@ very_wide = 1
 
 upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
-Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=1500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
 Nchain = 500
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
