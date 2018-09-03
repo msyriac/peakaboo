@@ -6,7 +6,7 @@ import sys, itertools
 import emcee
 import os
 
-tightball = 0
+tightball = 1
 add_2dpdf = 0
 plot_only = 0
 single_z = 0
@@ -35,6 +35,9 @@ collapse=''#'collapsed'#
 np.random.seed(10026)#
 
 testfn = collapse+'Sep3_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
+
+if very_wide:
+    testfn = collapse+'Sep3_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
