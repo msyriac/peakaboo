@@ -11,7 +11,7 @@ add_2dpdf = 0
 plot_only = 0
 single_z = 0
 test_cross = 1
-very_wide = 0
+very_wide = 1
 
 upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
