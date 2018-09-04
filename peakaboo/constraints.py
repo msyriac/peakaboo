@@ -98,13 +98,6 @@ covIgen = lambda ips_cov:mat(cov(ips_cov,rowvar=0)*12.25/2e4).I
     
 ##### PS shape:(101,100)
 psIauto_flat = swapaxes(psIauto,0,1).reshape(101,-1) 
-
-#psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
-#psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
-#                           for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
-#covIpsN = covIgen(psN_cov)
-
-
 psNauto_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{0}.npy'.format(z_arr[i]))
                            for i in range(Nz)]),0,1).reshape(10000,-1)
 covIpsNauto = covIgen(psNauto_cov)
@@ -168,12 +161,6 @@ if add_2dpdf:
 
 fidu_params = array([0.1,0.3,2.1])
 
-######## pick the good cosmology, where std/P among 10 1k models is <1%, and remove the first cosmology, 0eV one
-#psI1k_std = std(psI1ks,axis=0)
-#frac_diff = psI1k_std/psI[:,1].reshape(Nz,1,20)
-#idx_good = where(amax(mean(frac_diff,axis=-1),axis=0)<0.01)[0][1:] 
-
-   
 #obss = [psI_flat[1], pdf1dN_flat[1], pdf2dN_flat[1]]
 #covIs = [covIpsN, covIpdf1dN, covIpdf2dN]
 
@@ -200,11 +187,15 @@ if test_cross:
     covIpsNcross = covIgen(psNcross_cov)
     
     ######### auto + cross 
-    psI = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{1}_{2}.npy'.format(z_arr[i],z_arr[j],Nk))
-              for i in range(Nz) for j in range(i,Nz)])
+    #psI = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{1}_{2}.npy'.format(z_arr[i],z_arr[j],Nk))
+              #for i in range(Nz) for j in range(i,Nz)])
+    #psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
+    #psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
+                          #for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
+    #covIpsN = covIgen(psN_cov)
     
-    psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
-    psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j])) for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
+    psI = concatenate([psIauto_flat, psIcross_flat], axis=-1)
+    psN_cov = concatenate([psNauto_cov,psNcross_cov],axis=-1)
     covIpsN = covIgen(psN_cov)
     
     obss = [psIauto_flat[1],psIcross_flat[1],psI_flat[1]]
@@ -212,14 +203,14 @@ if test_cross:
     emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
                 for istats in [psIauto_flat,  psIcross_flat, psI_flat]]
     
-else:
-    obss = [psIauto_flat[1], pdf1dN_flat[1], comb_auto_flat[1]]
-    covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
+#else:
+    #obss = [psIauto_flat[1], pdf1dN_flat[1], comb_auto_flat[1]]
+    #covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
 
-    emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
-                for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
-    emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
-    emulators= emusingle+[emucomb_auto,]
+    #emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+                #for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
+    #emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
+    #emulators= emusingle+[emucomb_auto,]
 
 if add_2dpdf:
     obss += [pdf2dN_flat,]
@@ -235,8 +226,7 @@ rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ##
 from scipy.misc import factorial
 
 def lnprob_gaussian(p,jjj):
-    '''log likelihood of 
-    '''
+    '''log likelihood '''
     if p[0]<0: ####### force neutrino mass to be positive
         return -np.inf
     diff = emulators[jjj](p)-obss[jjj]
@@ -291,25 +281,25 @@ if not plot_only:
         #print 'cov shape',covIs[i].shape
         #print 'stats shape',[psIauto_flat,  pdf1dN_flat, comb_auto_flat][i].shape
         
-    i=0
-    print fn_arr[i], obss[i].shape
-    ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
-    if not os.path.isfile(ifn):
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-        pos, prob, state = sampler.run_mcmc(p0, 100)
-        sampler.reset()
-        sampler.run_mcmc(pos, Nchain)
-        save(ifn, sampler.flatchain)
+    #i=0
+    #print fn_arr[i], obss[i].shape
+    #ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
+    #if not os.path.isfile(ifn):
+        #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        #pos, prob, state = sampler.run_mcmc(p0, 100)
+        #sampler.reset()
+        #sampler.run_mcmc(pos, Nchain)
+        #save(ifn, sampler.flatchain)
 
-    i=1
-    print fn_arr[i], obss[i].shape
-    ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
-    if not os.path.isfile(ifn):
-        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-        pos, prob, state = sampler.run_mcmc(p0, 100)
-        sampler.reset()
-        sampler.run_mcmc(pos, Nchain)
-        save(ifn, sampler.flatchain)
+    #i=1
+    #print fn_arr[i], obss[i].shape
+    #ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
+    #if not os.path.isfile(ifn):
+        #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        #pos, prob, state = sampler.run_mcmc(p0, 100)
+        #sampler.reset()
+        #sampler.run_mcmc(pos, Nchain)
+        #save(ifn, sampler.flatchain)
 
     i=2
     print fn_arr[i], obss[i].shape
