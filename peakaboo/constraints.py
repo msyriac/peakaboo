@@ -11,13 +11,13 @@ add_2dpdf = 0
 plot_only = 0
 single_z = 0
 test_cross = 1
-very_wide = 1
+very_wide = 0
 
 upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
 Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 5000
+Nchain = 500
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
@@ -34,10 +34,10 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Sep3_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
+testfn = collapse+'Sep4_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
 
 if very_wide:
-    testfn = collapse+'Sep3_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
+    testfn = collapse+'Sep4_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
@@ -72,8 +72,6 @@ params = genfromtxt('/scratch/02977/jialiu/peakaboo/cosmo_params_all.txt',usecol
 #####################################
 
 ###### PS shape:(15, 101, 20)
-psI = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{1}_{2}.npy'.format(z_arr[i],z_arr[j],Nk))
-              for i in range(Nz) for j in range(i,Nz)])
 
 # auto's only
 psIauto = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{0}_{1}.npy'.format(iz,Nk)) for iz in z_arr])
@@ -108,9 +106,9 @@ psI_flat = swapaxes(psI,0,1).reshape(101,-1)
 psIauto_flat = swapaxes(psIauto,0,1).reshape(101,-1) 
 #psI1k_flat = array([swapaxes(ips,0,1).reshape(101,-1) for ips in psI1ks])
 
-psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
-                           for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
-covIpsN = covIgen(psN_cov)
+#psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
+#                           for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
+#covIpsN = covIgen(psN_cov)
 
 
 psNauto_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{0}.npy'.format(z_arr[i]))
@@ -198,6 +196,7 @@ fidu_params = array([0.1,0.3,2.1])
 #             for istats in [psIauto_flat, psI_flat, pdf1dN_flat, comb_auto_flat,comb_cros_flat]]
 
 if test_cross:
+    ######### cross
     psIcross = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{1}_{2}.npy'.format(z_arr[i],z_arr[j],Nk))
               for i in range(Nz-1) for j in range(i+1,Nz)])
     psIcross_flat = swapaxes(psIcross,0,1).reshape(101,-1) 
@@ -205,6 +204,15 @@ if test_cross:
                            for i in range(Nz-1) for j in range(i+1,Nz)]),0,1).reshape(10000,-1)
     
     covIpsNcross = covIgen(psNcross_cov)
+    
+    ######### auto + cross 
+    psI = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{1}_{2}.npy'.format(z_arr[i],z_arr[j],Nk))
+              for i in range(Nz) for j in range(i,Nz)])
+    
+    psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
+    psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j])) for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
+    covIpsN = covIgen(psN_cov)
+    
     obss = [psIauto_flat[1],psIcross_flat[1],psI_flat[1]]
     covIs = [covIpsNauto, covIpsNcross, covIpsN]
     emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
@@ -381,7 +389,7 @@ f,ax=subplots(3,3,figsize=(6,6))
 for j in range(len(MC_arr)):
     plotmc(MC_arr[j],f=f,icolor=colors[j])
 ax[0,1].legend(proxy[:len(fn_arr)],fn_arr,fontsize=8)
-ax[0,1].set_title('ps vs pdf (%s)'%(testfn))
+ax[0,1].set_title(testfn)
 fnfig='contour_%s.jpg'%(testfn)
 fnpath=like_dir+'plots/'+fnfig
 savefig(fnpath)
