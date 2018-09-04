@@ -194,7 +194,7 @@ if test_cross:
                           #for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
     #covIpsN = covIgen(psN_cov)
     
-    psI = concatenate([psIauto_flat, psIcross_flat], axis=-1)
+    psI_flat = concatenate([psIauto_flat, psIcross_flat], axis=-1)
     psN_cov = concatenate([psNauto_cov,psNcross_cov],axis=-1)
     covIpsN = covIgen(psN_cov)
     
