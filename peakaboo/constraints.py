@@ -75,14 +75,9 @@ params = genfromtxt('/scratch/02977/jialiu/peakaboo/cosmo_params_all.txt',usecol
 
 # auto's only
 psIauto = array( [load(eb_dir+'ALL_igalXigal_z{0}_z{0}_{1}.npy'.format(iz,Nk)) for iz in z_arr])
-#psI1ks = array( [[load(eb1k_dir+'ALL_igalXigal_z{0}_z{0}_1k{1}.npy'.format(iz,ik)) for iz in z_arr] 
-                 #for ik in range(10)])
-#psN = array( [load(eb_dir+'ALL_galXgal_z{0}_z{0}_{1}.npy'.format(iz,Nk)) for iz in z_arr])
 
 ##### 1d PDF shape:(5, 101, 27)
 pdf1dN = iscale*array( [load(eb_dir+'ALL_gal_pdf_z{0}_sg1.0_{1}.npy'.format(iz,Nk)) for iz in z_arr])
-#pdf1dN1ks = array( [[load(eb1k_dir+'ALL_gal_pdf_z{0}_sg1.0_1k{1}.npy'.format(iz,ik)) for iz in z_arr] 
-                 #for ik in range(10)])
 
 #### 2d PDF shape:(10, 101, 27, 27)
 if add_2dpdf:
@@ -102,10 +97,9 @@ if add_2dpdf:
 covIgen = lambda ips_cov:mat(cov(ips_cov,rowvar=0)*12.25/2e4).I
     
 ##### PS shape:(101,100)
-psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
 psIauto_flat = swapaxes(psIauto,0,1).reshape(101,-1) 
-#psI1k_flat = array([swapaxes(ips,0,1).reshape(101,-1) for ips in psI1ks])
 
+#psI_flat = swapaxes(psI,0,1).reshape(101,-1) 
 #psN_cov = swapaxes(array( [load(ebcov_dir+'ALL_galXgal_z{0}_z{1}.npy'.format(z_arr[i],z_arr[j]))
 #                           for i in range(Nz) for j in range(i,Nz)]),0,1).reshape(10000,-1)
 #covIpsN = covIgen(psN_cov)
