@@ -8,7 +8,7 @@ import os
 
 tightball = 0
 add_2dpdf = 0
-plot_only = 0
+plot_only = 1
 single_z = 0
 test_cross = 1
 very_wide = 0
