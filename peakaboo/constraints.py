@@ -292,7 +292,7 @@ if not plot_only:
         #print 'stats shape',[psIauto_flat,  pdf1dN_flat, comb_auto_flat][i].shape
         
     i=0
-    print fn_arr[i]
+    print fn_arr[i], obss[i].shape
     ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
     if not os.path.isfile(ifn):
         sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
@@ -302,7 +302,7 @@ if not plot_only:
         save(ifn, sampler.flatchain)
 
     i=1
-    print fn_arr[i]
+    print fn_arr[i], obss[i].shape
     ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
     if not os.path.isfile(ifn):
         sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
@@ -312,7 +312,7 @@ if not plot_only:
         save(ifn, sampler.flatchain)
 
     i=2
-    print fn_arr[i]
+    print fn_arr[i], obss[i].shape
     ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
     if not os.path.isfile(ifn):
         sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
