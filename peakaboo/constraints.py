@@ -34,7 +34,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Sep4_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
+testfn = collapse+'Sep4_%s_fullcov_%s_Nchain%i_%s_Mnu0.35'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
 
 if very_wide:
     testfn = collapse+'Sep4_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
@@ -266,7 +266,7 @@ if not plot_only:
     #p0 = (array([ (rand(nwalkers, ndim) -0.5) * array([1, 0.3, 0.3]) + 1]) * fidu_params).reshape(-1,3)
     
     ########## wide
-    p0_ranges=array([[0,0.6],[0.25,0.35],[1.6,2.6]])
+    p0_ranges=array([[0,0.35],[0.25,0.35],[1.6,2.6]])
     ########### very wide
     if very_wide:
         p0_ranges=array([[0.0,1.0],[0.1,0.6],[1.2,3.0]])
