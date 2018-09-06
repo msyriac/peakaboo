@@ -6,7 +6,7 @@ import sys, itertools
 import emcee
 import os
 
-tightball = 0
+tightball = 1
 add_2dpdf = 0
 plot_only = 0
 single_z = 0
@@ -17,7 +17,7 @@ upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
 Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 500
+Nchain = 10000
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
@@ -34,10 +34,10 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Sep4_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
+testfn = collapse+'Sep5_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
 
 if very_wide:
-    testfn = collapse+'Sep4_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
+    testfn = collapse+'Sep5_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
 #testfn = collapse+'Aug16_R_Nmin%s_Nmin2%s_Nchain%i_%s'%(Nmin,Nmin2,Nchain,Nk)#''#
 Nmin*=iscale
 
@@ -281,25 +281,25 @@ if not plot_only:
         #print 'cov shape',covIs[i].shape
         #print 'stats shape',[psIauto_flat,  pdf1dN_flat, comb_auto_flat][i].shape
         
-    #i=0
-    #print fn_arr[i], obss[i].shape
-    #ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
-    #if not os.path.isfile(ifn):
-        #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-        #pos, prob, state = sampler.run_mcmc(p0, 100)
-        #sampler.reset()
-        #sampler.run_mcmc(pos, Nchain)
-        #save(ifn, sampler.flatchain)
+    i=0
+    print fn_arr[i], obss[i].shape
+    ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
+    if not os.path.isfile(ifn):
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        pos, prob, state = sampler.run_mcmc(p0, 100)
+        sampler.reset()
+        sampler.run_mcmc(pos, Nchain)
+        save(ifn, sampler.flatchain)
 
-    #i=1
-    #print fn_arr[i], obss[i].shape
-    #ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
-    #if not os.path.isfile(ifn):
-        #sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
-        #pos, prob, state = sampler.run_mcmc(p0, 100)
-        #sampler.reset()
-        #sampler.run_mcmc(pos, Nchain)
-        #save(ifn, sampler.flatchain)
+    i=1
+    print fn_arr[i], obss[i].shape
+    ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
+    if not os.path.isfile(ifn):
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[i,], pool=pool)
+        pos, prob, state = sampler.run_mcmc(p0, 100)
+        sampler.reset()
+        sampler.run_mcmc(pos, Nchain)
+        save(ifn, sampler.flatchain)
 
     i=2
     print fn_arr[i], obss[i].shape
