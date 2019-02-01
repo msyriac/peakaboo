@@ -19,7 +19,7 @@ upload_MCMC=0
 Nk='10k' # '5ka', '5kb'
 Nmin=1000 #500###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 10000
+Nchain = 1000
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
@@ -36,7 +36,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Feb1_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
+testfn = collapse+'Feb1_%s_fullcov_%s_Nchain%i_%s_Nmin%i'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk,Nmin)#''#
 
 if very_wide:
     testfn = collapse+'Sep5_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
