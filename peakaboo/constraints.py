@@ -240,10 +240,6 @@ rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ##
 ############# likelihood #######
 from scipy.misc import factorial
 
-def lnprob_block(p,jjj=0):
-    '''block likelihood 
-    '''
-    return lnprob_gaussian(p,0)+lnprob_gaussian(p,1)
 
 def lnprob_gaussian(p,jjj):
     '''log likelihood '''
@@ -251,6 +247,11 @@ def lnprob_gaussian(p,jjj):
         return -np.inf
     diff = emulators[jjj](p)-obss[jjj]
     return float(-0.5*mat(diff)*covIs[jjj]*mat(diff).T)*rDH[jjj]
+
+def lnprob_block(p,jjj=0):
+    '''block likelihood 
+    '''
+    return lnprob_gaussian(p,0)+lnprob_gaussian(p,1)
 
 def lnprob_poisson(p,jjj=1):
     if p[0]<0: ####### force neutrino mass to be positive
