@@ -15,6 +15,7 @@ test_cross = 0
 very_wide = 0
 upload_dropbox = 1
 upload_MCMC=0
+bloc_cov = 1
 
 Nk='10k' # '5ka', '5kb'
 Nmin=1000 #500###### minimum counts in that bin to get included in PDF calculation
@@ -36,7 +37,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Feb1_%s_fullcov_%s_Nchain%i_%s_Nmin%i'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk,Nmin)#''#
+testfn = collapse+'Feb1_%s_blockcov_%s_Nchain%i_%s_Nmin%i'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk,Nmin)#''#
 
 if very_wide:
     testfn = collapse+'Sep5_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
@@ -239,6 +240,11 @@ rDH = [ float((1e4-len(covI)-2.0)/9999.0) for covI in covIs] ##
 ############# likelihood #######
 from scipy.misc import factorial
 
+def lnprob_block(p,jjj=0):
+    '''block likelihood 
+    '''
+    return lnprob_gaussian(p,0)+lnprob_gaussian(p,1)
+
 def lnprob_gaussian(p,jjj):
     '''log likelihood '''
     if p[0]<0: ####### force neutrino mass to be positive
@@ -253,10 +259,6 @@ def lnprob_poisson(p,jjj=1):
     n = obss[jjj]
     return sum(n*log(mu)-mu-log(factorial(n)))
 
-def lnprob_sanity(p,jjj=0):
-    '''log likelihood of 
-    '''
-    return lnprob_gaussian(p,0)+lnprob_poisson(p,1)
 
 lnprob = lnprob_gaussian
 
@@ -316,6 +318,8 @@ if not plot_only:
         save(ifn, sampler.flatchain)
 
     i=2
+    if bloc_cov:
+        lnprob = lnprob_block
     print fn_arr[i], obss[i].shape
     ifn = like_dir+'MC_%s_%s.npy'%(fn_arr[i],testfn)
     if not os.path.isfile(ifn):
