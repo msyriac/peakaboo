@@ -6,18 +6,20 @@ import sys, itertools
 import emcee
 import os
 
-tightball = 1
+local=0
+tightball = 0
 add_2dpdf = 0
 plot_only = 0
 single_z = 0
-test_cross = 1
+test_cross = 0
 very_wide = 0
-
+upload_dropbox = 1
 upload_MCMC=0
+
 Nk='10k' # '5ka', '5kb'
 Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 10000
+Nchain = 1000
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
@@ -34,7 +36,7 @@ except Exception:
 collapse=''#'collapsed'#
 np.random.seed(10026)#
 
-testfn = collapse+'Sep5_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
+testfn = collapse+'Feb1_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['wideP0','tightball'][tightball],Nchain,Nk)#''#
 
 if very_wide:
     testfn = collapse+'Sep5_%s_fullcov_%s_Nchain%i_%s'%(['tomo','z1'][single_z],['verywideP0','tightball'][tightball],Nchain,Nk)#''#
@@ -50,22 +52,33 @@ z_arr = arange(0.5,3,0.5)
 ######## stampede2
 like_dir='/scratch/02977/jialiu/peakaboo/likelihood_tomo/'
 stats_dir = '/scratch/02977/jialiu/peakaboo/stats_tomo/'
+peakaboo_dir='/scratch/02977/jialiu/peakaboo/'
 
 if single_z:
     z_arr = [1.0,]
     like_dir='/scratch/02977/jialiu/peakaboo/likelihood_z1/'
     stats_dir = '/scratch/02977/jialiu/peakaboo/stats_z1/'
 
+#ebcov_dir = stats_dir+'Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0/'
+
+ebcov_dir = stats_dir+'box5/'
+
 Nz = len(z_arr)
-eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
-#eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
-ebcov_dir = stats_dir+'Om0.29997_As2.10000_mva0.00000_mvb0.00000_mvc0.00000_h0.70000_Ode0.69995/1024b512/box5/output_eb_5000_s4/seed0/'
-params = genfromtxt('/scratch/02977/jialiu/peakaboo/cosmo_params_all.txt',usecols=[2,3,4])
 
 ######### local
-#stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
-#ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
-
+if local:
+    #stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
+    #ebcov_dir = stats_dir+'box5/output_eb_5000_s4/seed0/'
+    ebcov_dir = '/Users/jia/Dropbox/weaklensing/PDF/box5/'
+    stats_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
+    peakaboo_dir = '/Users/jia/Dropbox/weaklensing/PDF/'
+    like_dir = peakaboo_dir+'likelihood'
+    upload_dropbox = 0
+    
+eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
+#eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
+#
+params = genfromtxt(peakaboo_dir+'cosmo_params_all.txt',usecols=[2,3,4])
 
 #####################################
 ##### initiate avg statistics #######
@@ -203,19 +216,20 @@ if test_cross:
     emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
                 for istats in [psIauto_flat,  psIcross_flat, psI_flat]]
     
-#else:
-    #obss = [psIauto_flat[1], pdf1dN_flat[1], comb_auto_flat[1]]
-    #covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
+else:
+    obss = [psIauto_flat[1], pdf1dN_flat[1], comb_auto_flat[1]]
+    covIs = [covIpsNauto, covIpdf1dN, covIcomb_auto]
 
-    #emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
-                #for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
-    #emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
-    #emulators= emusingle+[emucomb_auto,]
+    emusingle = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
+                for istats in [psIauto_flat,  pdf1dN_flat]] #comb_auto_flat,comb_cros_flat]]
+    emucomb_auto = lambda p: concatenate([emusingle[0](p),emusingle[1](p)])
+    emulators= emusingle+[emucomb_auto,]
 
 if add_2dpdf:
     obss += [pdf2dN_flat,]
     covIs +=[covIpdf2dN,]
     emulators += [WLanalysis.buildInterpolator(array(pdf2dN_flat)[1:], params[1:], function='GP'),]
+
 #emulators = [WLanalysis.buildInterpolator(array(istats)[1:], params[1:], function='GP') 
             #for istats in [psIauto_flat, pdf1dN_flat, comb_auto_flat]]
 
@@ -379,10 +393,11 @@ fnpath=like_dir+'plots/'+fnfig
 savefig(fnpath)
 close()
 
-print 'uploading to dropbox'
-import os
-os.system('/work/02977/jialiu/Dropbox-Uploader/dropbox_uploader.sh upload %s %s'%(fnpath,fnfig))
-if upload_MCMC:
-    for ips in fn_arr:
-        ifn='MC_%s_%s.npy'%(ips,testfn)
-        os.system('/work/02977/jialiu/Dropbox-Uploader/dropbox_uploader.sh upload %s %s'%(like_dir+ifn,ifn))
+if upload_dropbox:
+    print 'uploading to dropbox'
+    import os
+    os.system('/work/02977/jialiu/Dropbox-Uploader/dropbox_uploader.sh upload %s %s'%(fnpath,fnfig))
+    if upload_MCMC:
+        for ips in fn_arr:
+            ifn='MC_%s_%s.npy'%(ips,testfn)
+            os.system('/work/02977/jialiu/Dropbox-Uploader/dropbox_uploader.sh upload %s %s'%(like_dir+ifn,ifn))
