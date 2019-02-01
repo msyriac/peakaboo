@@ -17,9 +17,9 @@ upload_dropbox = 1
 upload_MCMC=0
 
 Nk='10k' # '5ka', '5kb'
-Nmin=500 ###### minimum counts in that bin to get included in PDF calculation
+Nmin=1000 #500###### minimum counts in that bin to get included in PDF calculation
 Nmin2=20
-Nchain = 1000
+Nchain = 10000
 iscale = 1 ## rescale the PDF so it has similar magnitude as the power spectrum
 
 #Nmin_scale_arr = [[iNmin, iscale] for iscale in (1,1e-12, 1e-14) 
@@ -78,8 +78,8 @@ if local:
 eb_dir = stats_dir+'stats_avg/output_eb_5000_s4/'
 #eb1k_dir = stats_dir+'stats_avg_1k/output_eb_5000_s4/'
 #
-params = genfromtxt(peakaboo_dir+'cosmo_params_all.txt',usecols=[2,3,4])
 
+params = genfromtxt(peakaboo_dir+'cosmo_params_all.txt',usecols=[2,3,4])
 #####################################
 ##### initiate avg statistics #######
 #####################################
